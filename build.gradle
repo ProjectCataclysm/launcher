@@ -12,7 +12,7 @@ compileJava.options.encoding = 'UTF-8'
 
 buildscript {
     repositories {
-		// распакованный прогуард должен лежать в родительском каталоге проекта
+        // распакованный прогуард должен лежать в родительском каталоге проекта
         flatDir dirs: '../proguard/lib'
     }
     dependencies {
@@ -21,10 +21,10 @@ buildscript {
 }
 
 jar {
-	manifest {
+    manifest {
         attributes 'Main-Class': 'cataclysm.Main'
     }
-	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
 task proguard(type: proguard.gradle.ProGuardTask) {
@@ -40,5 +40,5 @@ repositories {
 }
 
 dependencies {
-	compile 'com.google.guava:guava:28.0-jre'
+    compile 'com.google.guava:guava:28.0-jre'
 }
