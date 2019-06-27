@@ -3,29 +3,22 @@ package cataclysm.io.sanitization;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
 
 import cataclysm.io.FileHasher;
 import cataclysm.launch.Launcher;
-import cataclysm.utils.HttpHelper;
-import cataclysm.utils.Log;
 
 /**
- * Created 16 ���. 2018 �. / 21:06:42 
+ * Created 16 окт. 2018 г. / 21:06:42 
  * @author Knoblul
  */
 public class SanitizationManager extends JComponent {
@@ -34,6 +27,34 @@ public class SanitizationManager extends JComponent {
 	public SanitizationManager() {
 		fill();
 	}
+	
+//	private static void deleteFileOrFolder(final Path path) throws IOException {
+//		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+//			@Override
+//			public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+//				Files.delete(file);
+//				return FileVisitResult.CONTINUE;
+//			}
+//
+//			@Override
+//			public FileVisitResult visitFileFailed(final Path file, final IOException e) {
+//				return handleException(e);
+//			}
+//
+//			private FileVisitResult handleException(final IOException e) {
+//				e.printStackTrace(); // replace with more robust error handling
+//				return FileVisitResult.TERMINATE;
+//			}
+//
+//			@Override
+//			public FileVisitResult postVisitDirectory(final Path dir, final IOException e) throws IOException {
+//				if (e != null)
+//					return handleException(e);
+//				Files.delete(dir);
+//				return FileVisitResult.CONTINUE;
+//			}
+//		});
+//	};
 
 	private void fill() {
 		setLayout(new GridBagLayout());
@@ -43,7 +64,7 @@ public class SanitizationManager extends JComponent {
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 
-		JLabel title = new JLabel("��������� �����...");
+		JLabel title = new JLabel("Проверяем файлы...");
 		title.setHorizontalAlignment(JLabel.CENTER);
 		title.setFont(title.getFont().deriveFont(Font.BOLD, 40));
 
@@ -61,129 +82,102 @@ public class SanitizationManager extends JComponent {
 		iconlal.setHorizontalAlignment(JLabel.CENTER);
 		add(iconlal, gbc);
 	}
-
-	private boolean rescan(File root, File file, Map<String, String> hashes) {
+	
+	private boolean recursiveCheckHashes(File root, File file, Map<String, String> hashes) {
 		if (file.isDirectory()) {
-			if (hashes.isEmpty()) {
-				return file.listFiles().length == 0;
-			}
-
-			boolean clear = true;
+			boolean result = true;
 			for (File f: file.listFiles()) {
-				clear &= rescan(root, f, hashes);
+				result &= recursiveCheckHashes(root, f, hashes);
 			}
-			return clear;
+			return result;
 		} else {
-			String fn = file.getAbsolutePath().substring(root.getAbsolutePath().length()+1);
-			fn = fn.replace(File.separator, "/");
-			return hashes.containsKey(fn);
+			String fn = file.getAbsolutePath().substring(root.getAbsolutePath().length() + 1);
+			fn = fn.replace(File.separatorChar, '/');
+			return hashes.get(fn).equals(FileHasher.hash(file));
 		}
 	}
-
-	private boolean checkArchiveHashes(File root, Resource resource) throws IOException {
-		File unpackDir = new File(root, resource.getUnpackDir());
-
-		Map<String, String> hashes = Maps.newHashMap();
-
-		try (InputStream in = HttpHelper.openStream(HttpHelper.clientURL(resource.getShaFile()));
-				BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
-			String ln;
-			while ((ln = reader.readLine()) != null) {
-				int idx = ln.lastIndexOf('=');
-				if (idx == -1)
-					throw new IOException("Malformed hash file");
-				String fileName = ln.substring(0, idx);
-				String fileHash = ln.substring(idx + 1);
-				hashes.put(fileName, fileHash);
+	
+	private boolean findMissingFiles(File root, File file, Map<String, String> hashes) {
+		List<File> files = Lists.newArrayList();
+		for (String fn: hashes.keySet()) {
+			String path = root.getAbsolutePath().substring(file.getAbsolutePath().length() + 1);
+			path = path.replace(File.separatorChar, '/');
+			if (fn.startsWith(path)) {
+				files.add(new File(root, fn));
 			}
-		}
-
-		if (!unpackDir.exists()) {
-			if (!hashes.isEmpty()) {
-				return false;
-			} else {
-				unpackDir.mkdirs();
-			}
-		}
-
-		Set<Entry<String,String>> entries = hashes.entrySet();
-		for (Entry<String, String> entry: entries) {
-			File file = new File(unpackDir, entry.getKey());
-			if (!file.exists()) {
-				Log.msg("File not exist %s", file);
-				return false;
-			}
-
-			String currHash = FileHasher.hash(file);
-			if (!currHash.equals(entry.getValue())) {
-				Log.msg("Hash diff %s %s <> %s", file, currHash, entry.getValue());
-				return false;
-			}
-		}
-
-		return rescan(unpackDir, unpackDir, hashes);
-	}
-
-	private boolean checkFileHash(File root, Resource resource) throws IOException {
-		File output = new File(root, resource.getFile());
-		if (!output.exists()) {
-			Log.msg("File not exists %s", output);
-			return false;
-		}
-
-		try (InputStream in = HttpHelper.openStream(HttpHelper.clientURL(resource.getShaFile()));
-				BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
-			String hash = reader.readLine();
-			if (hash == null)
-				throw new IOException("Error reading hash file");
-			String currHash = FileHasher.hash(output);
-			if (!currHash.equals(hash)) {
-				Log.msg("Hash diff %s %s <> %s", output, currHash, hash);
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	private boolean exist(File root, Resource resource) {
-		String fn = resource.isArchive() ? resource.getUnpackDir() : resource.getFile();
-		return new File(root, fn).exists();
-	}
-
-	public void perform(List<Resource> resources) throws IOException {
-		File gameDir = Launcher.config.gameDirectory;
-		if (!gameDir.exists()) {
-			gameDir.mkdirs();
 		}
 		
+		for (File f: files) {
+			if (!f.exists()) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	private void recursiveDeleteExtraFiles(File root, File file, Map<String, String> hashes) {
+		if (file.isDirectory()) {
+			// пробегаемся по всем файлам в директории
+			for (File f: file.listFiles()) {
+				recursiveDeleteExtraFiles(root, f, hashes);
+			}
+			
+			// удаляем пустые директории
+			if (file.listFiles().length == 0) {
+				file.delete();
+			}
+		} else {
+			// получаем имя файла
+			String fn = file.getAbsolutePath().substring(root.getAbsolutePath().length() + 1);
+			fn = fn.replace(File.separatorChar, '/');
+			
+			// проверяем, есть ли имя в хешах
+			if (!hashes.containsKey(fn)) {
+				file.delete();
+			}
+		}
+	}
+
+	public List<Resource> perform(ResourceMaster master) throws IOException {
+		// получаем игровую директорию
+		File root = Launcher.config.gameDirectory;
+		if (!root.exists()) {
+			// если директория остуствует, то создаём её и добавляем ВСЕ ресурсы
+			// на скачивание
+			root.mkdirs();
+			return master.getResources();
+		}
+		
+		List<Resource> toDownload = Lists.newArrayList();
+		List<Resource> resources = master.getResources();
+		Map<String, String> hashes = master.getHashes();
 		for (int i = 0; i < resources.size(); i++) {
 			Resource resource = resources.get(i);
-			if (resource.needSanitize()) {
-				if (resource.isArchive()) {
-					if (checkArchiveHashes(gameDir, resource)) {
-						resources.remove(i--);
-					}
-				} else {
-					if (checkFileHash(gameDir, resource)) {
-						resources.remove(i--);
-					}
+			File local = new File(root, resource.getLocal());
+			if (!local.exists()) {
+				// если локальный файл не существует добавляем ресурс на
+				// скачивание
+				toDownload.add(resource);
+				continue;
+			}
+
+			if (resource.isHashed()) {
+				boolean protectedMode = master.getProtectedFolders().contains(resource.getLocal());
+				// если директория защищена от посторонних файлов, то удаляем
+				// все посторонние файлы
+				if (protectedMode) {
+					recursiveDeleteExtraFiles(root, local, hashes);
 				}
-			} else {
-				if (exist(gameDir, resource)) {
-					resources.remove(i--);
+				
+				// если недостаёт файлов или файлы изменены - то добавляем
+				// ресурс на скачивание
+				if (findMissingFiles(root, local, hashes) || !recursiveCheckHashes(root, local, hashes)) {
+					toDownload.add(resource);
 				}
 			}
 		}
 		
-		// ��������� ������� ��� ����� ���������� �������������� ��������
-		if (!new File(gameDir, "config/optionsof.txt").exists()) {
-			Resource ri = new Resource("config.zip", false);
-			if (!resources.contains(ri)) {
-				resources.add(ri);
-			}
-		}
-
-		System.out.println(resources);
+		return toDownload;
 	}
 }

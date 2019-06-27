@@ -9,8 +9,8 @@ import javax.swing.filechooser.FileSystemView;
 
 import com.google.common.collect.Lists;
 
+import cataclysm.io.sanitization.ResourceMaster;
 import cataclysm.io.sanitization.Resource;
-import cataclysm.io.sanitization.ResourceRetriever;
 import cataclysm.io.sanitization.SanitizationManager;
 import cataclysm.ui.ConfigFrame;
 import cataclysm.ui.DialogUtils;
@@ -39,7 +39,7 @@ public class Launcher implements Runnable {
 	public static LaunchStatusFrame statusFrame;
 
 	private static VersionHelper versionHelper;
-	private static ResourceRetriever resourceRetriever;
+	private static ResourceMaster resourceMaster;
 	private static SanitizationManager sanitizer;
 	private static DownloadingManager downloader;
 
@@ -62,7 +62,7 @@ public class Launcher implements Runnable {
 		config = new ConfigFrame();
 		frame = new LauncherFrame();
 		statusFrame = new LaunchStatusFrame();
-		resourceRetriever = new ResourceRetriever();
+		resourceMaster = new ResourceMaster();
 		sanitizer = new SanitizationManager();
 		downloader = new DownloadingManager();
 		versionHelper = new VersionHelper();
@@ -88,17 +88,29 @@ public class Launcher implements Runnable {
 			frame.setVisible(false);
 			statusFrame.showFrame();
 
-			List<Resource> resources = resourceRetriever.retrieveResources();
+			Log.msg("Retrieving download info...");
+			resourceMaster.retrieveDownloadInformation();
+			
+			Log.msg("Retrieving hashes...");
+			resourceMaster.retrieveHashes();
+			
 			Log.msg("Sanitizing...");
 			statusFrame.fill(sanitizer);
-			sanitizer.perform(resources);
-
-			if (!resources.isEmpty()) {
-				Log.msg("Downloading %d files/archives...", resources.size());
+			List<Resource> toDownload = sanitizer.perform(resourceMaster);
+			if (!toDownload.isEmpty()) {
+				Log.msg("Downloading %d files/archives...", toDownload.size());
 				statusFrame.fill(downloader);
-				downloader.perform(resources);
+				downloader.perform(toDownload);
 			}
-
+		} catch (Throwable t) {
+			statusFrame.setVisible(false);
+			DialogUtils.showError("Ошибка загрузки файлов", t);
+			frame.setVisible(true);
+			launched = false;
+			return;
+		}
+		
+		try {
 			Log.msg("STARTING GAYM!!1!");
 			statusFrame.setVisible(false);
 			config.setVisible(false);
@@ -114,9 +126,8 @@ public class Launcher implements Runnable {
 				frame.setVisible(true);
 				launched = false;
 				
-				JOptionPane.showMessageDialog(frame,
-						"Игра была аварийно завершена\nTODO: добавить отправку отчёта об ошибке на сервера SME",
-						"Ошибка", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(frame, "Игра была аварийно завершена", "Ошибка",
+						JOptionPane.ERROR_MESSAGE);
 			} else {
 				System.exit(0);
 			}
@@ -135,8 +146,14 @@ public class Launcher implements Runnable {
 		command.add("-Xmx" + config.memory + "m");
 		command.add("-Djava.library.path=");
 		//command.add("-Dfile.encoding=UTF-8");
+		
+		// оптимизация
+		command.add("-XX:+UseG1GC");
+		command.add("-XX:+UseStringDeduplication");
+		
+		// класспатх
 		command.add("-cp");
-		command.add("sme_client.jar");
+		command.add("core.jar");
 		command.add("start.StartMinecraft");
 		ProcessBuilder pb = new ProcessBuilder(command);
 		pb.directory(config.gameDirectory);

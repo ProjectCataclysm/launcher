@@ -23,10 +23,15 @@ jar {
 task proguard(type: proguard.gradle.ProGuardTask) {
     configuration 'proguard.pro'
     injars  'build/libs/CataclysmLauncher.jar'
-    outjars 'build/libs/CataclysmLauncher_obf.jar'
+    outjars 'build/libs/launcher.jar'
 }
 
-build.finalizedBy(proguard)
+task generate_version(type:Exec) {
+    workingDir 'build/libs'
+    commandLine 'java', '-jar', 'launcher.jar', '-version'
+}
+
+build.finalizedBy(proguard, generate_version)
 
 repositories {
     jcenter()
@@ -34,4 +39,5 @@ repositories {
 
 dependencies {
     compile 'com.google.guava:guava:28.0-jre'
+    compile 'com.googlecode.json-simple:json-simple:1.1.1'
 }

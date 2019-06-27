@@ -10,11 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Timer;
@@ -128,15 +124,15 @@ public class DownloadingManager extends JComponent {
 	}
 
 	private void downloadFile(File root, Resource resource) throws IOException {
-		File output = new File(root, resource.getFile());
-		URL url = HttpHelper.clientURL(resource.getFile());
+		File output = new File(root, resource.getLocal());
+		URL url = HttpHelper.clientURL(resource.getRemote());
 		URLConnection connection = url.openConnection();
 		connection.setConnectTimeout(15000);
 		connection.setReadTimeout(15000);
 		downloadProgress.setMinimum(0);
 		downloadProgress.setValue(0);
 		downloadProgress.setMaximum(connection.getContentLength());
-		currentFileLoading.setText("Загружаем " + resource.getFile());
+		currentFileLoading.setText("Загружаем " + resource.getRemote());
 
 		long totalLen = 0;
 		try (InputStream in = connection.getInputStream(); 
@@ -151,7 +147,7 @@ public class DownloadingManager extends JComponent {
 				}
 			}
 		} catch (IOException e) {
-			throw new IOException("Could not download " + resource.getFile(), e);
+			throw new IOException("Could not download " + resource.getRemote(), e);
 		} finally {
 			HttpHelper.close(connection);
 		}
@@ -159,53 +155,25 @@ public class DownloadingManager extends JComponent {
 		currentFileLoading.setText("");
 	}
 
-	private static void deleteFileOrFolder(final Path path) throws IOException {
-		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
-				Files.delete(file);
-				return FileVisitResult.CONTINUE;
-			}
-
-			@Override
-			public FileVisitResult visitFileFailed(final Path file, final IOException e) {
-				return handleException(e);
-			}
-
-			private FileVisitResult handleException(final IOException e) {
-				e.printStackTrace(); // replace with more robust error handling
-				return FileVisitResult.TERMINATE;
-			}
-
-			@Override
-			public FileVisitResult postVisitDirectory(final Path dir, final IOException e) throws IOException {
-				if (e != null)
-					return handleException(e);
-				Files.delete(dir);
-				return FileVisitResult.CONTINUE;
-			}
-		});
-	};
-	
 	private void downloadAndUnpackArchive(File root, Resource resource) throws IOException {
-		File unpackDir = new File(root, resource.getUnpackDir());
-		File zipFile = new File(root, resource.getFile());
+		File unpackDir = new File(root, resource.getLocal());
+		File zipFile = new File(root, resource.getRemote());
 
-		if (unpackDir.exists()) {
+//		if (unpackDir.exists()) {
 //			if (!unpackDir.delete()) {
 //				throw new IOException("can't delete dir " + unpackDir);
 //			}
-			deleteFileOrFolder(unpackDir.toPath());
-		}
+//			deleteFileOrFolder(unpackDir.toPath());
+//		}
 
-		URL url = HttpHelper.clientURL(resource.getFile());
+		URL url = HttpHelper.clientURL(resource.getRemote());
 		URLConnection connection = url.openConnection();
 		connection.setConnectTimeout(15000);
 		connection.setReadTimeout(15000);
 		downloadProgress.setMinimum(0);
 		downloadProgress.setValue(0);
 		downloadProgress.setMaximum(connection.getContentLength());
-		currentFileLoading.setText("Загружаем " + resource.getFile());
+		currentFileLoading.setText("Загружаем " + resource.getRemote());
 
 		long totalLen = 0;
 		try (InputStream in = connection.getInputStream(); 
@@ -220,7 +188,7 @@ public class DownloadingManager extends JComponent {
 				}
 			}
 		} catch (Throwable e) {
-			throw new IOException("Could not download " + resource.getFile(), e);
+			throw new IOException("Could not download " + resource.getRemote(), e);
 		} finally {
 			HttpHelper.close(connection);
 		}
@@ -232,7 +200,7 @@ public class DownloadingManager extends JComponent {
 
 		downloadProgress.setMinimum(0);
 		downloadProgress.setValue(0);
-		currentFileLoading.setText("Распаковываем " + resource.getFile());
+		currentFileLoading.setText("Распаковываем " + zipFile.getName());
 		int entryCount = 0;
 
 		try (InputStream in = Files.newInputStream(zipFile.toPath());
@@ -271,14 +239,13 @@ public class DownloadingManager extends JComponent {
 				zip.closeEntry();
 			}
 		} catch (Throwable e) {
-			throw new IOException("Could not unpack " + resource.getFile(), e);
-		}
-
-		zipFile.delete();
-		currentFileLoading.setText("");
-
-		synchronized (currentSpeed) {
-			measureDownloadSpeed = true;
+			throw new IOException("Could not unpack " + zipFile, e);
+		} finally {
+			zipFile.delete();
+			currentFileLoading.setText("");
+			synchronized (currentSpeed) {
+				measureDownloadSpeed = true;
+			}
 		}
 	}
 
@@ -287,7 +254,7 @@ public class DownloadingManager extends JComponent {
 			measureDownloadSpeed = true;
 		}
 
-		if (resource.isArchive()) {
+		if (resource.isFolder()) {
 			downloadAndUnpackArchive(root, resource);
 		} else {
 			downloadFile(root, resource);
