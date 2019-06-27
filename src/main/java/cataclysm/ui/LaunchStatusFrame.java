@@ -12,7 +12,7 @@ import cataclysm.utils.Icons;
 import cataclysm.utils.VersionHelper;
 
 /**
- * Created 20 окт. 2018 г. / 21:36:58 
+ * Created 20 пїЅпїЅпїЅ. 2018 пїЅ. / 21:36:58 
  * @author Knoblul
  */
 public class LaunchStatusFrame extends JFrame {
@@ -21,7 +21,7 @@ public class LaunchStatusFrame extends JFrame {
 	
 	public LaunchStatusFrame() {
 		Icons.setupIcons(this);
-		setTitle("SME LAUNCHER " + VersionHelper.VERSION);
+		setTitle("Project Cataclysm Launcher v" + VersionHelper.VERSION);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setSize(600, 400);
 		setResizable(false);

@@ -17,14 +17,14 @@ import cataclysm.launch.Launcher;
 import cataclysm.utils.Log;
 
 /**
- * Created 16 îêò. 2018 ã. / 22:17:44 
+ * Created 16 ï¿½ï¿½ï¿½. 2018 ï¿½. / 22:17:44 
  * @author Knoblul
  */
 public class DialogUtils {
 	public static void showError(String message, Throwable t) {
 		Log.err(t, message);
 		
-		JDialog dialog = new JDialog(Launcher.frame, "Îøèáêà", true);
+		JDialog dialog = new JDialog(Launcher.frame, "ÐžÑˆÐ¸Ð±ÐºÐ°", true);
 		dialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		dialog.setLayout(new GridBagLayout());
 		
@@ -55,7 +55,7 @@ public class DialogUtils {
 		jscp.setMaximumSize(new Dimension(400, 500));
 		dialog.add(jscp, gbc);
 		
-		JButton ok = new JButton("Îê");
+		JButton ok = new JButton("ÐžÐº");
 		ok.addActionListener(e -> dialog.setVisible(false));
 		
 		gbc.fill = GridBagConstraints.NONE;

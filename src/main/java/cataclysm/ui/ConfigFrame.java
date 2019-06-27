@@ -31,7 +31,7 @@ import cataclysm.utils.Log;
 import cataclysm.utils.PlatformHelper;
 
 /**
- * Created 28 сент. 2018 г. / 21:34:44
+ * Created 28 пїЅпїЅпїЅпїЅ. 2018 пїЅ. / 21:34:44
  * 
  * @author Knoblul
  */
@@ -59,7 +59,7 @@ public class ConfigFrame extends JDialog {
 		setModalityType(ModalityType.DOCUMENT_MODAL);
 		setSize(500, 250);
 		setResizable(false);
-		setTitle("Настройки");
+		setTitle("РќР°СЃС‚СЂРѕР№РєРё");
 		
 		fill();
 	}
@@ -69,7 +69,7 @@ public class ConfigFrame extends JDialog {
 
 		GridBagConstraints gbc = new GridBagConstraints();
 
-		JLabel label = new JLabel("Папка с игрой:");
+		JLabel label = new JLabel("РџР°РїРєР° СЃ РёРіСЂРѕР№:");
 		label.setFont(label.getFont().deriveFont(Font.PLAIN, 20));
 
 		gbc.gridx = 0;
@@ -91,7 +91,7 @@ public class ConfigFrame extends JDialog {
 		gbc.insets.set(0, 40, 0, 0);
 		add(jtf, gbc);
 
-		JButton select = new JButton("Выбор");
+		JButton select = new JButton("Р’С‹Р±СЂР°С‚СЊ");
 		select.addActionListener(e -> selectGameDir(jtf));
 		gbc.fill = GridBagConstraints.NONE;
 		gbc.gridx = 1;
@@ -99,7 +99,7 @@ public class ConfigFrame extends JDialog {
 		gbc.insets.set(0, 4, 0, 10);
 		add(select, gbc);
 
-		label = new JLabel("Выделяемая память (МБ):");
+		label = new JLabel("Р’С‹РґРµР»СЏРµРјР°СЏ РїР°РјСЏС‚СЊ (РњР‘):");
 		label.setFont(label.getFont().deriveFont(Font.PLAIN, 20));
 		gbc.gridx = 0;
 		gbc.gridy = 2;
@@ -137,7 +137,7 @@ public class ConfigFrame extends JDialog {
 		JFileChooser jfc = new JFileChooser(gameDirectory);
 		jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		jfc.setMultiSelectionEnabled(false);
-		jfc.setDialogTitle("Выбор папки с игрой");
+		jfc.setDialogTitle("Р’С‹Р±РѕСЂ РїР°РїРєРё СЃ РёРіСЂРѕР№");
 		
 		int result = jfc.showSaveDialog(this);
 		if (result == JFileChooser.APPROVE_OPTION) {

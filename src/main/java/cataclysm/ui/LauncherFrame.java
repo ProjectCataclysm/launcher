@@ -19,7 +19,7 @@ import cataclysm.utils.Icons;
 import cataclysm.utils.VersionHelper;
 
 /**
- * Created 28 сент. 2018 г. / 16:55:45 
+ * Created 28 пїЅпїЅпїЅпїЅ. 2018 пїЅ. / 16:55:45 
  * @author Knoblul
  */
 public class LauncherFrame extends JFrame {
@@ -72,7 +72,7 @@ public class LauncherFrame extends JFrame {
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		
-		JButton startButton = new JButton("Запуск");
+		JButton startButton = new JButton("Р—Р°РїСѓСЃРє");
 		startButton.addActionListener(e -> Launcher.launch());
 		startButton.setPreferredSize(new Dimension(startButton.getPreferredSize().width, 50));
 		

@@ -27,7 +27,7 @@ import cataclysm.launch.Launcher;
 import cataclysm.ui.DialogUtils;
 
 /**
- * Created 20 окт. 2018 г. / 22:51:07 
+ * Created 20 РѕРєС‚. 2018 Рі. / 22:51:07 
  * @author Knoblul
  */
 public class VersionHelper extends JComponent {
@@ -51,7 +51,7 @@ public class VersionHelper extends JComponent {
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 
-		JLabel title = new JLabel("Проверка наличия обновлений...");
+		JLabel title = new JLabel("РџСЂРѕРІРµСЂРєР° РЅР°Р»РёС‡РёСЏ РѕР±РЅРѕРІР»РµРЅРёР№...");
 		title.setHorizontalAlignment(JLabel.CENTER);
 		title.setFont(title.getFont().deriveFont(Font.BOLD, 20));
 
@@ -81,7 +81,7 @@ public class VersionHelper extends JComponent {
 
 		GridBagConstraints gbc = new GridBagConstraints();
 
-		JLabel title = new JLabel("Обновляем лаунчер");
+		JLabel title = new JLabel("РћР±РЅРѕРІР»СЏРµРј Р»Р°СѓРЅС‡РµСЂ");
 		title.setHorizontalAlignment(JLabel.CENTER);
 		title.setFont(title.getFont().deriveFont(Font.BOLD, 30));
 
@@ -151,7 +151,7 @@ public class VersionHelper extends JComponent {
 		try {
 			File jar = currentJarLocation();
 			if (jar == null) {
-				// eclipse-версия всегда Up-to-date
+				// eclipse-РІРµСЂСЃРёСЏ РІСЃРµРіРґР° Up-to-date
 				return true;
 			}
 		} catch (IOException e1) {
@@ -170,7 +170,7 @@ public class VersionHelper extends JComponent {
 				return version.equals(VERSION);
 			}
 		} catch (IOException e) {
-			DialogUtils.showError("Невозможно проверить наличие обновлений!", e);
+			DialogUtils.showError("РќРµРІРѕР·РјРѕР¶РЅРѕ РїСЂРѕРІРµСЂРёС‚СЊ РЅР°Р»РёС‡РёРµ РѕР±РЅРѕРІР»РµРЅРёР№!", e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -221,7 +221,7 @@ public class VersionHelper extends JComponent {
 			ProcessBuilder pb = new ProcessBuilder(command);
 			pb.start();
 		} catch (IOException e) {
-			DialogUtils.showError("Невозможно обновить лаунчер!", e);
+			DialogUtils.showError("РќРµРІРѕР·РјРѕР¶РЅРѕ РѕР±РЅРѕРІРёС‚СЊ Р»Р°СѓРЅС‡РµСЂ!", e);
 		}
 		
 		System.exit(0);
@@ -229,10 +229,10 @@ public class VersionHelper extends JComponent {
 	
 	public boolean shouldStartLauncher(String[] args) {
 		if (args.length > 0) {
-			// если в параметр был передан файл с окночнанием .jar, то удаляем
-			// этот файл
-			// нужно для удаления родительского джарника, напр. при запуске
-			// лаунчера через обновляющий джар
+			// РµСЃР»Рё РІ РїР°СЂР°РјРµС‚СЂ Р±С‹Р» РїРµСЂРµРґР°РЅ С„Р°Р№Р» СЃ РѕРєРЅРѕС‡РЅР°РЅРёРµРј .jar, С‚Рѕ СѓРґР°Р»СЏРµРј
+			// СЌС‚РѕС‚ С„Р°Р№Р»
+			// РЅСѓР¶РЅРѕ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ РґР¶Р°СЂРЅРёРєР°, РЅР°РїСЂ. РїСЂРё Р·Р°РїСѓСЃРєРµ
+			// Р»Р°СѓРЅС‡РµСЂР° С‡РµСЂРµР· РѕР±РЅРѕРІР»СЏСЋС‰РёР№ РґР¶Р°СЂ
 			File src = new File(args[0]);
 			if (src.getName().endsWith(".jar")) {
 				src.delete();
@@ -241,19 +241,19 @@ public class VersionHelper extends JComponent {
 		
 		File relaunchLocation = checkLocation();
 		if (relaunchLocation != null) {
-			// перезапускаем лаунчер в другом джаре
+			// РїРµСЂРµР·Р°РїСѓСЃРєР°РµРј Р»Р°СѓРЅС‡РµСЂ РІ РґСЂСѓРіРѕРј РґР¶Р°СЂРµ
 			relaunch(relaunchLocation);
 			return false;
 		}
 		
 		if (!checkUpdates()) {
 			Log.err("Launcher outdated!");
-			// обновляем лаунчер
+			// РѕР±РЅРѕРІР»СЏРµРј Р»Р°СѓРЅС‡РµСЂ
 			updateLauncher();
 			return false;
 		}
 		
-		// все проверки прошли успешно, запускаем данный экземпляр как основной лаунчер
+		// РІСЃРµ РїСЂРѕРІРµСЂРєРё РїСЂРѕС€Р»Рё СѓСЃРїРµС€РЅРѕ, Р·Р°РїСѓСЃРєР°РµРј РґР°РЅРЅС‹Р№ СЌРєР·РµРјРїР»СЏСЂ РєР°Рє РѕСЃРЅРѕРІРЅРѕР№ Р»Р°СѓРЅС‡РµСЂ
 		return true;
 	}
 }
