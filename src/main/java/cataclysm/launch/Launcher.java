@@ -21,7 +21,7 @@ import cataclysm.utils.Log;
 import cataclysm.utils.VersionHelper;
 
 /**
- * Created 27 сент. 2018 г. / 21:10:13 
+ * Created 27 СЃРµРЅС‚. 2018 Рі. / 21:10:13 
  * @author Knoblul
  */
 public class Launcher implements Runnable {
@@ -51,7 +51,7 @@ public class Launcher implements Runnable {
 //		ConsoleDisconnector.disconnect();
 		
 		if (!LauncherLock.isAvaible()) {
-			JOptionPane.showMessageDialog(null, "Лаунчер уже запущен", "Ошибка", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Р›Р°СѓРЅС‡РµСЂ СѓР¶Рµ Р·Р°РїСѓС‰РµРЅ", "РћС€РёР±РєР°", JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
 			return;
 		}
@@ -81,7 +81,7 @@ public class Launcher implements Runnable {
 	public void run() {
 		try {
 			if (launched) {
-				throw new RuntimeException("Игра уже запущена");
+				throw new RuntimeException("РРіСЂР° СѓР¶Рµ Р·Р°РїСѓС‰РµРЅР°");
 			}
 			launched = true;
 
@@ -115,14 +115,14 @@ public class Launcher implements Runnable {
 				launched = false;
 				
 				JOptionPane.showMessageDialog(frame,
-						"Игра была аварийно завершена\nTODO: добавить отправку отчёта об ошибке на сервера SME",
-						"Ошибка", JOptionPane.ERROR_MESSAGE);
+						"РРіСЂР° Р±С‹Р»Р° Р°РІР°СЂРёР№РЅРѕ Р·Р°РІРµСЂС€РµРЅР°\nTODO: РґРѕР±Р°РІРёС‚СЊ РѕС‚РїСЂР°РІРєСѓ РѕС‚С‡С‘С‚Р° РѕР± РѕС€РёР±РєРµ РЅР° СЃРµСЂРІРµСЂР° SME",
+						"РћС€РёР±РєР°", JOptionPane.ERROR_MESSAGE);
 			} else {
 				System.exit(0);
 			}
 		} catch (Throwable t) {
 			statusFrame.setVisible(false);
-			DialogUtils.showError("Невозможно запустить игру", t);
+			DialogUtils.showError("РќРµРІРѕР·РјРѕР¶РЅРѕ Р·Р°РїСѓСЃС‚РёС‚СЊ РёРіСЂСѓ", t);
 			frame.setVisible(true);
 			launched = false;
 		}

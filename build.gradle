@@ -7,17 +7,38 @@
  * user guide available at https://docs.gradle.org/2.14.1/userguide/tutorial_java_projects.html
  */
 
-// Apply the java plugin to add support for Java
 apply plugin: 'java'
+compileJava.options.encoding = 'UTF-8'
 
-// In this section you declare where to find the dependencies of your project
+buildscript {
+    repositories {
+		// распакованный прогуард должен лежать в родительском каталоге проекта
+        flatDir dirs: '../proguard/lib'
+    }
+    dependencies {
+        classpath ':proguard:'
+    }
+}
+
+jar {
+	manifest {
+        attributes 'Main-Class': 'cataclysm.Main'
+    }
+	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+task proguard(type: proguard.gradle.ProGuardTask) {
+	configuration 'proguard.pro'
+	injars  'build/libs/CataclysmLauncher.jar'
+	outjars 'build/libs/CataclysmLauncher_obf.jar'
+}
+
+build.finalizedBy(proguard)
+
 repositories {
-    // Use 'jcenter' for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
     jcenter()
 }
 
-// In this section you declare the dependencies for your production and test code
 dependencies {
 	compile 'com.google.guava:guava:28.0-jre'
 }

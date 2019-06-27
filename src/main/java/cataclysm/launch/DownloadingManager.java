@@ -32,7 +32,7 @@ import cataclysm.utils.HttpHelper;
 /**
  * 
  * 
- * <br><br><i>Created 16 îêò. 2018 ã. / 21:32:13</i><br>
+ * <br><br><i>Created 16 Ð¾ÐºÑ‚. 2018 Ð³. / 21:32:13</i><br>
  * SME REDUX / NOT FOR FREE USE!
  * @author Knoblul
  */
@@ -74,10 +74,10 @@ public class DownloadingManager extends JComponent {
 	private static String readableSpeed(int size) {
 		if (size <= 0)
 			return "0";
-		final String[] units = new String[] { "Á", "ÊÁ", "ÌÁ", "ÃÁ", "ÒÁ" };
+		final String[] units = new String[] { "Ð‘", "ÐšÐ‘", "ÐœÐ‘", "Ð“Ð‘", "Ð¢Ð‘" };
 		int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
 		return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups]
-				+ "/ñåê";
+				+ "/ÑÐµÐº";
 	}
 
 	private void fill() {
@@ -88,7 +88,7 @@ public class DownloadingManager extends JComponent {
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 
-		JLabel title = new JLabel("Çàãðóæàåì ôàéëû...");
+		JLabel title = new JLabel("Ð—Ð°Ð³Ñ€ÑƒÐ¶Ð°ÐµÐ¼ Ñ„Ð°Ð¹Ð»Ñ‹...");
 		title.setHorizontalAlignment(JLabel.CENTER);
 		title.setFont(title.getFont().deriveFont(Font.BOLD, 40));
 
@@ -136,7 +136,7 @@ public class DownloadingManager extends JComponent {
 		downloadProgress.setMinimum(0);
 		downloadProgress.setValue(0);
 		downloadProgress.setMaximum(connection.getContentLength());
-		currentFileLoading.setText("Çàãðóæàåì " + resource.getFile());
+		currentFileLoading.setText("Ð—Ð°Ð³Ñ€ÑƒÐ¶Ð°ÐµÐ¼ " + resource.getFile());
 
 		long totalLen = 0;
 		try (InputStream in = connection.getInputStream(); 
@@ -205,7 +205,7 @@ public class DownloadingManager extends JComponent {
 		downloadProgress.setMinimum(0);
 		downloadProgress.setValue(0);
 		downloadProgress.setMaximum(connection.getContentLength());
-		currentFileLoading.setText("Çàãðóæàåì " + resource.getFile());
+		currentFileLoading.setText("Ð—Ð°Ð³Ñ€ÑƒÐ¶Ð°ÐµÐ¼ " + resource.getFile());
 
 		long totalLen = 0;
 		try (InputStream in = connection.getInputStream(); 
@@ -232,7 +232,7 @@ public class DownloadingManager extends JComponent {
 
 		downloadProgress.setMinimum(0);
 		downloadProgress.setValue(0);
-		currentFileLoading.setText("Ðàñïàêîâûâàåì " + resource.getFile());
+		currentFileLoading.setText("Ð Ð°ÑÐ¿Ð°ÐºÐ¾Ð²Ñ‹Ð²Ð°ÐµÐ¼ " + resource.getFile());
 		int entryCount = 0;
 
 		try (InputStream in = Files.newInputStream(zipFile.toPath());
