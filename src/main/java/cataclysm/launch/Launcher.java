@@ -104,9 +104,9 @@ public class Launcher implements Runnable {
 			}
 		} catch (Throwable t) {
 			statusFrame.setVisible(false);
-			DialogUtils.showError("Ошибка загрузки файлов", t);
 			frame.setVisible(true);
 			launched = false;
+			DialogUtils.showError("Ошибка загрузки файлов", t);
 			return;
 		}
 		
@@ -143,13 +143,13 @@ public class Launcher implements Runnable {
 		List<String> command = Lists.newArrayList();
 		command.add("java");
 		command.add("-Xms256m");
-		command.add("-Xmx" + config.memory + "m");
+		command.add("-Xmx" + (config.memory/1024/1024) + "m");
 		command.add("-Djava.library.path=");
 		//command.add("-Dfile.encoding=UTF-8");
 		
 		// оптимизация
-		command.add("-XX:+UseG1GC");
-		command.add("-XX:+UseStringDeduplication");
+//		command.add("-XX:+UseG1GC");
+//		command.add("-XX:+UseStringDeduplication");
 		
 		// класспатх
 		command.add("-cp");

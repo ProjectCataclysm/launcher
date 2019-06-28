@@ -4,6 +4,8 @@
 -repackageclasses cataclysm.obf
 -dontnote
 -dontwarn
+-keepattributes *Annotation*,SourceFile,LineNumberTable
+-renamesourcefileattribute obf
 
 -keep,allowshrinking class !cataclysm.** {
     <fields>;

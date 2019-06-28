@@ -27,6 +27,7 @@ public class LaunchStatusFrame extends JFrame {
 		setResizable(false);
 		setContentPane(panel = new JPanel(new GridBagLayout()));
 		setTitle(Launcher.frame.getTitle());
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 	}
 	
 	public void fill(JComponent component) {

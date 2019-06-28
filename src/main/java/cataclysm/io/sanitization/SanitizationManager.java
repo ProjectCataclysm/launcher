@@ -99,8 +99,8 @@ public class SanitizationManager extends JComponent {
 	
 	private boolean findMissingFiles(File root, File file, Map<String, String> hashes) {
 		List<File> files = Lists.newArrayList();
+		String path = file.getAbsolutePath().substring(root.getAbsolutePath().length() + 1);
 		for (String fn: hashes.keySet()) {
-			String path = root.getAbsolutePath().substring(file.getAbsolutePath().length() + 1);
 			path = path.replace(File.separatorChar, '/');
 			if (fn.startsWith(path)) {
 				files.add(new File(root, fn));
@@ -168,6 +168,11 @@ public class SanitizationManager extends JComponent {
 				// все посторонние файлы
 				if (protectedMode) {
 					recursiveDeleteExtraFiles(root, local, hashes);
+				}
+				
+				// ВАЖНО: не сканируем рут!
+				if (root.getAbsolutePath().equals(local.getAbsolutePath())) {
+					continue;
 				}
 				
 				// если недостаёт файлов или файлы изменены - то добавляем

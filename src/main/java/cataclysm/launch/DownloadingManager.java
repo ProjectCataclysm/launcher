@@ -133,6 +133,10 @@ public class DownloadingManager extends JComponent {
 		downloadProgress.setValue(0);
 		downloadProgress.setMaximum(connection.getContentLength());
 		currentFileLoading.setText("Загружаем " + resource.getRemote());
+		
+		if (!output.getParentFile().exists()) {
+			output.getParentFile().mkdirs();
+		}
 
 		long totalLen = 0;
 		try (InputStream in = connection.getInputStream(); 
