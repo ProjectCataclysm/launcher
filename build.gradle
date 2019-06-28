@@ -1,28 +1,41 @@
-apply plugin: 'java'
-compileJava.options.encoding = 'UTF-8'
-
 buildscript {
     repositories {
         // распакованный прогуард должен лежать в родительском каталоге проекта
         flatDir dirs: '../proguard/lib'
+        // подключаем jcenter для иморта плагина shadow (нужен для fat jar)
+        jcenter()
     }
     dependencies {
         classpath ':proguard:'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.2'
     }
 }
+
+apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
+compileJava.options.encoding = 'UTF-8'
 
 jar {
     manifest {
         attributes 'Main-Class': 'cataclysm.Main'
     }
-    from { 
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+}
+
+shadowJar {
+    classifier 'fatjar'
+    manifest {
+        attributes 'Main-Class': 'cataclysm.Main'
     }
+}
+
+artifacts {
+    archives jar
+    archives shadowJar
 }
 
 task proguard(type: proguard.gradle.ProGuardTask) {
     configuration 'proguard.pro'
-    injars  'build/libs/CataclysmLauncher.jar'
+    injars  'build/libs/CataclysmLauncher-fatjar.jar'
     outjars 'build/libs/launcher.jar'
 }
 
@@ -31,7 +44,8 @@ task generate_version(type:Exec) {
     commandLine 'java', '-jar', 'launcher.jar', '-version'
 }
 
-build.finalizedBy(proguard, generate_version)
+build.finalizedBy(proguard)
+proguard.finalizedBy(generate_version)
 
 repositories {
     jcenter()

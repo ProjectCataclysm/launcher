@@ -37,7 +37,7 @@ public class ResourceMaster {
 		
 		JSONParser parser = new JSONParser();
 		try (InputStreamReader reader = new InputStreamReader(
-				HttpHelper.openStream(HttpHelper.clientURL("build.json")))) {
+				HttpHelper.openStream(HttpHelper.clientURL("deploy.json")))) {
 			JSONObject root = (JSONObject) parser.parse(reader);
 			
 			JSONArray pfnodes = (JSONArray) root.get("protected_folders");
@@ -55,7 +55,7 @@ public class ResourceMaster {
 				resources.add(resource);
 			});
 		} catch (ParseException e) {
-			throw new IOException("Failed to parse build.json", e);
+			throw new IOException("Failed to parse deploy.json", e);
 		}
 	}
 	
