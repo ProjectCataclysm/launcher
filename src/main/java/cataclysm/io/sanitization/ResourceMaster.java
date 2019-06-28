@@ -62,7 +62,7 @@ public class ResourceMaster {
 	public void retrieveHashes() throws IOException {
 		for (Resource resource: resources) {
 			if (resource.isHashed()) {
-				try (InputStream in = HttpHelper.openStream(HttpHelper.clientURL(resource.getRemote() + ".sha"));
+				try (InputStream in = HttpHelper.openStream(HttpHelper.clientURL(resource.getRemote() + ".hash"));
 						BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charsets.UTF_8))) {
 					String ln;
 					while ((ln = reader.readLine()) != null) {
