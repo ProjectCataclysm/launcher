@@ -127,9 +127,9 @@ public class Launcher implements Runnable {
 				
 				JOptionPane.showMessageDialog(frame, "Игра была аварийно завершена", "Ошибка",
 						JOptionPane.ERROR_MESSAGE);
-			} else {
-				System.exit(0);
 			}
+			
+			System.exit(0);
 		} catch (Throwable t) {
 			statusFrame.setVisible(false);
 			DialogUtils.showError("Невозможно запустить игру", t);
@@ -143,6 +143,7 @@ public class Launcher implements Runnable {
 		command.add("java");
 		command.add("-Xms256m");
 		command.add("-Xmx" + (config.memory/1024/1024) + "m");
+		command.add("-XX:ErrorFile=crash-reports/fatal_pid_%p.log");
 		command.add("-Djava.library.path=");
 		//command.add("-Dfile.encoding=UTF-8");
 		
