@@ -7,11 +7,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
 import cataclysm.io.FileHasher;
@@ -93,7 +95,14 @@ public class SanitizationManager extends JComponent {
 		} else {
 			String fn = file.getAbsolutePath().substring(root.getAbsolutePath().length() + 1);
 			fn = fn.replace(File.separatorChar, '/');
-			return hashes.get(fn).equals(FileHasher.hash(file));
+			
+			System.out.println("Hasing " + file);
+			Stopwatch sw = Stopwatch.createStarted();
+			String hash = FileHasher.hash(file);
+			sw.stop();
+			System.out.println("hashed in " + sw.elapsed(TimeUnit.MILLISECONDS) / 1000.0);
+			
+			return hashes.get(fn).equals(hash);
 		}
 	}
 	

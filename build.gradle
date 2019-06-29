@@ -26,6 +26,11 @@ shadowJar {
     manifest {
         attributes 'Main-Class': 'cataclysm.Main'
     }
+    
+    exclude '*.txt'
+    exclude '*/*.txt'
+    exclude '*/*.java'
+    exclude 'META-INF/maven/**'
 }
 
 artifacts {
@@ -49,9 +54,11 @@ proguard.finalizedBy(generate_version)
 
 repositories {
     jcenter()
+    maven { url "http://iudex.fi/maven/" }
 }
 
 dependencies {
     compile 'com.google.guava:guava:28.0-jre'
     compile 'com.googlecode.json-simple:json-simple:1.1.1'
+    compile 'com.saphir2:sphlib:3.0'
 }

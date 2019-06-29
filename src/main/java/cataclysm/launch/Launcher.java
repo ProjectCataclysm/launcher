@@ -67,7 +67,6 @@ public class Launcher implements Runnable {
 		downloader = new DownloadingManager();
 		versionHelper = new VersionHelper();
 		
-		frame.showVersionChecker(versionHelper);
 		if (versionHelper.shouldStartLauncher(args)) {
 			frame.showLauncher();
 		}

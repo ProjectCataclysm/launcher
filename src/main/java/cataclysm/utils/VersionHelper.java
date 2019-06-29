@@ -248,6 +248,8 @@ public class VersionHelper extends JComponent {
 		
 		if (!checkUpdates()) {
 			Log.err("Launcher outdated!");
+			Launcher.frame.showVersionChecker(this);
+
 			// обновляем лаунчер
 			updateLauncher();
 			return false;

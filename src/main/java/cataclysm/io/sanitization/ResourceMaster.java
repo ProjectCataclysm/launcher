@@ -34,6 +34,7 @@ public class ResourceMaster {
 	@SuppressWarnings("unchecked")
 	public void retrieveDownloadInformation() throws IOException {
 		resources.clear();
+		protectedFolders.clear();
 		
 		JSONParser parser = new JSONParser();
 		try (InputStreamReader reader = new InputStreamReader(
@@ -60,6 +61,7 @@ public class ResourceMaster {
 	}
 	
 	public void retrieveHashes() throws IOException {
+		hashes.clear();
 		for (Resource resource: resources) {
 			if (resource.isHashed()) {
 				try (InputStream in = HttpHelper.openStream(HttpHelper.clientURL(resource.getRemote() + ".hash"));
