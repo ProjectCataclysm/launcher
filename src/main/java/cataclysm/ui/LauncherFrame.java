@@ -110,6 +110,7 @@ public class LauncherFrame extends JFrame {
 	
 	public void showLauncher() {
 		setContentPane(launcherContent);
+		setVisible(true);
 		revalidate();
 	}
 }
