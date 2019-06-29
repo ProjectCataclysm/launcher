@@ -147,8 +147,8 @@ public class Launcher implements Runnable {
 		//command.add("-Dfile.encoding=UTF-8");
 		
 		// оптимизация
-//		command.add("-XX:+UseG1GC");
-//		command.add("-XX:+UseStringDeduplication");
+		command.add("-XX:+UseG1GC");
+		command.add("-XX:+UseStringDeduplication");
 		
 		// класспатх
 		command.add("-cp");
