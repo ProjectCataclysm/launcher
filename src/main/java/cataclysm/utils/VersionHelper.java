@@ -33,7 +33,7 @@ import cataclysm.ui.DialogUtils;
 public class VersionHelper extends JComponent {
 	private static final long serialVersionUID = -6203764377406251750L;
 	private JProgressBar progress;
-	public static final String VERSION = "1.29";
+	public static final String VERSION = "1.30";
 
 	public VersionHelper() {
 		progress = new JProgressBar();
@@ -131,6 +131,9 @@ public class VersionHelper extends JComponent {
 			
 			if (jar.equals(updateJar) || !stubJar.exists()) {
 				try {
+					if (stubJar.exists()) {
+						stubJar.delete();
+					}
 					Files.copy(jar.toPath(), stubJar.toPath());
 				} catch (IOException e) {
 					DialogUtils.showError("failed to copy update/launcher jar", e);
