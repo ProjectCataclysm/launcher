@@ -33,7 +33,7 @@ import cataclysm.ui.DialogUtils;
 public class VersionHelper extends JComponent {
 	private static final long serialVersionUID = -6203764377406251750L;
 	private JProgressBar progress;
-	public static final String VERSION = "1.30";
+	public static final String VERSION = "1.4";
 
 	public VersionHelper() {
 		progress = new JProgressBar();

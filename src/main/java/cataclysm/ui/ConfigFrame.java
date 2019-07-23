@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Properties;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -28,6 +29,7 @@ import com.google.common.base.Charsets;
 
 import cataclysm.launch.Launcher;
 import cataclysm.utils.Log;
+import cataclysm.utils.LoginHolder;
 import cataclysm.utils.PlatformHelper;
 
 /**
@@ -44,6 +46,9 @@ public class ConfigFrame extends JDialog {
 	public File gameDirectory;
 	public long memory;
 
+	private JLabel loginStatusLabel;
+	private JButton signOutButton;
+
 	public ConfigFrame() {
 		super(Launcher.frame);
 
@@ -57,23 +62,62 @@ public class ConfigFrame extends JDialog {
 		loadConfig();
 
 		setModalityType(ModalityType.DOCUMENT_MODAL);
-		setSize(500, 250);
+		setSize(500, 260);
 		setResizable(false);
 		setTitle("Настройки");
 		
 		fill();
+	}
+	
+	public void updateLogin() {
+		LoginHolder holder = Launcher.loginFrame.getLoginHolder();
+		if (holder != null) {
+			loginStatusLabel.setText("Вы вошли как " + holder.getUsername());
+			signOutButton.setEnabled(true);
+		} else {
+			loginStatusLabel.setText(" ");
+			signOutButton.setEnabled(false);
+		}
 	}
 
 	private void fill() {
 		setLayout(new GridBagLayout());
 
 		GridBagConstraints gbc = new GridBagConstraints();
-
+		
+		loginStatusLabel = new JLabel(" ");
+		loginStatusLabel.setVerticalAlignment(JLabel.CENTER);
+		signOutButton = new JButton("Выход");
+		signOutButton.setEnabled(false);
+		signOutButton.addActionListener(e -> Launcher.loginFrame.signout(true));
+		
+		gbc.gridy = 0;
+		gbc.gridx = 0;
+		gbc.weightx = 1;
+		gbc.anchor = GridBagConstraints.NORTH;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		add(Box.createHorizontalBox(), gbc);
+		
+		gbc.insets.set(6, 2, 2, 2);
+		gbc.gridy = 0;
+		gbc.gridx = 1;
+		gbc.weightx = 1;
+		gbc.anchor = GridBagConstraints.NORTH;
+		gbc.fill = GridBagConstraints.NONE;
+		add(loginStatusLabel, gbc);
+		
+		gbc.insets.set(2, 2, 2, 2);
+		gbc.gridy = 0;
+		gbc.gridx = 2;
+		gbc.weightx = 1;
+		gbc.anchor = GridBagConstraints.NORTH;
+		add(signOutButton, gbc);
+		
 		JLabel label = new JLabel("Папка с игрой:");
 		label.setFont(label.getFont().deriveFont(Font.PLAIN, 20));
 
 		gbc.gridx = 0;
-		gbc.gridy = 0;
+		gbc.gridy++;
 		gbc.gridwidth = 2;
 		gbc.weightx = 1;
 		gbc.insets.set(10, 10, 10, 10);
@@ -85,7 +129,7 @@ public class ConfigFrame extends JDialog {
 		jtf.setText(gameDirectory.getAbsolutePath());
 		jtf.setPreferredSize(new Dimension(20, 28));
 		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.gridy = 1;
+		gbc.gridy++;
 		gbc.gridwidth = 1;
 		gbc.anchor = GridBagConstraints.CENTER;
 		gbc.insets.set(0, 40, 0, 0);
@@ -102,7 +146,7 @@ public class ConfigFrame extends JDialog {
 		label = new JLabel("Выделяемая память (МБ):");
 		label.setFont(label.getFont().deriveFont(Font.PLAIN, 20));
 		gbc.gridx = 0;
-		gbc.gridy = 2;
+		gbc.gridy++;
 		gbc.gridwidth = 2;
 		gbc.weightx = 1;
 		gbc.insets.set(10, 10, 10, 10);
@@ -118,7 +162,7 @@ public class ConfigFrame extends JDialog {
 		memSpinner.setPreferredSize(new Dimension(200, 28));
 		gbc.fill = GridBagConstraints.NONE;
 		gbc.gridx = 0;
-		gbc.gridy = 3;
+		gbc.gridy++;
 		gbc.weightx = 0;
 		gbc.gridwidth = 1;
 		gbc.insets.set(0, 40, 0, 0);
@@ -147,6 +191,7 @@ public class ConfigFrame extends JDialog {
 	}
 
 	public void showDialog() {
+		updateLogin();
 		setLocationRelativeTo(Launcher.frame);
 		setVisible(true);
 	}
@@ -163,7 +208,7 @@ public class ConfigFrame extends JDialog {
 			props.load(in);
 
 			gameDirectory = new File(props.getProperty("GameDirectory", gameDirectory.getAbsolutePath()));
-			memory = Long.parseLong(props.getProperty("memory", Long.toString(memory)));
+			memory = Long.valueOf(props.getProperty("memory", Long.toString(memory)));
 		} catch (IOException e) {
 			Log.err(e, "Can't save config file");
 		}

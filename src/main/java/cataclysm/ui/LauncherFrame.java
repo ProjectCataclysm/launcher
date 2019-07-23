@@ -26,6 +26,8 @@ public class LauncherFrame extends JFrame {
 	private static final long serialVersionUID = 397595061352916545L;
 	
 	private JProgressBar progress;
+	private JButton configButton;
+	private JButton startButton;
 	private JPanel launcherContent;
 	
 	public LauncherFrame() {
@@ -44,7 +46,7 @@ public class LauncherFrame extends JFrame {
 		
 		GridBagConstraints gbc = new GridBagConstraints();
 		
-		JButton configButton = new JButton();
+		configButton = new JButton();
 		configButton.addActionListener(e -> Launcher.config.showDialog());
 		
 		try {
@@ -72,7 +74,7 @@ public class LauncherFrame extends JFrame {
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		
-		JButton startButton = new JButton("Запуск");
+		startButton = new JButton("Запуск");
 		startButton.addActionListener(e -> Launcher.launch());
 		startButton.setPreferredSize(new Dimension(startButton.getPreferredSize().width, 50));
 		
@@ -99,7 +101,25 @@ public class LauncherFrame extends JFrame {
 		progress.setPreferredSize(new Dimension(20, 8));
 		progress.setBorder(null);
 		progress.setForeground(Color.GREEN.darker());
-//		launcherContent.add(progress, gbc);
+	}
+	
+	public void updateLogin() {
+		if (!Launcher.loginFrame.isLoggedIn()) {
+			startButton.setText("Вы не вошли");
+			startButton.setEnabled(false);
+			configButton.setEnabled(false);
+		} else if (Launcher.loginFrame.getAccessDeniedString() != null) {
+			startButton.setText(Launcher.loginFrame.getAccessDeniedString());
+			startButton.setEnabled(false);
+			configButton.setEnabled(true);
+		} else {
+			startButton.setText("Запуск");
+			startButton.setEnabled(true);
+			configButton.setEnabled(true);
+		}
+		
+		Launcher.config.updateLogin();
+		Launcher.config.setVisible(false);
 	}
 	
 	public void showVersionChecker(JComponent component) {

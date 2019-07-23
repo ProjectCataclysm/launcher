@@ -2,8 +2,11 @@ package cataclysm.utils;
 
 import java.io.File;
 
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
 /**
- * Created 16 окт. 2018 г. / 22:09:12 
+ * Created 16 пїЅпїЅпїЅ. 2018 пїЅ. / 22:09:12 
  * @author Knoblul
  */
 public class PlatformHelper {
@@ -54,5 +57,14 @@ public class PlatformHelper {
 	public static long getAvaibleMemory() {
 		long maxMemory = Runtime.getRuntime().maxMemory();
 		return maxMemory;// / 1024 / 1024;
+	}
+	
+	public static void setLookAndFeel() {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -9,15 +9,17 @@ import javax.swing.filechooser.FileSystemView;
 
 import com.google.common.collect.Lists;
 
-import cataclysm.io.sanitization.ResourceMaster;
 import cataclysm.io.sanitization.Resource;
+import cataclysm.io.sanitization.ResourceMaster;
 import cataclysm.io.sanitization.SanitizationManager;
 import cataclysm.ui.ConfigFrame;
 import cataclysm.ui.DialogUtils;
 import cataclysm.ui.LaunchStatusFrame;
 import cataclysm.ui.LauncherFrame;
+import cataclysm.ui.LoginFrame;
 import cataclysm.utils.LauncherLock;
 import cataclysm.utils.Log;
+import cataclysm.utils.LoginHolder;
 import cataclysm.utils.VersionHelper;
 
 /**
@@ -36,6 +38,7 @@ public class Launcher implements Runnable {
 	
 	public static ConfigFrame config;
 	public static LauncherFrame frame;
+	public static LoginFrame loginFrame;
 	public static LaunchStatusFrame statusFrame;
 
 	private static VersionHelper versionHelper;
@@ -59,16 +62,22 @@ public class Launcher implements Runnable {
 		Runtime.getRuntime().addShutdownHook(new Thread(LauncherLock.unlock()));
 		
 		instance = this;
-		config = new ConfigFrame();
 		frame = new LauncherFrame();
+		config = new ConfigFrame();
+		loginFrame = new LoginFrame();
 		statusFrame = new LaunchStatusFrame();
 		resourceMaster = new ResourceMaster();
 		sanitizer = new SanitizationManager();
 		downloader = new DownloadingManager();
 		versionHelper = new VersionHelper();
 		
+		loginFrame.initialize();
+		
 		if (versionHelper.shouldStartLauncher(args)) {
 			frame.showLauncher();
+			if (!loginFrame.isLoggedIn()) {
+				loginFrame.showFrame();
+			}
 		}
 	}
 
@@ -128,13 +137,13 @@ public class Launcher implements Runnable {
 				JOptionPane.showMessageDialog(frame, "Игра была аварийно завершена", "Ошибка",
 						JOptionPane.ERROR_MESSAGE);
 			}
-			
-			System.exit(0);
 		} catch (Throwable t) {
 			statusFrame.setVisible(false);
 			DialogUtils.showError("Невозможно запустить игру", t);
 			frame.setVisible(true);
 			launched = false;
+		} finally {
+			System.exit(0);
 		}
 	}
 
@@ -151,10 +160,22 @@ public class Launcher implements Runnable {
 		command.add("-XX:+UseG1GC");
 		command.add("-XX:+UseStringDeduplication");
 		
+		// антиинжект
+		command.add("-XX:+DisableAttachMechanism");
+		
 		// класспатх
 		command.add("-cp");
 		command.add("core.jar");
 		command.add("start.StartMinecraft");
+		
+		LoginHolder loginHolder = loginFrame.getLoginHolder();
+		command.add("--uuid");
+		command.add(loginHolder.getUUID());
+		command.add("--sessionId");
+		command.add(loginHolder.getSessionId());
+		command.add("--username");
+		command.add(loginHolder.getUsername());
+		
 		ProcessBuilder pb = new ProcessBuilder(command);
 		pb.directory(config.gameDirectory);
 		return pb.inheritIO().start().waitFor();
