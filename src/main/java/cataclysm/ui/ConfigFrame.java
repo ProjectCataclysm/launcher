@@ -90,6 +90,8 @@ public class ConfigFrame extends JDialog {
 		signOutButton = new JButton("Выход");
 		signOutButton.setEnabled(false);
 		signOutButton.addActionListener(e -> Launcher.loginFrame.signout(true));
+		signOutButton.setMaximumSize(new Dimension(90, 30));
+		signOutButton.setPreferredSize(signOutButton.getMaximumSize());
 		
 		gbc.gridy = 0;
 		gbc.gridx = 0;
@@ -98,7 +100,7 @@ public class ConfigFrame extends JDialog {
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		add(Box.createHorizontalBox(), gbc);
 		
-		gbc.insets.set(6, 2, 2, 2);
+		gbc.insets.set(10, 0, 2, 0);
 		gbc.gridy = 0;
 		gbc.gridx = 1;
 		gbc.weightx = 1;
@@ -106,7 +108,7 @@ public class ConfigFrame extends JDialog {
 		gbc.fill = GridBagConstraints.NONE;
 		add(loginStatusLabel, gbc);
 		
-		gbc.insets.set(2, 2, 2, 2);
+		gbc.insets.set(2, 0, 2, 0);
 		gbc.gridy = 0;
 		gbc.gridx = 2;
 		gbc.weightx = 1;
@@ -136,6 +138,8 @@ public class ConfigFrame extends JDialog {
 		add(jtf, gbc);
 
 		JButton select = new JButton("Выбрать");
+		select.setMaximumSize(new Dimension(90, 30));
+		select.setPreferredSize(select.getMaximumSize());
 		select.addActionListener(e -> selectGameDir(jtf));
 		gbc.fill = GridBagConstraints.NONE;
 		gbc.gridx = 1;

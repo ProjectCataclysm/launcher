@@ -35,15 +35,12 @@ public class LauncherLock {
 		}
 	}
 	
-	public static Runnable unlock() {
-		return () -> {
-			try {
-				lock.release();
-			} catch (Throwable e) { }
+	public static void unlock() {
+		try {
+			lock.release();
+			stream.close();
+		} catch (Throwable e) {
 			
-			try {
-				stream.close();
-			} catch (Throwable e) { }
-		};
+		}
 	}
 }

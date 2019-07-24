@@ -54,6 +54,7 @@ public class LoginFrame extends JDialog {
 	private JLabel errorLabel;
 	private JTextField emailField;
 	private JPasswordField passwordField;
+	private JButton loginButton;
 	
 	private LoginHolder loginHolder;
 	private String accessDeniedString;
@@ -154,19 +155,28 @@ public class LoginFrame extends JDialog {
 		gbc.gridwidth = 2;
 		gbc.weightx = 1;
 		gbc.anchor = GridBagConstraints.CENTER;
-		JButton loginButton = new JButton("Войти");
+		loginButton = new JButton("Войти");
+		getRootPane().setDefaultButton(loginButton);
 		loginButton.addActionListener(e -> performLogin());
 		loginButton.setMinimumSize(new Dimension(150, 30));
 		contentPanel.add(loginButton, gbc);
 		contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 		
-		setContentPane(contentPanel);
+		setLoadingVisible(false);
 		
 		ImageIcon icon = new ImageIcon(SanitizationManager.class.getResource("/icons/loading.gif"));
 		iconLoading = new JLabel();
 		iconLoading.setIcon(icon);
 		iconLoading.setOpaque(false);
 		iconLoading.setHorizontalAlignment(JLabel.CENTER);
+	}
+	
+	private void setLoadingVisible(boolean visible) {
+		loginButton.setEnabled(!visible);
+		getRootPane().setDefaultButton(!visible ? loginButton : null);
+		setContentPane(visible ? iconLoading : contentPanel);
+		revalidate();
+		repaint();
 	}
 	
 	private void performLogin() {
@@ -185,14 +195,7 @@ public class LoginFrame extends JDialog {
 			return;
 		}
 		
-//		getContentPane().add(iconLoading, BorderLayout.CENTER);
-//		revalidate();
-//		repaint();
-		
-		setContentPane(iconLoading);
-		revalidate();
-		repaint();
-		
+		setLoadingVisible(true);
 		new Thread(this::performAuthenticateRequest).start();
 	}
 	
@@ -255,7 +258,6 @@ public class LoginFrame extends JDialog {
 		String result = HttpHelper.postRequest(HttpHelper.AUTH_SCRIPT, args);
 		if (result.startsWith("error: ")) {
 			errorLabel.setText(translateError(result));
-			signout(false);
 			return;
 		}
 		createLoginHolder(result);
@@ -268,9 +270,7 @@ public class LoginFrame extends JDialog {
 		args.put("password", PasswordUtil.hashPassword(new String(passwordField.getPassword())));
 		String result = HttpHelper.postRequest(HttpHelper.AUTH_SCRIPT, args);
 		
-		setContentPane(contentPanel);
-		revalidate();
-		repaint();
+		setLoadingVisible(false);
 		
 		if (result.startsWith("error: ")) {
 			errorLabel.setText(translateError(result));
@@ -292,7 +292,7 @@ public class LoginFrame extends JDialog {
 		case "you are banned":
 			return "Вы забанены :/";
 		case "invalid session":
-			return "Сессия истекла";
+			return "Недействительная сессия";
 		}
 		
 		if (code.startsWith("db query failed: ")) {
@@ -304,7 +304,9 @@ public class LoginFrame extends JDialog {
 
 	public void initialize() {
 		loadSessionFile();
-		Launcher.frame.updateLogin();
+		if (!isLoggedIn()) {
+			signout(true);
+		}
 	}
 	
 	public LoginHolder getLoginHolder() {
@@ -320,6 +322,8 @@ public class LoginFrame extends JDialog {
 	}
 
 	public void showFrame() {
+		emailField.setText("");
+		passwordField.setText("");
 		setLocationRelativeTo(getParent());
 		setVisible(true);
 	}

@@ -73,8 +73,12 @@ public class HttpHelper {
 			StringBuilder argsString = new StringBuilder();
 			args.forEach((k, v) -> argsString.append("&").append(k).append("=").append(urlEncode(v)));
 			URL url = new URL("http://" + script + "?" + argsString.substring(1));
+			URLConnection connection = url.openConnection();
+			connection.setUseCaches(false);
+			connection.setConnectTimeout(10000);
+			connection.setReadTimeout(10000);
 			StringBuilder sb = new StringBuilder();
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), Charsets.UTF_8))) {
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charsets.UTF_8))) {
 				String ln;
 				while ((ln = reader.readLine()) != null) {
 					sb.append(ln);

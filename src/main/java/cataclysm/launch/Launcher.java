@@ -1,5 +1,6 @@
 package cataclysm.launch;
 
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -20,6 +21,7 @@ import cataclysm.ui.LoginFrame;
 import cataclysm.utils.LauncherLock;
 import cataclysm.utils.Log;
 import cataclysm.utils.LoginHolder;
+import cataclysm.utils.PlatformHelper;
 import cataclysm.utils.VersionHelper;
 
 /**
@@ -52,17 +54,20 @@ public class Launcher implements Runnable {
 
 	public Launcher(String[] args) {
 //		ConsoleDisconnector.disconnect();
-		
+		PlatformHelper.setLookAndFeel();
 		if (!LauncherLock.isAvaible()) {
+			Toolkit.getDefaultToolkit().beep();
 			JOptionPane.showMessageDialog(null, "Лаунчер уже запущен", "Ошибка", JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
 			return;
 		}
 		
-		Runtime.getRuntime().addShutdownHook(new Thread(LauncherLock.unlock()));
+		Runtime.getRuntime().addShutdownHook(new Thread(LauncherLock::unlock));
 		
 		instance = this;
 		frame = new LauncherFrame();
+		frame.showLauncher();
+
 		config = new ConfigFrame();
 		loginFrame = new LoginFrame();
 		statusFrame = new LaunchStatusFrame();
@@ -71,13 +76,10 @@ public class Launcher implements Runnable {
 		downloader = new DownloadingManager();
 		versionHelper = new VersionHelper();
 		
-		loginFrame.initialize();
-		
 		if (versionHelper.shouldStartLauncher(args)) {
-			frame.showLauncher();
-			if (!loginFrame.isLoggedIn()) {
-				loginFrame.showFrame();
-			}
+			loginFrame.initialize();
+		} else {
+			System.exit(0);
 		}
 	}
 
@@ -168,6 +170,7 @@ public class Launcher implements Runnable {
 		command.add("core.jar");
 		command.add("start.StartMinecraft");
 		
+		// данные для входа
 		LoginHolder loginHolder = loginFrame.getLoginHolder();
 		command.add("--uuid");
 		command.add(loginHolder.getUUID());

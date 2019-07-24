@@ -101,6 +101,10 @@ public class LauncherFrame extends JFrame {
 		progress.setPreferredSize(new Dimension(20, 8));
 		progress.setBorder(null);
 		progress.setForeground(Color.GREEN.darker());
+		
+		startButton.setText("Загрузка...");
+		startButton.setEnabled(false);
+		configButton.setEnabled(false);
 	}
 	
 	public void updateLogin() {
@@ -117,7 +121,6 @@ public class LauncherFrame extends JFrame {
 			startButton.setEnabled(true);
 			configButton.setEnabled(true);
 		}
-		
 		Launcher.config.updateLogin();
 		Launcher.config.setVisible(false);
 	}

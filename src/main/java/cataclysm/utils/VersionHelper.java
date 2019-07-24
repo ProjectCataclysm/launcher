@@ -245,12 +245,14 @@ public class VersionHelper extends JComponent {
 		File relaunchLocation = checkLocation();
 		if (relaunchLocation != null) {
 			// перезапускаем лаунчер в другом джаре
+			Launcher.frame.setVisible(false);
 			relaunch(relaunchLocation);
 			return false;
 		}
 		
 		if (!checkUpdates()) {
 			Log.err("Launcher outdated!");
+			Launcher.frame.setVisible(false);
 			Launcher.frame.showVersionChecker(this);
 
 			// обновляем лаунчер
