@@ -22,6 +22,7 @@ import cataclysm.utils.LauncherLock;
 import cataclysm.utils.Log;
 import cataclysm.utils.LoginHolder;
 import cataclysm.utils.PlatformHelper;
+import cataclysm.utils.PlatformHelper.PlatformOS;
 import cataclysm.utils.VersionHelper;
 
 /**
@@ -136,34 +137,46 @@ public class Launcher implements Runnable {
 				frame.setVisible(true);
 				launched = false;
 				
-				JOptionPane.showMessageDialog(frame, "Игра была аварийно завершена", "Ошибка",
+				JOptionPane.showMessageDialog(frame, "Игра была аварийно завершена с кодом " + exitCode, "Ошибка",
 						JOptionPane.ERROR_MESSAGE);
 			}
+			
+			frame.setVisible(true);
 		} catch (Throwable t) {
 			statusFrame.setVisible(false);
 			DialogUtils.showError("Невозможно запустить игру", t);
 			frame.setVisible(true);
 			launched = false;
-		} finally {
-			System.exit(0);
 		}
 	}
 
 	private int startGame() throws IOException, InterruptedException {
 		List<String> command = Lists.newArrayList();
 		command.add("java");
-		command.add("-Xms256m");
-		command.add("-Xmx" + (config.memory/1024/1024) + "m");
+
+		// логгинг вылетов
 		command.add("-XX:ErrorFile=crash-reports/fatal_pid_%p.log");
-		command.add("-Djava.library.path=");
-		//command.add("-Dfile.encoding=UTF-8");
 		
 		// оптимизация
 		command.add("-XX:+UseG1GC");
 		command.add("-XX:+UseStringDeduplication");
+		command.add("-Dfile.encoding=UTF-8");
 		
 		// антиинжект
 		command.add("-XX:+DisableAttachMechanism");
+
+		// память
+		if (config.limitMemory) {
+			command.add("-Xms256m");
+			command.add("-Xmx" + (config.memory) + "m");
+		}
+		
+		if (PlatformHelper.getOS() == PlatformOS.MAC) {
+			command.add("-XstartOnFirstThread");
+		}
+		
+		// либрарипатх
+		command.add("-Djava.library.path=");
 		
 		// класспатх
 		command.add("-cp");
@@ -180,7 +193,64 @@ public class Launcher implements Runnable {
 		command.add(loginHolder.getUsername());
 		
 		ProcessBuilder pb = new ProcessBuilder(command);
+		
+		File logsDir = new File(config.gameDirectory, "logs");
+		logsDir.mkdirs();
+		
+		File errorFile = new File(logsDir, "launcher_output1.log");
+		File outFile = new File(logsDir, "launcher_output2.log");
+		
+		pb.redirectError(errorFile);
+		pb.redirectOutput(outFile);
+		
 		pb.directory(config.gameDirectory);
-		return pb.inheritIO().start().waitFor();
+		Process process = pb.start();
+		int exitCode = process.waitFor();
+		if (exitCode != 1) {
+			errorFile.delete();
+			outFile.delete();
+		}
+		
+		return exitCode;
+		
+		
+//		// https://stackoverflow.com/questions/5483830/process-waitfor-never-returns
+//		BufferedReader tr = new BufferedReader(new InputStreamReader(processInputStream));
+//		while ((tr.readLine()) != null) { }
+//		
+//		tr = new BufferedReader(new InputStreamReader(processErrorStream));
+//		while ((tr.readLine()) != null) { }
+//		//---------------------------
+//
+//		int exitCode = process.waitFor();
+//		if (exitCode == 1) {
+//			try (PrintWriter pw = new PrintWriter(new File(logsDir, "launch_error.txt"))) {
+//				try (BufferedReader reader = new BufferedReader(
+//						new InputStreamReader(processErrorStream, Charsets.UTF_8))) {
+//					String ln;
+//					while ((ln = reader.readLine()) != null) {
+//						pw.println(ln);
+//					}
+//				}
+//				
+//				try (BufferedReader reader = new BufferedReader(
+//						new InputStreamReader(processInputStream, Charsets.UTF_8))) {
+//					String ln;
+//					while ((ln = reader.readLine()) != null) {
+//						pw.println(ln);
+//					}
+//				}
+//			}
+//		} else {
+//			try (BufferedReader reader = new BufferedReader(new InputStreamReader(processInputStream))) {
+//				while ((tr.readLine()) != null) { }
+//			}
+//			
+//			try (BufferedReader reader = new BufferedReader(new InputStreamReader(processErrorStream))) {
+//				while ((tr.readLine()) != null) { }
+//			}
+//		}
+//		
+//		return exitCode;
 	}
 }

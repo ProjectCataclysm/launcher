@@ -101,8 +101,7 @@ public class SanitizationManager extends JComponent {
 			String hash = FileHasher.hash(file);
 			sw.stop();
 			System.out.println("hashed in " + sw.elapsed(TimeUnit.MILLISECONDS) / 1000.0);
-			
-			return hashes.get(fn).equals(hash);
+			return hashes.get(fn) != null && hashes.get(fn).equals(hash);
 		}
 	}
 	

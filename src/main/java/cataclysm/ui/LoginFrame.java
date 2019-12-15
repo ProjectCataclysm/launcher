@@ -185,7 +185,7 @@ public class LoginFrame extends JDialog {
 			return;
 		}
 		
-		if (!EMAIL_PATTERN.matcher(emailField.getText()).matches()) {
+		if (!EMAIL_PATTERN.matcher(emailField.getText().trim()).matches()) {
 			errorLabel.setText("Некорректный email");
 			return;
 		}
@@ -266,7 +266,7 @@ public class LoginFrame extends JDialog {
 	private void performAuthenticateRequest() {
 		Map<String, String> args = Maps.newHashMap();
 		args.put("action", "authenticate");
-		args.put("email", emailField.getText());
+		args.put("email", emailField.getText().trim());
 		args.put("password", PasswordUtil.hashPassword(new String(passwordField.getPassword())));
 		String result = HttpHelper.postRequest(HttpHelper.AUTH_SCRIPT, args);
 		

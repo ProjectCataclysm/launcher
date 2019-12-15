@@ -3,6 +3,7 @@ package cataclysm;
 import java.io.PrintWriter;
 
 import cataclysm.launch.Launcher;
+import cataclysm.ui.DialogUtils;
 import cataclysm.utils.VersionHelper;
 
 /**
@@ -22,7 +23,7 @@ public class Main {
 			
 			new Launcher(args);
 		} catch (Throwable t) {
-			t.printStackTrace();
+			DialogUtils.showError("Ошибка", t);
 			System.exit(1);
 		}
 	}

@@ -13,38 +13,52 @@ public class PlatformHelper {
 	public enum PlatformOS {
 		WINDOWS,
 		MAC,
-		SOLARIS,
-		LINUX,
-		UNKNOWN
+		LINUX
+	}
+
+	private static final PlatformOS PLATFORM;
+	private static String osArchIdentifier;
+	
+	static {
+		String osName = System.getProperty("os.name");
+		if (osName.startsWith("Windows")) {
+			PLATFORM = PlatformOS.WINDOWS;
+		} else if (osName.startsWith("Linux") || osName.startsWith("FreeBSD") || osName.startsWith("SunOS")
+				|| osName.startsWith("Unix")) {
+			PLATFORM = PlatformOS.LINUX;
+		} else if (osName.startsWith("Mac OS X") || osName.startsWith("Darwin")) {
+			PLATFORM = PlatformOS.MAC;
+		} else {
+			throw new RuntimeException("Unknown platform: " + osName);
+		}
+		
+		String arch = System.getProperty("os.arch");
+		switch (PLATFORM) {
+		case LINUX:
+			osArchIdentifier = arch.startsWith("arm") || arch.startsWith("aarch64")
+				? "linux-" + (arch.contains("64") || arch.contains("armv8") ? "arm64" : "arm32")
+				: "linux";
+			break;
+		case MAC:
+			osArchIdentifier = "macos";
+			break;
+		case WINDOWS:
+			osArchIdentifier = arch.contains("64") ? "win64" : "win32";
+			break;
+		}
+	}
+	
+	public static String getOsArchIdentifier() {
+		return osArchIdentifier;
 	}
 	
 	public static PlatformOS getOS() {
-		String osName = System.getProperty("os.name").toLowerCase();
-		
-		if (osName.contains("win"))
-			return PlatformOS.WINDOWS;
-		
-		if (osName.contains("mac"))
-			return PlatformOS.MAC;
-		
-		if (osName.contains("solaris"))
-			return PlatformOS.SOLARIS;
-		
-		if (osName.contains("sunos"))
-			return PlatformOS.SOLARIS;
-		
-		if (osName.contains("linux"))
-			return PlatformOS.LINUX;
-		
-		if (osName.contains("unix"))
-			return PlatformOS.LINUX;
-		
-		return PlatformOS.UNKNOWN;
+		return PLATFORM;
 	}
 	
 	public static File getDefaultGameDirectory() {
 		String path = ".project-cataclysm/";
-		switch (PlatformHelper.getOS()) {
+		switch (getOS()) {
 		case WINDOWS:
 			return new File(System.getenv("APPDATA"), path);
 		case MAC:
@@ -54,9 +68,9 @@ public class PlatformHelper {
 		}
 	}
 	
-	public static long getAvaibleMemory() {
+	public static int getAvaibleMemory() {
 		long maxMemory = Runtime.getRuntime().maxMemory();
-		return maxMemory;// / 1024 / 1024;
+		return (int) (maxMemory / 1024 / 1024);
 	}
 	
 	public static void setLookAndFeel() {

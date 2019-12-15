@@ -18,6 +18,7 @@ import java.util.Properties;
 
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -44,7 +45,8 @@ public class ConfigFrame extends JDialog {
 
 	private File configFile;
 	public File gameDirectory;
-	public long memory;
+	public int memory;
+	public boolean limitMemory;
 
 	private JLabel loginStatusLabel;
 	private JButton signOutButton;
@@ -57,7 +59,8 @@ public class ConfigFrame extends JDialog {
 		Log.msg("Config file %s", configFile);
 		
 		memory = PlatformHelper.getAvaibleMemory();
-		Log.msg("Maximum memory usage %dmb", memory/1024/1024);
+		limitMemory = false;
+		Log.msg("Maximum memory usage %dmb, limitMemory=%s", memory, limitMemory);
 
 		loadConfig();
 
@@ -146,21 +149,18 @@ public class ConfigFrame extends JDialog {
 		gbc.weightx = 0;
 		gbc.insets.set(0, 4, 0, 10);
 		add(select, gbc);
-
-		label = new JLabel("Выделяемая память (МБ):");
-		label.setFont(label.getFont().deriveFont(Font.PLAIN, 20));
+		
+		JCheckBox limitMemCheckBox = new JCheckBox("Выделяемая память (МБ):", limitMemory);
+		limitMemCheckBox.setFont(limitMemCheckBox.getFont().deriveFont(Font.PLAIN, 20));
 		gbc.gridx = 0;
 		gbc.gridy++;
 		gbc.gridwidth = 2;
 		gbc.weightx = 1;
 		gbc.insets.set(10, 10, 10, 10);
 		gbc.anchor = GridBagConstraints.WEST;
-		add(label, gbc);
+		add(limitMemCheckBox, gbc);
 		
-		if (memory < 256 * 1024 * 1024) {
-			memory = 256 * 1024 * 1024;
-		}
-		SpinnerNumberModel model = new SpinnerNumberModel((int) (memory/1024/1024), 256, 16*1024, 1);
+		SpinnerNumberModel model = new SpinnerNumberModel(memory, 256, 16*1024, 1);
 
 		JSpinner memSpinner = new JSpinner(model);
 		memSpinner.setPreferredSize(new Dimension(200, 28));
@@ -172,10 +172,19 @@ public class ConfigFrame extends JDialog {
 		gbc.insets.set(0, 40, 0, 0);
 		add(memSpinner, gbc);
 		
+		limitMemCheckBox.addActionListener(e -> {
+			limitMemory = limitMemCheckBox.isSelected();
+			saveConfig();
+			memSpinner.setEnabled(limitMemory);
+			model.setValue(limitMemory ? memory : 0);
+		});
+		memSpinner.setEnabled(limitMemory);
+		model.setValue(limitMemory ? memory : 0);
+
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				memory = Long.valueOf(memSpinner.getModel().getValue().toString()) * 1024 * 1024;
+				memory = Integer.valueOf(memSpinner.getModel().getValue().toString());
 				saveConfig();
 			}
 		});
@@ -212,9 +221,14 @@ public class ConfigFrame extends JDialog {
 			props.load(in);
 
 			gameDirectory = new File(props.getProperty("GameDirectory", gameDirectory.getAbsolutePath()));
-			memory = Long.valueOf(props.getProperty("memory", Long.toString(memory)));
-		} catch (IOException e) {
-			Log.err(e, "Can't save config file");
+			memory = Integer.valueOf(props.getProperty("memory", Integer.toString(memory)));
+			limitMemory = Boolean.valueOf(props.getProperty("limitMemory", Boolean.toString(limitMemory)));
+		} catch (Exception e) {
+			Log.err(e, "Can't load config file");
+		}
+		
+		if (memory < 256 || memory > 16*1024) {
+			memory = 1024;
 		}
 	}
 
@@ -226,7 +240,7 @@ public class ConfigFrame extends JDialog {
 
 			props.setProperty("GameDirectory", gameDirectory.getAbsolutePath());
 			props.setProperty("memory", Long.toString(memory));
-
+			props.setProperty("limitMemory", Boolean.toString(limitMemory));
 			props.store(out, "");
 		} catch (IOException e) {
 			Log.err(e, "Can't save config file");

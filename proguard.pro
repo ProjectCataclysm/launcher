@@ -5,7 +5,8 @@
 -dontnote
 -dontwarn
 -keepattributes *Annotation*,SourceFile,LineNumberTable
--renamesourcefileattribute obf
+-renamesourcefileattribute SourceFile
+-printmapping launcher.map
 
 -keep,allowshrinking class !cataclysm.** {
     <fields>;

@@ -33,7 +33,7 @@ import cataclysm.ui.DialogUtils;
 public class VersionHelper extends JComponent {
 	private static final long serialVersionUID = -6203764377406251750L;
 	private JProgressBar progress;
-	public static final String VERSION = "1.4";
+	public static final String VERSION = "1.4.73";
 
 	public VersionHelper() {
 		progress = new JProgressBar();
@@ -101,11 +101,12 @@ public class VersionHelper extends JComponent {
 
 	private File currentJarLocation() throws IOException {
 		try {
-			File jar = new File(VersionHelper.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-			if (jar.isDirectory() || !jar.getName().endsWith(".jar")) {
+			File stub = new File(VersionHelper.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+			if (stub.isDirectory() || !stub.getName().toLowerCase().endsWith(".jar")
+					&& !stub.getName().toLowerCase().endsWith(".exe")) {
 				return null;
 			}
-			return jar;
+			return stub;
 		} catch (URISyntaxException e) {
 			throw new IOException(e);
 		}
@@ -125,7 +126,7 @@ public class VersionHelper extends JComponent {
 			File stubJar = stubJarLocation();
 			File updateJar = updateJarLocation();
 			
-			if (jar == null) {
+			if (jar == null || jar.getName().toLowerCase().endsWith(".exe")) {
 				return null;
 			}
 			
@@ -150,7 +151,6 @@ public class VersionHelper extends JComponent {
 
 	private boolean checkUpdates() {
 		updateCheckingUI();
-		
 		try {
 			File jar = currentJarLocation();
 			if (jar == null) {
@@ -160,7 +160,6 @@ public class VersionHelper extends JComponent {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		
 		
 		try {
 			URL url = HttpHelper.launcherURL("version.txt");
@@ -230,6 +229,27 @@ public class VersionHelper extends JComponent {
 		System.exit(0);
 	}
 	
+	private boolean relaunchExeAsStub() {
+		try {
+			File jar = currentJarLocation();
+			File stub = stubJarLocation();
+			if (jar != null && jar.getName().toLowerCase().endsWith(".exe")) {
+				if (!stub.exists()) {
+					Log.err("Launcher outdated!");
+					Launcher.frame.setVisible(false);
+					Launcher.frame.showVersionChecker(this);
+					updateLauncher();
+				} else {
+					relaunch(stub);
+				}
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		
+		return false;
+	}
+	
 	public boolean shouldStartLauncher(String[] args) {
 		if (args.length > 0) {
 			// если в параметр был передан файл с окночнанием .jar, то удаляем
@@ -247,6 +267,11 @@ public class VersionHelper extends JComponent {
 			// перезапускаем лаунчер в другом джаре
 			Launcher.frame.setVisible(false);
 			relaunch(relaunchLocation);
+			return false;
+		}
+		
+		// если лаунчер обёрнут в exe, то перезапускаем его в джарнике
+		if (relaunchExeAsStub()) {
 			return false;
 		}
 		
