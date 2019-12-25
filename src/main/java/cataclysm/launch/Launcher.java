@@ -192,6 +192,10 @@ public class Launcher implements Runnable {
 		command.add("--username");
 		command.add(loginHolder.getUsername());
 		
+		if (config.memorizeMeshes) {
+			command.add("--memorizeMeshes");
+		}
+		
 		ProcessBuilder pb = new ProcessBuilder(command);
 		
 		File logsDir = new File(config.gameDirectory, "logs");

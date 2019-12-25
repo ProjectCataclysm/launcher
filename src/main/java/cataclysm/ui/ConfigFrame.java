@@ -47,6 +47,7 @@ public class ConfigFrame extends JDialog {
 	public File gameDirectory;
 	public int memory;
 	public boolean limitMemory;
+	public boolean memorizeMeshes;
 
 	private JLabel loginStatusLabel;
 	private JButton signOutButton;
@@ -65,7 +66,7 @@ public class ConfigFrame extends JDialog {
 		loadConfig();
 
 		setModalityType(ModalityType.DOCUMENT_MODAL);
-		setSize(500, 260);
+		setSize(500, 320);
 		setResizable(false);
 		setTitle("Настройки");
 		
@@ -180,6 +181,21 @@ public class ConfigFrame extends JDialog {
 		});
 		memSpinner.setEnabled(limitMemory);
 		model.setValue(limitMemory ? memory : 0);
+		
+		JCheckBox memorizeMeshesCheckbox = new JCheckBox("Предзагружать модели в RAM", memorizeMeshes);
+		memorizeMeshesCheckbox.setToolTipText("<html>ДАННАЯ ФУНКЦИЯ ЭКСПЕРИМЕНТАЛЬНАЯ! "
+				+ "<br>Включение этой настройки может увеличить "
+				+ "<br>использование оперативной памяти и привести "
+				+ "<br>к крашам/фризам игры, однако на слабых машинах "
+				+ "<br>с большим количеством RAM может увеличится FPS</html>");
+		memorizeMeshesCheckbox.setFont(memorizeMeshesCheckbox.getFont().deriveFont(Font.PLAIN, 18));
+		gbc.gridx = 0;
+		gbc.gridy++;
+		gbc.gridwidth = 2;
+		gbc.weightx = 1;
+		gbc.insets.set(10, 10, 10, 10);
+		gbc.anchor = GridBagConstraints.WEST;
+		add(memorizeMeshesCheckbox, gbc);
 
 		addWindowListener(new WindowAdapter() {
 			@Override
@@ -223,6 +239,7 @@ public class ConfigFrame extends JDialog {
 			gameDirectory = new File(props.getProperty("GameDirectory", gameDirectory.getAbsolutePath()));
 			memory = Integer.valueOf(props.getProperty("memory", Integer.toString(memory)));
 			limitMemory = Boolean.valueOf(props.getProperty("limitMemory", Boolean.toString(limitMemory)));
+			memorizeMeshes = Boolean.valueOf(props.getProperty("memorizeMeshes", Boolean.toString(memorizeMeshes)));
 		} catch (Exception e) {
 			Log.err(e, "Can't load config file");
 		}
@@ -241,6 +258,7 @@ public class ConfigFrame extends JDialog {
 			props.setProperty("GameDirectory", gameDirectory.getAbsolutePath());
 			props.setProperty("memory", Long.toString(memory));
 			props.setProperty("limitMemory", Boolean.toString(limitMemory));
+			props.setProperty("memorizeMeshes", Boolean.toString(memorizeMeshes));
 			props.store(out, "");
 		} catch (IOException e) {
 			Log.err(e, "Can't save config file");
