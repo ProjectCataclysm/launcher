@@ -160,6 +160,13 @@ public class SanitizationManager extends JComponent {
 		List<Resource> toDownload = Lists.newArrayList();
 		List<Resource> resources = master.getResources();
 		Map<String, String> hashes = master.getHashes();
+		
+		// удаляем все посторонние файлы из защищёных директорий
+		for (String folder : master.getProtectedFolders()) {
+			recursiveDeleteExtraFiles(root, new File(root, folder), hashes);
+		}
+
+		// санитизируем папку с игрой, сравниваем хеши файлов с hashes
 		for (int i = 0; i < resources.size(); i++) {
 			Resource resource = resources.get(i);
 			File local = new File(root, resource.getLocal());
@@ -171,13 +178,6 @@ public class SanitizationManager extends JComponent {
 			}
 
 			if (resource.isHashed()) {
-				boolean protectedMode = master.getProtectedFolders().contains(resource.getLocal());
-				// если директория защищена от посторонних файлов, то удаляем
-				// все посторонние файлы
-				if (protectedMode) {
-					recursiveDeleteExtraFiles(root, local, hashes);
-				}
-				
 				// ВАЖНО: не сканируем рут!
 				if (root.getAbsolutePath().equals(local.getAbsolutePath())) {
 					continue;
