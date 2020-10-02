@@ -108,7 +108,7 @@ public class LauncherFrame extends JFrame {
 	}
 	
 	public void updateLogin() {
-		if (!Launcher.loginFrame.isLoggedIn()) {
+		if (Launcher.loginFrame.isNotLoggedIn()) {
 			startButton.setText("Вы не вошли");
 			startButton.setEnabled(false);
 			configButton.setEnabled(false);

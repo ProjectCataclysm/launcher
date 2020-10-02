@@ -1,13 +1,8 @@
 buildscript {
     repositories {
-        // распакованный прогуард должен лежать в родительском каталоге проекта
-        flatDir dirs: '../proguard/lib'
-        
-        // подключаем jcenter для иморта плагина shadow (нужен для fat jar)
         jcenter()
     }
     dependencies {
-        classpath ':proguard:'
         classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.2'
     }
 }
@@ -40,22 +35,24 @@ artifacts {
     archives shadowJar
 }
 
-task proguard(type: proguard.gradle.ProGuardTask) {
-    configuration 'proguard.pro'
-    injars  'build/libs/CataclysmLauncher-fatjar.jar'
-    outjars 'build/libs/launcher_obf.jar'
+task proguard(type: Exec) {
+    workingDir '.'
+    commandLine 'java',
+            '-jar', '../build-tools/libs/proguard/lib/proguard.jar', '@proguard.pro',
+            '-injars', 'build/libs/Launcher-fatjar.jar',
+            '-outjars', 'build/libs/launcher_obf.jar'
 }
 
-task stringer(type:Exec) {
+task stringer(type: Exec) {
     workingDir '.'
-    commandLine 'java', '-jar', '../stringer/stringer.jar',
+    commandLine 'java', '-jar', '../build-tools/libs/stringer/stringer.jar',
          '-configFile', 'stringer.xml',
           'build/libs/launcher_obf.jar',
           'build/libs/launcher.jar',
           '-verbose', 'off'
 }
 
-task generate_version(type:Exec) {
+task generate_version(type: Exec) {
     workingDir 'build/libs'
     commandLine 'java', '-jar', 'launcher.jar', '-version'
 }

@@ -4,13 +4,14 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Timer;
@@ -22,7 +23,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 
-import cataclysm.io.sanitization.Resource;
+import cataclysm.io.sanitation.Resource;
 import cataclysm.utils.HttpHelper;
 
 /**
@@ -33,10 +34,9 @@ import cataclysm.utils.HttpHelper;
  * @author Knoblul
  */
 public class DownloadingManager extends JComponent {
-	private static final long serialVersionUID = -6748902640791102435L;
-	private static final int DLSPEED_MEASURE_PERIOD = 500;
+	private static final int DL_SPEED_MEASURE_PERIOD = 500;
 
-	private static byte[] buffer = new byte[4096];
+	private static byte[] buffer = new byte[8192];
 
 	private JProgressBar downloadProgress;
 	private JProgressBar overallProgress;
@@ -44,32 +44,33 @@ public class DownloadingManager extends JComponent {
 	private JLabel currentFileLoading;
 	private JLabel currentSpeed;
 
-	private Timer timerDownloadSpeed;
+	private final Object speedLock = new Object();
+
 	private int downloadedBytes;
 	private boolean measureDownloadSpeed;
 
 	public DownloadingManager() {
 		fill();
 
-		timerDownloadSpeed = new Timer("DownloadSpeedCalculator", true);
+		Timer timerDownloadSpeed = new Timer("DownloadSpeedCalculator", true);
 		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
-				synchronized (currentSpeed) {
+				synchronized (speedLock) {
 					if (measureDownloadSpeed) {
-						int speed = (int)(downloadedBytes/(double)DLSPEED_MEASURE_PERIOD*1000.0);
+						int speed = (int)(downloadedBytes/(double) DL_SPEED_MEASURE_PERIOD *1000.0);
 						currentSpeed.setText(readableSpeed(speed));
 						downloadedBytes = 0;
 					}
 				}
 			}
 		};
-		timerDownloadSpeed.schedule(task, 0, DLSPEED_MEASURE_PERIOD);
+		timerDownloadSpeed.schedule(task, 0, DL_SPEED_MEASURE_PERIOD);
 	}
 	
 	private static String readableSpeed(int size) {
 		if (size <= 0)
-			return "0";
+			return "0 Б/сек";
 		final String[] units = new String[] { "Б", "КБ", "МБ", "ГБ", "ТБ" };
 		int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
 		return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups]
@@ -123,8 +124,13 @@ public class DownloadingManager extends JComponent {
 		currentFileLoading.setText("...");
 	}
 
-	private void downloadFile(File root, Resource resource) throws IOException {
-		File output = new File(root, resource.getLocal());
+	private void downloadFile(Path rootPath, Resource resource) throws IOException {
+		Path outputPath = rootPath.resolve(resource.getLocal());
+		Path parentPath = outputPath.getParent();
+		if (!Files.exists(parentPath)) {
+			Files.createDirectories(parentPath);
+		}
+		
 		URL url = HttpHelper.clientURL(resource.getRemote());
 		URLConnection connection = url.openConnection();
 		connection.setConnectTimeout(15000);
@@ -133,20 +139,16 @@ public class DownloadingManager extends JComponent {
 		downloadProgress.setValue(0);
 		downloadProgress.setMaximum(connection.getContentLength());
 		currentFileLoading.setText("Загружаем " + resource.getRemote());
-		
-		if (!output.getParentFile().exists()) {
-			output.getParentFile().mkdirs();
-		}
 
 		long totalLen = 0;
 		try (InputStream in = connection.getInputStream(); 
-				OutputStream out = Files.newOutputStream(output.toPath())) {
+				OutputStream out = Files.newOutputStream(outputPath)) {
 			int len;
 			while ((len = in.read(buffer)) > 0) {
 				out.write(buffer, 0, len);
 				totalLen += len;
 				downloadProgress.setValue((int) totalLen);
-				synchronized (currentSpeed) {
+				synchronized (speedLock) {
 					downloadedBytes += len;
 				}
 			}
@@ -159,9 +161,9 @@ public class DownloadingManager extends JComponent {
 		currentFileLoading.setText("");
 	}
 
-	private void downloadAndUnpackArchive(File root, Resource resource) throws IOException {
-		File unpackDir = new File(root, resource.getLocal());
-		File zipFile = new File(root, resource.getRemote());
+	private void downloadAndUnpackArchive(Path rootPath, Resource resource) throws IOException {
+		Path unpackPath = rootPath.resolve(resource.getLocal());
+		Path zipPath = rootPath.resolve(resource.getRemote());
 
 //		if (unpackDir.exists()) {
 //			if (!unpackDir.delete()) {
@@ -181,13 +183,13 @@ public class DownloadingManager extends JComponent {
 
 		long totalLen = 0;
 		try (InputStream in = connection.getInputStream(); 
-				OutputStream out = Files.newOutputStream(zipFile.toPath())) {
+				OutputStream out = Files.newOutputStream(zipPath)) {
 			int len;
 			while ((len = in.read(buffer)) > 0) {
 				out.write(buffer, 0, len);
 				totalLen += len;
 				downloadProgress.setValue((int) totalLen);
-				synchronized (currentSpeed) {
+				synchronized (speedLock) {
 					downloadedBytes += len;
 				}
 			}
@@ -197,17 +199,17 @@ public class DownloadingManager extends JComponent {
 			HttpHelper.close(connection);
 		}
 
-		synchronized (currentSpeed) {
+		synchronized (speedLock) {
 			measureDownloadSpeed = false;
 			currentSpeed.setText("");
 		}
 
 		downloadProgress.setMinimum(0);
 		downloadProgress.setValue(0);
-		currentFileLoading.setText("Распаковываем " + zipFile.getName());
+		currentFileLoading.setText("Распаковываем " + zipPath.getFileName().toString());
 		int entryCount = 0;
 
-		try (InputStream in = Files.newInputStream(zipFile.toPath());
+		try (InputStream in = Files.newInputStream(zipPath);
 				ZipInputStream zip = new ZipInputStream(in)) {
 			ZipEntry entry;
 			while ((entry = zip.getNextEntry()) != null) {
@@ -219,19 +221,19 @@ public class DownloadingManager extends JComponent {
 		}
 		downloadProgress.setMaximum(entryCount);
 		
-		try (InputStream in = Files.newInputStream(zipFile.toPath());
-				ZipInputStream zip = new ZipInputStream(in)) {
+		try (InputStream in = Files.newInputStream(zipPath, StandardOpenOption.DELETE_ON_CLOSE);
+			 ZipInputStream zip = new ZipInputStream(in)) {
 			ZipEntry entry;
 			int index = 0;
 			while ((entry = zip.getNextEntry()) != null) {
 				if (!entry.isDirectory()) {
-					File output = new File(unpackDir, entry.getName());
-					File parent = output.getParentFile();
-					if (!parent.exists()) {
-						parent.mkdirs();
+					Path outputPath = unpackPath.resolve(entry.getName());
+					Path parentPath = outputPath.getParent();
+					if (!Files.exists(parentPath)) {
+						Files.createDirectories(parentPath);
 					}
 
-					try (OutputStream out = Files.newOutputStream(output.toPath())) {
+					try (OutputStream out = Files.newOutputStream(outputPath)) {
 						int len;
 						while ((len = zip.read(buffer)) > 0) {
 							out.write(buffer, 0, len);
@@ -243,35 +245,34 @@ public class DownloadingManager extends JComponent {
 				zip.closeEntry();
 			}
 		} catch (Throwable e) {
-			throw new IOException("Could not unpack " + zipFile, e);
+			throw new IOException("Could not unpack " + zipPath, e);
 		} finally {
-			zipFile.delete();
 			currentFileLoading.setText("");
-			synchronized (currentSpeed) {
+			synchronized (speedLock) {
 				measureDownloadSpeed = true;
 			}
 		}
 	}
 
-	private void performDownload(File root, Resource resource) throws IOException {
-		synchronized (currentSpeed) {
+	private void performDownload(Path rootPath, Resource resource) throws IOException {
+		synchronized (speedLock) {
 			measureDownloadSpeed = true;
 		}
 
 		if (resource.isFolder()) {
-			downloadAndUnpackArchive(root, resource);
+			downloadAndUnpackArchive(rootPath, resource);
 		} else {
-			downloadFile(root, resource);
+			downloadFile(rootPath, resource);
 		}
 
-		synchronized (currentSpeed) {
+		synchronized (speedLock) {
 			measureDownloadSpeed = false;
 			currentSpeed.setText("");
 		}
 	}
 
 	void perform(List<Resource> resources) throws IOException {
-		File root = Launcher.config.gameDirectory;
+		Path root = Launcher.config.gameDirectoryPath;
 
 		overallProgress.setMinimum(0);
 		overallProgress.setMaximum(resources.size()+1);

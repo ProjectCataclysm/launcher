@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 import com.google.common.base.Throwables;
 
 /**
- * Created 28 сент. 2018 г. / 18:03:14 
+ * Created 28 . 2018 . / 18:03:14
  * @author Knoblul
  */
 public class Log {

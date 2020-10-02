@@ -1,41 +1,36 @@
 package cataclysm.launch;
 
-import java.awt.Toolkit;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
-import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileSystemView;
-
+import cataclysm.io.sanitation.Resource;
+import cataclysm.io.sanitation.ResourceMaster;
+import cataclysm.io.sanitation.SanitationManager;
+import cataclysm.ui.*;
+import cataclysm.utils.*;
+import cataclysm.utils.PlatformHelper.PlatformOS;
 import com.google.common.collect.Lists;
 
-import cataclysm.io.sanitization.Resource;
-import cataclysm.io.sanitization.ResourceMaster;
-import cataclysm.io.sanitization.SanitizationManager;
-import cataclysm.ui.ConfigFrame;
-import cataclysm.ui.DialogUtils;
-import cataclysm.ui.LaunchStatusFrame;
-import cataclysm.ui.LauncherFrame;
-import cataclysm.ui.LoginFrame;
-import cataclysm.utils.LauncherLock;
-import cataclysm.utils.Log;
-import cataclysm.utils.LoginHolder;
-import cataclysm.utils.PlatformHelper;
-import cataclysm.utils.PlatformHelper.PlatformOS;
-import cataclysm.utils.VersionHelper;
+import javax.swing.*;
+import java.awt.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * Created 27 сент. 2018 г. / 21:10:13 
  * @author Knoblul
  */
 public class Launcher implements Runnable {
-	public static File workDir;
+	public static Path workDirPath;
 	
 	static {
-		workDir = new File(FileSystemView.getFileSystemView().getDefaultDirectory(), "cataclysmLauncher");
-		if (!workDir.exists()) {
-			workDir.mkdirs();
+		workDirPath = Paths.get(System.getProperty("user.home"), "ProjectCataclysm");
+		if (!Files.exists(workDirPath)) {
+			try {
+				Files.createDirectories(workDirPath);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -44,9 +39,8 @@ public class Launcher implements Runnable {
 	public static LoginFrame loginFrame;
 	public static LaunchStatusFrame statusFrame;
 
-	private static VersionHelper versionHelper;
 	private static ResourceMaster resourceMaster;
-	private static SanitizationManager sanitizer;
+	private static SanitationManager sanitizer;
 	private static DownloadingManager downloader;
 
 	public static Launcher instance;
@@ -56,7 +50,7 @@ public class Launcher implements Runnable {
 	public Launcher(String[] args) {
 //		ConsoleDisconnector.disconnect();
 		PlatformHelper.setLookAndFeel();
-		if (!LauncherLock.isAvaible()) {
+		if (!LauncherLock.isAvailable()) {
 			Toolkit.getDefaultToolkit().beep();
 			JOptionPane.showMessageDialog(null, "Лаунчер уже запущен", "Ошибка", JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
@@ -64,20 +58,20 @@ public class Launcher implements Runnable {
 		}
 		
 		Runtime.getRuntime().addShutdownHook(new Thread(LauncherLock::unlock));
-		
+
 		instance = this;
 		frame = new LauncherFrame();
-		frame.showLauncher();
 
 		config = new ConfigFrame();
 		loginFrame = new LoginFrame();
 		statusFrame = new LaunchStatusFrame();
 		resourceMaster = new ResourceMaster();
-		sanitizer = new SanitizationManager();
+		sanitizer = new SanitationManager();
 		downloader = new DownloadingManager();
-		versionHelper = new VersionHelper();
+		VersionHelper versionHelper = new VersionHelper();
 		
 		if (versionHelper.shouldStartLauncher(args)) {
+			frame.showLauncher();
 			loginFrame.initialize();
 		} else {
 			System.exit(0);
@@ -96,7 +90,14 @@ public class Launcher implements Runnable {
 			}
 			launched = true;
 
+			loginFrame.initialize();
+			if (loginFrame.isNotLoggedIn()) {
+				return;
+			}
+
 			frame.setVisible(false);
+
+			statusFrame.fill(sanitizer);
 			statusFrame.showFrame();
 
 			Log.msg("Retrieving download info...");
@@ -106,7 +107,6 @@ public class Launcher implements Runnable {
 			resourceMaster.retrieveHashes();
 			
 			Log.msg("Sanitizing...");
-			statusFrame.fill(sanitizer);
 			List<Resource> toDownload = sanitizer.perform(resourceMaster);
 			if (!toDownload.isEmpty()) {
 				Log.msg("Downloading %d files/archives...", toDownload.size());
@@ -130,13 +130,13 @@ public class Launcher implements Runnable {
 			try {
 				exitCode = startGame();
 				Log.msg("---- GAME STOPPED WITH CODE %d ----", exitCode);
-			} catch (InterruptedException e) { }
-			
+			} catch (InterruptedException ignored) { }
+			launched = false;
+
 			if (exitCode != 0) {
 				statusFrame.setVisible(false);
 				frame.setVisible(true);
-				launched = false;
-				
+
 				JOptionPane.showMessageDialog(frame, "Игра была аварийно завершена с кодом " + exitCode, "Ошибка",
 						JOptionPane.ERROR_MESSAGE);
 			}
@@ -152,7 +152,19 @@ public class Launcher implements Runnable {
 
 	private int startGame() throws IOException, InterruptedException {
 		List<String> command = Lists.newArrayList();
-		command.add("java");
+
+		boolean customJava = true;
+		if (PlatformHelper.getOS() == PlatformOS.WINDOWS) {
+			Path javaPath = config.gameDirectoryPath.resolve(Paths.get("jre8", "bin", "java.exe"));
+			if (Files.exists(javaPath)) {
+				command.add(javaPath.toAbsolutePath().toString());
+				customJava = false;
+			}
+		}
+
+		if (customJava) {
+			command.add("java");
+		}
 
 		// логгинг вылетов
 		command.add("-XX:ErrorFile=crash-reports/fatal_pid_%p.log");
@@ -191,33 +203,27 @@ public class Launcher implements Runnable {
 		command.add(loginHolder.getSessionId());
 		command.add("--username");
 		command.add(loginHolder.getUsername());
-		
-		if (config.memorizeMeshes) {
-			command.add("--memorizeMeshes");
-		}
-		
+
+		command.add("--texturesQuality");
+		command.add(Integer.toString(config.texturesQuality));
+
 		ProcessBuilder pb = new ProcessBuilder(command);
-		
-		File logsDir = new File(config.gameDirectory, "logs");
-		logsDir.mkdirs();
-		
-		File errorFile = new File(logsDir, "launcher_output1.log");
-		File outFile = new File(logsDir, "launcher_output2.log");
-		
-		pb.redirectError(errorFile);
-		pb.redirectOutput(outFile);
-		
-		pb.directory(config.gameDirectory);
-		Process process = pb.start();
-		int exitCode = process.waitFor();
-		if (exitCode != 1) {
-			errorFile.delete();
-			outFile.delete();
+
+		Path logsPath = config.gameDirectoryPath.resolve("logs");
+		if (!Files.exists(logsPath)) {
+			Files.createDirectories(logsPath);
 		}
 		
-		return exitCode;
+		Path errorFilePath = logsPath.resolve("launcher-stderr.log");
+		Path outFilePath = logsPath.resolve("launcher-stdout.log");
 		
+		pb.redirectError(errorFilePath.toFile());
+		pb.redirectOutput(outFilePath.toFile());
 		
+		pb.directory(config.gameDirectoryPath.toFile());
+		Process process = pb.start();
+		return process.waitFor();
+
 //		// https://stackoverflow.com/questions/5483830/process-waitfor-never-returns
 //		BufferedReader tr = new BufferedReader(new InputStreamReader(processInputStream));
 //		while ((tr.readLine()) != null) { }

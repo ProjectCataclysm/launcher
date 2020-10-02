@@ -13,7 +13,7 @@ import com.google.common.collect.Lists;
 import cataclysm.ui.DialogUtils;
 
 /**
- * Created 28 сент. 2018 г. / 18:09:34 
+ * Created 28 . 2018 . / 18:09:34
  * @author Knoblul
  */
 public class Icons {

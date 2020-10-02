@@ -1,46 +1,49 @@
 package cataclysm.utils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.channels.FileLock;
-import java.nio.file.Files;
-import java.util.UUID;
-
 import cataclysm.launch.Launcher;
 
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+
 public class LauncherLock {
-	private static FileOutputStream stream;
+	private static FileChannel channel;
 	private static FileLock lock;
-	
+
 	public static void lock() throws IOException {
-		File lockFile = new File(Launcher.workDir, ".lock");
-		if (!lockFile.exists()) {
-			try (OutputStream out = Files.newOutputStream(lockFile.toPath())) {
-				out.write(UUID.randomUUID().toString().getBytes());
-			}
+		Path lockPath = Launcher.workDirPath.resolve("launcher.lock");
+		if (!Files.exists(lockPath)) {
+			Files.createFile(lockPath);
 		}
-		stream = new FileOutputStream(lockFile);
-		lock = stream.getChannel().tryLock();
+		channel = FileChannel.open(lockPath, StandardOpenOption.WRITE);
+		lock = channel.tryLock();
+		if (lock == null) {
+			throw new IOException("Two instances cant run at the same time");
+		}
 	}
-	
-	public static boolean isAvaible() {
+
+	public static boolean isAvailable() {
 		try {
 			lock();
-			return lock != null;
+			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
 		}
 	}
-	
+
 	public static void unlock() {
 		try {
-			lock.release();
-			stream.close();
-		} catch (Throwable e) {
-			
+			lock.close();
+		} catch (IOException ignored) {
+		}
+
+		try {
+			channel.close();
+		} catch (Throwable ignored) {
 		}
 	}
 }

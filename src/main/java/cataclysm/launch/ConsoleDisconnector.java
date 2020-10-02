@@ -7,7 +7,7 @@ import java.io.PrintStream;
 /**
  * 
  * 
- * <br><br><i>Created 14 џэт. 2019 у. / 13:48:15</i><br>
+ * <br><br><i>Created 14 . 2019 . / 13:48:15</i><br>
  * SME REDUX / NOT FOR FREE USE!
  * @author Knoblul
  */

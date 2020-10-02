@@ -1,24 +1,21 @@
 package cataclysm.utils;
 
-import java.io.File;
+import cataclysm.ui.ConfigFrame;
 
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
- * Created 16 ���. 2018 �. / 22:09:12 
+ * Created 16 ���. 2018 �. / 22:09:12
+ *
  * @author Knoblul
  */
 public class PlatformHelper {
-	public enum PlatformOS {
-		WINDOWS,
-		MAC,
-		LINUX
-	}
-
 	private static final PlatformOS PLATFORM;
 	private static String osArchIdentifier;
-	
+
 	static {
 		String osName = System.getProperty("os.name");
 		if (osName.startsWith("Windows")) {
@@ -31,54 +28,66 @@ public class PlatformHelper {
 		} else {
 			throw new RuntimeException("Unknown platform: " + osName);
 		}
-		
+
 		String arch = System.getProperty("os.arch");
 		switch (PLATFORM) {
-		case LINUX:
-			osArchIdentifier = arch.startsWith("arm") || arch.startsWith("aarch64")
-				? "linux-" + (arch.contains("64") || arch.contains("armv8") ? "arm64" : "arm32")
-				: "linux";
-			break;
-		case MAC:
-			osArchIdentifier = "macos";
-			break;
-		case WINDOWS:
-			osArchIdentifier = arch.contains("64") ? "win64" : "win32";
-			break;
+			case LINUX:
+				osArchIdentifier = arch.startsWith("arm") || arch.startsWith("aarch64")
+						? "linux-" + (arch.contains("64") || arch.contains("armv8") ? "arm64" : "arm32")
+						: "linux";
+				break;
+			case MAC:
+				osArchIdentifier = "macos";
+				break;
+			case WINDOWS:
+				osArchIdentifier = System.getenv("ProgramFiles(x86)") != null ? "win64" : "win32";
+				break;
 		}
 	}
-	
+
 	public static String getOsArchIdentifier() {
 		return osArchIdentifier;
 	}
-	
+
 	public static PlatformOS getOS() {
 		return PLATFORM;
 	}
-	
-	public static File getDefaultGameDirectory() {
+
+	public static Path getDefaultGameDirectory() {
 		String path = ".project-cataclysm/";
 		switch (getOS()) {
-		case WINDOWS:
-			return new File(System.getenv("APPDATA"), path);
-		case MAC:
-			return new File(System.getProperty("user.home", ""), "Library/Application Support/" + path);
-		default:
-			return new File(System.getProperty("user.home", ""), path);
+			case WINDOWS:
+				return Paths.get(System.getenv("APPDATA"), path);
+			case MAC:
+				return Paths.get(System.getProperty("user.home", ""), "Library/Application Support/" + path);
+			default:
+				return Paths.get(System.getProperty("user.home", ""), path);
 		}
 	}
-	
-	public static int getAvaibleMemory() {
+
+	public static int getAvailableMemory() {
 		long maxMemory = Runtime.getRuntime().maxMemory();
-		return (int) (maxMemory / 1024 / 1024);
+		return ConfigFrame.roundUpToPowerOfTwo((int) (maxMemory / 1024 / 1024));
 	}
-	
+
+	public static int getMaximumMemory() {
+		return osArchIdentifier.contains("64") ? 16 * 1024 : 2048;
+	}
+
 	public static void setLookAndFeel() {
+		ImageIO.setUseCache(false); // Disable on-disc stream cache should speed up texture pack reloading.
+
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
 				| UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public enum PlatformOS {
+		WINDOWS,
+		MAC,
+		LINUX
 	}
 }

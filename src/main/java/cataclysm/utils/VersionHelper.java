@@ -5,7 +5,6 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,6 +13,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -33,7 +34,7 @@ import cataclysm.ui.DialogUtils;
 public class VersionHelper extends JComponent {
 	private static final long serialVersionUID = -6203764377406251750L;
 	private JProgressBar progress;
-	public static final String VERSION = "1.4.75";
+	public static final String VERSION = "1.5.07";
 
 	public VersionHelper() {
 		progress = new JProgressBar();
@@ -63,11 +64,11 @@ public class VersionHelper extends JComponent {
 		gbc.gridy = 1;
 
 		ImageIcon icon = new ImageIcon(VersionHelper.class.getResource("/icons/loading.gif"));
-		JLabel iconlal = new JLabel();
-		iconlal.setIcon(icon);
-		iconlal.setOpaque(false);
-		iconlal.setHorizontalAlignment(JLabel.CENTER);
-		add(iconlal, gbc);
+		JLabel iconLabel = new JLabel();
+		iconLabel.setIcon(icon);
+		iconLabel.setOpaque(false);
+		iconLabel.setHorizontalAlignment(JLabel.CENTER);
+		add(iconLabel, gbc);
 
 		revalidate();
 		repaint();
@@ -99,50 +100,50 @@ public class VersionHelper extends JComponent {
 		validate();
 	}
 
-	private File currentJarLocation() throws IOException {
+	private Path currentJarPath() throws IOException {
 		try {
-			File stub = new File(VersionHelper.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-			if (stub.isDirectory() || !stub.getName().toLowerCase().endsWith(".jar")
-					&& !stub.getName().toLowerCase().endsWith(".exe")) {
+			Path path = Paths.get(VersionHelper.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+			if (Files.isDirectory(path) || !path.getFileName().toString().toLowerCase().endsWith(".jar")
+					&& !path.getFileName().toString().toLowerCase().endsWith(".exe")) {
 				return null;
 			}
-			return stub;
+			return path;
 		} catch (URISyntaxException e) {
 			throw new IOException(e);
 		}
 	}
 
-	private File stubJarLocation() throws IOException {
-		return new File(Launcher.workDir, "launcher.jar");
+	private Path stubJarPath() {
+		return Launcher.workDirPath.resolve("launcher.jar");
 	}
 	
-	private File updateJarLocation() throws IOException {
-		return new File(Launcher.workDir, "launcher_update.jar");
+	private Path updateJarPath() {
+		return Launcher.workDirPath.resolve("launcher_update.jar");
 	}
 
-	private File checkLocation() {
+	private Path checkLocation() {
 		try {
-			File jar = currentJarLocation();
-			File stubJar = stubJarLocation();
-			File updateJar = updateJarLocation();
+			Path jar = currentJarPath();
+			Path stubJar = stubJarPath();
+			Path updateJar = updateJarPath();
 			
-			if (jar == null || jar.getName().toLowerCase().endsWith(".exe")) {
+			if (jar == null || jar.getFileName().toString().toLowerCase().endsWith(".exe")) {
 				return null;
 			}
 			
-			if (jar.equals(updateJar) || !stubJar.exists()) {
+			if (jar.equals(updateJar) || !Files.exists(stubJar)) {
 				try {
-					if (stubJar.exists()) {
-						stubJar.delete();
+					if (Files.exists(stubJar)) {
+						Files.deleteIfExists(stubJar);
 					}
-					Files.copy(jar.toPath(), stubJar.toPath());
+					Files.copy(jar, stubJar);
 				} catch (IOException e) {
 					DialogUtils.showError("failed to copy update/launcher jar", e);
 					throw new RuntimeException(e);
 				}
 			}
 			
-			return jar != null && !jar.equals(stubJar) ? stubJar : null;
+			return !jar.equals(stubJar) ? stubJar : null;
 		} catch (IOException e) {
 			DialogUtils.showError("checkLocation error!", e);
 			throw new RuntimeException(e);
@@ -152,7 +153,7 @@ public class VersionHelper extends JComponent {
 	private boolean checkUpdates() {
 		updateCheckingUI();
 		try {
-			File jar = currentJarLocation();
+			Path jar = currentJarPath();
 			if (jar == null) {
 				// eclipse-версия всегда Up-to-date
 				return true;
@@ -177,12 +178,12 @@ public class VersionHelper extends JComponent {
 		}
 	}
 	
-	private void relaunch(File file) {
+	private void relaunch(Path path) {
 		try {
 			List<String> command = Lists.newArrayList();
 			command.add("java");
 			command.add("-jar");
-			command.add(file.getAbsolutePath());
+			command.add(path.toAbsolutePath().toString());
 			ProcessBuilder pb = new ProcessBuilder(command);
 			pb.start();
 		} catch (IOException e) {
@@ -195,7 +196,7 @@ public class VersionHelper extends JComponent {
 	private void updateLauncher() {
 		updatingProgressUI();
 		try {
-			File updateJar = updateJarLocation();
+			Path updateJar = updateJarPath();
 			
 			Log.msg("Downloading update...");
 
@@ -207,7 +208,7 @@ public class VersionHelper extends JComponent {
 			progress.setValue(0);
 			int total = 0;
 			try (InputStream in = url.openStream();
-					OutputStream out = Files.newOutputStream(updateJar.toPath())) {
+					OutputStream out = Files.newOutputStream(updateJar)) {
 				int len;
 				byte[] buffer = new byte[4096];
 				while ((len = in.read(buffer)) > 0) {
@@ -219,7 +220,7 @@ public class VersionHelper extends JComponent {
 			List<String> command = Lists.newArrayList();
 			command.add("java");
 			command.add("-jar");
-			command.add(updateJar.getAbsolutePath());
+			command.add(updateJar.toAbsolutePath().toString());
 			ProcessBuilder pb = new ProcessBuilder(command);
 			pb.start();
 		} catch (IOException e) {
@@ -231,10 +232,10 @@ public class VersionHelper extends JComponent {
 	
 	private boolean relaunchExeAsStub() {
 		try {
-			File jar = currentJarLocation();
-			File stub = stubJarLocation();
-			if (jar != null && jar.getName().toLowerCase().endsWith(".exe")) {
-				if (!stub.exists()) {
+			Path jar = currentJarPath();
+			Path stub = stubJarPath();
+			if (jar != null && jar.getFileName().toString().toLowerCase().endsWith(".exe")) {
+				if (!Files.exists(stub)) {
 					Log.err("Launcher outdated!");
 					Launcher.frame.setVisible(false);
 					Launcher.frame.showVersionChecker(this);
@@ -256,13 +257,17 @@ public class VersionHelper extends JComponent {
 			// этот файл
 			// нужно для удаления родительского джарника, напр. при запуске
 			// лаунчера через обновляющий джар
-			File src = new File(args[0]);
-			if (src.getName().endsWith(".jar")) {
-				src.delete();
+			Path src = Paths.get(args[0]);
+			if (src.getFileName().endsWith(".jar")) {
+				try {
+					Files.deleteIfExists(src);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		
-		File relaunchLocation = checkLocation();
+		Path relaunchLocation = checkLocation();
 		if (relaunchLocation != null) {
 			// перезапускаем лаунчер в другом джаре
 			Launcher.frame.setVisible(false);
