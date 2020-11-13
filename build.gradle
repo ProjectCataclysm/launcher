@@ -1,3 +1,5 @@
+import org.gradle.internal.jvm.Jvm
+
 buildscript {
     repositories {
         jcenter()
@@ -14,20 +16,24 @@ compileJava.options.encoding = 'UTF-8'
 
 jar {
     manifest {
-        attributes 'Main-Class': 'cataclysm.Main'
+        attributes 'Main-Class': 'cataclysm.launcher.Main'
     }
 }
 
 shadowJar {
     classifier 'fatjar'
     manifest {
-        attributes 'Main-Class': 'cataclysm.Main'
+        attributes 'Main-Class': 'cataclysm.launcher.Main'
     }
     
     exclude '**/*.txt'
     exclude '**/*.java'
     exclude '**/*.html'
     exclude 'META-INF/maven/**'
+
+    from("$buildDir/libs/winjfx") {
+        include 'WinJFX.dll'
+    }
 }
 
 artifacts {
@@ -38,36 +44,55 @@ artifacts {
 task proguard(type: Exec) {
     workingDir '.'
     commandLine 'java',
-            '-jar', '../build-tools/libs/proguard/lib/proguard.jar', '@proguard.pro',
+            '-jar', '../build-tools/libs/proguard/lib/proguard.jar', '@configurations/proguard.pro',
             '-injars', 'build/libs/Launcher-fatjar.jar',
-            '-outjars', 'build/libs/launcher_obf.jar'
+            '-outjars', 'build/libs/Launcher-obf.jar'
 }
 
 task stringer(type: Exec) {
     workingDir '.'
     commandLine 'java', '-jar', '../build-tools/libs/stringer/stringer.jar',
-         '-configFile', 'stringer.xml',
-          'build/libs/launcher_obf.jar',
-          'build/libs/launcher.jar',
+         '-configFile', 'configurations/stringer.xml',
+          'build/libs/Launcher-obf.jar',
+          'build/libs/Launcher.jar',
           '-verbose', 'off'
 }
 
 task generate_version(type: Exec) {
     workingDir 'build/libs'
-    commandLine 'java', '-jar', 'launcher.jar', '-version'
+    commandLine 'java', '-jar', 'Launcher.jar', '--version'
+}
+
+task compile_winjfx(type: Exec) {
+    // таск для компиляции 32-bit дллки winjfx
+    def wd = 'build/libs/winjfx'
+    new File(wd).mkdirs()
+    workingDir wd
+    commandLine 'C:/MinGW/bin/g++.exe',
+                '-I', "${Jvm.current().javaHome}/include",
+                '-I', "${Jvm.current().javaHome}/include/win32",
+                '-c', new File('./src/main/native/WinJFX.c').getAbsolutePath()
+}
+
+task link_winjfx(type: Exec, dependsOn: compile_winjfx) {
+    new File('build/libs/winjfx').mkdirs()
+    workingDir 'build/libs/winjfx'
+    commandLine 'C:/MinGW/bin/g++.exe', '-s', '-shared', '-o', 'WinJFX.dll', 'WinJFX.o',
+            '-Wl,--export-all-symbols', '-Wl,--add-stdcall-alias',
+            '-lole32', '-luuid', '-lgdi32'
 }
 
 build.finalizedBy(proguard)
 proguard.finalizedBy(stringer)
-stringer.finalizedBy(generate_version)
+compileJava.finalizedBy(link_winjfx)
 
 repositories {
     jcenter()
-    maven { url "http://iudex.fi/maven/" }
 }
 
 dependencies {
     compile 'com.google.guava:guava:28.0-jre'
     compile 'com.googlecode.json-simple:json-simple:1.1.1'
-    compile 'com.saphir2:sphlib:3.0'
+    compile 'de.jensd:fontawesomefx-commons:8.12'
+    compile 'de.jensd:fontawesomefx-materialdesignfont:1.7.22-4'
 }
