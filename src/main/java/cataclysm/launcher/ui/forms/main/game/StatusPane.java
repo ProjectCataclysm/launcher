@@ -2,18 +2,22 @@ package cataclysm.launcher.ui.forms.main.game;
 
 import cataclysm.launcher.ui.Launcher;
 import cataclysm.launcher.ui.controls.IconButton;
+import cataclysm.launcher.ui.controls.LabelField;
 import cataclysm.launcher.ui.controls.LargeButton;
+import cataclysm.launcher.ui.forms.dialog.ModalDialog;
+import cataclysm.launcher.ui.forms.launch.LaunchForm;
 import cataclysm.launcher.ui.forms.main.MainForm;
+import com.google.common.base.Throwables;
 import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIconView;
 import javafx.animation.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
-import ru.knoblul.winjfx.TrayIcon;
 
 /**
  * <br><br>REVOM ENGINE / ProjectCataclysm
@@ -22,13 +26,16 @@ import ru.knoblul.winjfx.TrayIcon;
  * @author Knoblul
  */
 public class StatusPane extends StackPane {
-	private final ParallelTransition downloadingSwipeAnimation;
-	private boolean downloadVisible;
+	private final Launcher launcher;
+	private final Button playButton;
+	private final ParallelTransition launchFormSwipeAnimation;
 
 	public StatusPane(Launcher launcher, MainForm mainForm) {
+		this.launcher = launcher;
+
 		getStyleClass().add("bottom-content");
 
-		Button playButton = new LargeButton("Играть");
+		playButton = new LargeButton("Играть");
 		playButton.getStyleClass().add("play-button");
 
 		Button settingsButton = new IconButton("Настройки", new MaterialDesignIconView(MaterialDesignIcon.SETTINGS));
@@ -38,10 +45,11 @@ public class StatusPane extends StackPane {
 		Button logoutButton = new IconButton("Выход", new MaterialDesignIconView(MaterialDesignIcon.LOGOUT));
 		logoutButton.getStyleClass().add("logout-button");
 		logoutButton.setOnAction(event -> {
-//			if (launcher.showModal(false, "Подтвердите", "Вы уверены что хотите выйти из аккаунта?")) {
-//				launcher.logout();
-//			}
-			launcher.getTrayIcon().showMessage("Hello", "Lorem ipsum dolor sit amet", TrayIcon.MessageType.INFO);
+			if (launcher.showModal(false, "Подтвердите", "Вы уверены что хотите выйти из аккаунта?")
+					== ModalDialog.YES_OPTION) {
+				launcher.logout();
+			}
+//			launcher.getTrayIcon().showMessage("Hello", "Lorem ipsum dolor sit amet", TrayIcon.MessageType.INFO);
 		});
 
 		VBox vbox = new VBox(settingsButton, logoutButton);
@@ -57,15 +65,11 @@ public class StatusPane extends StackPane {
 		mainPane.setCenter(userNameLabel);
 		mainPane.setRight(playButton);
 
-		BorderPane downloadingPane = new BorderPane();
-		downloadingPane.getStyleClass().addAll("padded-pane", "downloading-pane");
-		downloadingPane.setBackground(new Background(new BackgroundFill(new Color(0, 0, 0, 0.35), null, null)));
-		downloadingPane.setCenter(new Label("IF YOU READ THIS VI VON"));
-		downloadingPane.setManaged(false);
-		downloadingPane.layoutYProperty().bind(mainPane.heightProperty());
-		downloadingPane.setOnMouseClicked(event -> toggleDownloadingPane());
+		LaunchForm launchForm = new LaunchForm(launcher, this);
+		launchForm.setManaged(false);
+		launchForm.layoutYProperty().bind(mainPane.heightProperty());
 		mainPane.layoutBoundsProperty().addListener((observable, oldValue, newValue) ->
-				downloadingPane.resize(mainPane.getWidth(), mainPane.getHeight()));
+				launchForm.resize(mainPane.getWidth(), mainPane.getHeight()));
 
 		Duration swipeDuration = Duration.seconds(0.5);
 
@@ -85,42 +89,54 @@ public class StatusPane extends StackPane {
 		fadeMain.setToValue(0);
 		fadeMain.setInterpolator(Interpolator.EASE_BOTH);
 
-		TranslateTransition translateLoading = new TranslateTransition(swipeDuration, downloadingPane);
-		translateLoading.toYProperty().bind(mainPane.heightProperty().negate());
-		translateLoading.setFromY(0);
-		translateLoading.setInterpolator(Interpolator.EASE_BOTH);
+		TranslateTransition translateLaunch = new TranslateTransition(swipeDuration, launchForm);
+		translateLaunch.toYProperty().bind(mainPane.heightProperty().negate());
+		translateLaunch.setFromY(0);
+		translateLaunch.setInterpolator(Interpolator.EASE_BOTH);
 
-		FadeTransition fadeLoading = new FadeTransition(swipeDuration.multiply(3), downloadingPane);
-		fadeLoading.setFromValue(0);
-		fadeLoading.setToValue(1);
-		fadeLoading.setInterpolator(Interpolator.EASE_BOTH);
-		downloadingPane.setOpacity(0);
+		FadeTransition fadeLaunch = new FadeTransition(swipeDuration.multiply(3), launchForm);
+		fadeLaunch.setFromValue(0);
+		fadeLaunch.setToValue(1);
+		fadeLaunch.setInterpolator(Interpolator.EASE_BOTH);
+		launchForm.setOpacity(0);
 
-		downloadingSwipeAnimation = new ParallelTransition(
+		launchFormSwipeAnimation = new ParallelTransition(
 				//translateMain,
 				scaleMain,
 				fadeMain,
-				translateLoading,
-				fadeLoading
+				translateLaunch,
+				fadeLaunch
 		);
-		downloadingSwipeAnimation.setInterpolator(Interpolator.EASE_BOTH);
-		playButton.setOnAction(event -> toggleDownloadingPane());
+		launchFormSwipeAnimation.setInterpolator(Interpolator.EASE_BOTH);
+		playButton.setOnAction(event -> launchForm.launch());
 
 		Rectangle clip = new Rectangle();
 		clip.widthProperty().bind(mainPane.widthProperty());
 		clip.heightProperty().bind(mainPane.heightProperty());
 		setClip(clip);
-		getChildren().addAll(mainPane, downloadingPane);
+		getChildren().addAll(mainPane, launchForm);
 	}
 
-	public boolean isDownloadVisible() {
-		return downloadVisible;
+	public void setLaunchFormVisible(boolean launchFormVisible) {
+		launchFormSwipeAnimation.setRate(launchFormVisible ? 1 : -1);
+		launchFormSwipeAnimation.play();
 	}
 
-	public void toggleDownloadingPane() {
-		downloadingSwipeAnimation.setRate(downloadVisible ? -1 : 1);
-		downloadingSwipeAnimation.play();
-		downloadVisible = !downloadVisible;
+	public void handleLaunchTaskChainCompleted(Throwable cause) {
+		setLaunchFormVisible(false);
+		if (cause != null) {
+			LabelField text = new LabelField(Throwables.getStackTraceAsString(cause));
+			text.setWrapText(false);
+			text.getStyleClass().add("exception-text");
+			text.setMaxHeight(300);
+
+			Label title = new Label("Не удалось запустить игру:");
+			title.getStyleClass().add("exception-title");
+
+			launcher.showModal(true, "Ошибка", new VBox(title, text));
+			playButton.setText("Играть");
+		} else {
+			playButton.setText("Завершить игру");
+		}
 	}
 }
-

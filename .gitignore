@@ -4,9 +4,12 @@
 /game/
 /out/
 /logs/
+out
+build
 .settings
 .classpath
 .project
 /configurations/launcher.map
 session.txt
 config.cfg
+*.log

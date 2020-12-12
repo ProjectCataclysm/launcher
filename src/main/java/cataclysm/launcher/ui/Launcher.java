@@ -3,7 +3,7 @@ package cataclysm.launcher.ui;
 import cataclysm.launcher.ui.controls.LauncherBackground;
 import cataclysm.launcher.ui.controls.WindowHeader;
 import cataclysm.launcher.ui.forms.dialog.ModalDialog;
-import cataclysm.launcher.ui.forms.loading.LoadingForm;
+import cataclysm.launcher.ui.forms.initialization.InitializeForm;
 import cataclysm.launcher.ui.forms.login.LoginForm;
 import cataclysm.launcher.ui.forms.main.MainForm;
 import cataclysm.launcher.utils.Account;
@@ -63,7 +63,7 @@ public class Launcher extends Application {
 
 	private MainForm mainForm;
 	private LoginForm loginForm;
-	private LoadingForm loadingForm;
+	private InitializeForm initializeForm;
 
 	public Settings getSettings() {
 		return settings;
@@ -93,8 +93,8 @@ public class Launcher extends Application {
 		return mainForm;
 	}
 
-	public LoadingForm getLoadingForm() {
-		return loadingForm;
+	public InitializeForm getInitializeForm() {
+		return initializeForm;
 	}
 
 	public Launcher() {
@@ -137,9 +137,9 @@ public class Launcher extends Application {
 
 		mainForm = new MainForm(this);
 		loginForm = new LoginForm(this);
-		loadingForm = new LoadingForm(this);
+		initializeForm = new InitializeForm(this);
 
-		StackPane formWrapper = new StackPane(mainForm, loadingForm, loginForm);
+		StackPane formWrapper = new StackPane(mainForm, initializeForm, loginForm);
 		Rectangle clip = new Rectangle();
 		clip.widthProperty().bind(formWrapper.widthProperty());
 		clip.heightProperty().bind(formWrapper.heightProperty());
@@ -150,7 +150,7 @@ public class Launcher extends Application {
 		loginForm.setOpacity(0);
 		mainForm.setVisible(false);
 		mainForm.setOpacity(0);
-		currentForm = loadingForm;
+		currentForm = initializeForm;
 
 		background.createBlurEffect(() -> topPane);
 		background.getChildren().add(launcherPane);
@@ -182,15 +182,15 @@ public class Launcher extends Application {
 
 		if (shouldLaunchReporter()) {
 			try {
-				loadingForm.setOpacity(0);
+				initializeForm.setOpacity(0);
 				initCrashReporter();
 			} catch (IOException e) {
 				Log.warn(e, "Failed to init crash reporter");
 			}
 		}
 
-		loadingForm.setOpacity(1);
-		loadingForm.beginLoading();
+		initializeForm.setOpacity(1);
+		initializeForm.beginInitialization();
 	}
 
 	private boolean shouldLaunchReporter() {
@@ -343,7 +343,7 @@ public class Launcher extends Application {
 	public void initCrashReporter() throws IOException {
 		Log.msg("Initailizing crash-reporter...");
 
-		if (!loadingForm.checkLoginHolderForReporter()) {
+		if (!initializeForm.checkLoginHolderForReporter()) {
 			throw new IOException("Login required");
 		}
 

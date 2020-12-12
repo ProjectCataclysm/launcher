@@ -52,7 +52,7 @@ public class ModalDialog extends BorderPane {
 		fill();
 
 		StackPane shadowWrapper = new StackPane(this);
-		shadowWrapper.setMaxSize(480, USE_PREF_SIZE);
+		shadowWrapper.setMaxSize(600, USE_PREF_SIZE);
 		shadowWrapper.getStyleClass().add("modal-shadow");
 
 		StackPane stageWrapper = new StackPane(shadowWrapper);

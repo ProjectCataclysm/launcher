@@ -1,4 +1,4 @@
-package cataclysm.launcher.ui.forms.loading;
+package cataclysm.launcher.ui.forms.initialization;
 
 import cataclysm.launcher.ui.Launcher;
 import cataclysm.launcher.utils.Account;
@@ -22,12 +22,12 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author Knoblul
  */
-public class LoadingForm extends BorderPane {
+public class InitializeForm extends BorderPane {
 	private final Launcher launcher;
 	private final Label subTitle;
 	private final ProgressBar progressBar;
 
-	public LoadingForm(Launcher launcher) {
+	public InitializeForm(Launcher launcher) {
 		getStyleClass().add("loading-form");
 
 		this.launcher = launcher;
@@ -52,7 +52,7 @@ public class LoadingForm extends BorderPane {
 		setCenter(center);
 	}
 
-	public void beginLoading() {
+	public void beginInitialization() {
 		CompletableFuture<Void> versionCheckFuture = CompletableFuture
 				.runAsync(this::checkForUpdates, AsyncTasks.executor)
 				.thenRunAsync(this::updateLauncher, AsyncTasks.executor);

@@ -166,6 +166,8 @@
   	-fx-background-color: -fx-bg-primary-color;
   	-fx-background-radius: 0;
   	-fx-padding: 0;
+  	-fx-border-style: solid;
+  	-fx-border-color: -fx-border-secondary-color;
 }
 
 .progress-bar .bar {
@@ -205,16 +207,28 @@
     -fx-padding: 0;
 }
 
+.scroll-bar:horizontal {
+	-fx-pref-height: 8px;
+    -fx-padding: 0;
+}
+
 .scroll-bar .increment-button,
 .scroll-bar .decrement-button {
-	-fx-background-color :transparent;
+	-fx-border-color: transparent;
+	-fx-background-color: transparent;
 	visibility: hidden;
 	-fx-padding: 0;
 }
 
 .scroll-bar .increment-arrow,
 .scroll-bar .decrement-arrow {
+	-fx-background-color: transparent;
 	-fx-shape : " ";
+	-fx-padding: 0;
+}
+
+.scroll-pane .corner {
+	-fx-background-color: transparent;
 	-fx-padding: 0;
 }
 
@@ -586,4 +600,13 @@
 
 .launcher .settings-pane .browse-game-dir-button {
 	-fx-padding: 0.25em 1em;
+}
+
+.launcher .downloading {
+	-fx-spacing: 1em;
+	-fx-alignment: center;
+}
+
+.launcher .downloading .glyph-icon {
+	-glyph-size: 25px;
 }
