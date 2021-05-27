@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch4jConfig>
-  <dontWrapJar>true</dontWrapJar>
+  <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>.\Launcher.jar</jar>
+  <jar>C:\Dev\ProjectCataclysm\launcher\build\libs\launcher.jar</jar>
   <outfile>C:\Dev\ProjectCataclysm\Launcher\build\libs\ProjectCataclysm.exe</outfile>
   <errTitle>Error</errTitle>
   <cmdLine></cmdLine>
@@ -18,10 +18,10 @@
     <path>./java</path>
     <bundledJre64Bit>false</bundledJre64Bit>
     <bundledJreAsFallback>false</bundledJreAsFallback>
-    <minVersion>1.8.0_20</minVersion>
+    <minVersion>1.8.0_200</minVersion>
     <maxVersion></maxVersion>
     <jdkPreference>preferJre</jdkPreference>
-    <runtimeBits>32</runtimeBits>
+    <runtimeBits>64/32</runtimeBits>
   </jre>
   <versionInfo>
     <fileVersion>1.0.0.0</fileVersion>
