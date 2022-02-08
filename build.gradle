@@ -1,10 +1,5 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.2'
-    }
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.0"
 }
 
 apply plugin: 'java'
@@ -14,16 +9,16 @@ compileJava.options.encoding = 'UTF-8'
 
 jar {
     manifest {
-        attributes 'Main-Class': 'cataclysm.Main'
+        attributes('Main-Class': 'cataclysm.Main')
     }
 }
 
 shadowJar {
     classifier 'fatjar'
     manifest {
-        attributes 'Main-Class': 'cataclysm.Main'
+        attributes('Main-Class': 'cataclysm.Main')
     }
-    
+
     exclude '**/*.txt'
     exclude '**/*.java'
     exclude '**/*.html'
@@ -35,7 +30,7 @@ artifacts {
     archives shadowJar
 }
 
-task proguard(type: Exec) {
+task proguard(type: Exec, dependsOn: build) {
     workingDir '.'
     commandLine 'java',
             '-jar', '../core/obfuscation/proguard/lib/proguard.jar', '@proguard.pro',
@@ -43,7 +38,7 @@ task proguard(type: Exec) {
             '-outjars', 'build/libs/launcher_obf.jar'
 }
 
-task stringer(type: Exec) {
+task stringer(type: Exec, dependsOn: proguard) {
     workingDir '.'
     commandLine 'java', '-jar', '../core/obfuscation/stringer/stringer.jar',
          '-configFile', 'stringer.xml',
@@ -52,22 +47,23 @@ task stringer(type: Exec) {
           '-verbose', 'off'
 }
 
-task generate_version(type: Exec) {
+task generateVersion(type: Exec, dependsOn: stringer) {
     workingDir 'build/libs'
     commandLine 'java', '-jar', 'launcher.jar', '-version'
 }
 
-build.finalizedBy(proguard)
-proguard.finalizedBy(stringer)
-stringer.finalizedBy(generate_version)
+task finalJar(dependsOn: generateVersion) {
+    group = 'Building'
+}
 
 repositories {
-    jcenter()
-    maven { url "http://iudex.fi/maven/" }
+    mavenCentral()
+    maven { url "https://iudex.fi/maven/" }
 }
 
 dependencies {
-    compile 'com.google.guava:guava:28.0-jre'
-    compile 'com.googlecode.json-simple:json-simple:1.1.1'
-    compile 'com.saphir2:sphlib:3.0'
+    implementation 'net.java.dev.jna:jna:4.4.0'
+    implementation 'com.google.guava:guava:31.0.1-jre'
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+    implementation 'com.saphir2:sphlib:3.0'
 }
