@@ -166,14 +166,23 @@ public class Launcher implements Runnable {
 			command.add("java");
 		}
 
+		command.add("-Dfile.encoding=UTF-8");
+
 		// логгинг вылетов
 		command.add("-XX:ErrorFile=crashes/fatal_pid_%p.log");
+		command.add("-XX:HeapDumpPath=crashes/heapdump_pid_%p.hprof");
 		
 		// оптимизация
+		command.add("-XX:+UnlockExperimentalVMOptions");
 		command.add("-XX:+UseG1GC");
-		command.add("-XX:+UseStringDeduplication");
-		command.add("-Dfile.encoding=UTF-8");
-		
+		command.add("-XX:G1NewSizePercent=20");
+		command.add("-XX:G1ReservePercent=20");
+		command.add("-XX:MaxGCPauseMillis=50");
+		command.add("-XX:G1HeapRegionSize=32M");
+
+		// макс. размер стека вызова
+		command.add("-Xss1M");
+
 		// антиинжект
 		command.add("-XX:+DisableAttachMechanism");
 
