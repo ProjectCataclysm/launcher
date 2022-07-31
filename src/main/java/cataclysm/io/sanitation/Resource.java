@@ -7,10 +7,10 @@ package cataclysm.io.sanitation;
  * @author Knoblul
  */
 public class Resource {
-	private String local;
-	private String remote;
-	private boolean hashed;
-	private boolean isFolder;
+	private final String local;
+	private final String remote;
+	private final boolean hashed;
+	private final boolean isFolder;
 	
 	public Resource(String local, String remote, boolean hashed, boolean isFolder) {
 		this.local = local;

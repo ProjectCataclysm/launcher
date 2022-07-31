@@ -23,8 +23,6 @@ import java.util.concurrent.TimeUnit;
  * @author Knoblul
  */
 public class SanitationManager extends JComponent {
-	private static final long serialVersionUID = 7429535511171151670L;
-
 	public SanitationManager() {
 		fill();
 	}
@@ -122,7 +120,7 @@ public class SanitationManager extends JComponent {
 		}
 
 		for (Path p : paths) {
-			if (!Files.exists(p)) {
+			if (!Files.isRegularFile(p)) {
 				return true;
 			}
 		}
@@ -164,7 +162,7 @@ public class SanitationManager extends JComponent {
 	public List<Resource> perform(ResourceMaster master) throws IOException {
 		// получаем игровую директорию
 		Path rootPath = Launcher.config.gameDirectoryPath;
-		if (!Files.exists(rootPath)) {
+		if (!Files.isDirectory(rootPath)) {
 			// если директория остуствует, то создаём её и добавляем ВСЕ ресурсы
 			// на скачивание
 			Files.createDirectories(rootPath);
@@ -184,7 +182,7 @@ public class SanitationManager extends JComponent {
 		// санитизируем папку с игрой, сравниваем хеши файлов с hashes
 		for (Resource resource : resources) {
 			Path localPath = rootPath.resolve(resource.getLocal());
-			if (!Files.exists(localPath)) {
+			if (!Files.isRegularFile(localPath)) {
 				// если локальный файл не существует добавляем ресурс на
 				// скачивание
 				toDownload.add(resource);

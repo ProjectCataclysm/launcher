@@ -9,10 +9,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -23,7 +25,6 @@ import java.util.Properties;
  * @author Knoblul
  */
 public class ConfigFrame extends JDialog {
-	private static final long serialVersionUID = -7097069158813087568L;
 	public Path gameDirectoryPath;
 	public int memory;
 	public boolean limitMemory;
@@ -228,10 +229,6 @@ public class ConfigFrame extends JDialog {
 	}
 
 	public void loadConfig() {
-		if (!Files.exists(configFile)) {
-			saveConfig();
-		}
-
 		try (InputStream in = Files.newInputStream(configFile)) {
 			Log.msg("Loading config file...");
 			props.clear();
@@ -241,6 +238,8 @@ public class ConfigFrame extends JDialog {
 			memory = roundUpToPowerOfTwo(Integer.parseInt(props.getProperty("memory", Integer.toString(memory))));
 			limitMemory = Boolean.parseBoolean(props.getProperty("limitMemory", Boolean.toString(limitMemory)));
 			texturesQuality = Math.min(Math.max(Integer.parseInt(props.getProperty("texturesQuality", Integer.toString(texturesQuality))), 0), 3);
+		} catch (FileNotFoundException | NoSuchFileException e) {
+			saveConfig();
 		} catch (Exception e) {
 			Log.err(e, "Can't load config file");
 		}

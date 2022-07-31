@@ -1,4 +1,4 @@
-package cataclysm.utils.jfx;
+package jfx;
 
 import com.sun.jna.IntegerType;
 import com.sun.jna.Native;

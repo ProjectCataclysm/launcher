@@ -17,23 +17,21 @@ import java.nio.file.Paths;
 import java.util.List;
 
 /**
- * Created 27 сент. 2018 г. / 21:10:13 
+ * Created 27 сент. 2018 г. / 21:10:13
+ *
  * @author Knoblul
  */
 public class Launcher implements Runnable {
 	public static Path workDirPath;
-	
+
 	static {
-		workDirPath = Paths.get(System.getProperty("user.home"), "ProjectCataclysm");
-		if (!Files.exists(workDirPath)) {
-			try {
-				Files.createDirectories(workDirPath);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		try {
+			workDirPath = Files.createDirectories(Paths.get(System.getProperty("user.home"), "ProjectCataclysm"));
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to create work directory", e);
 		}
 	}
-	
+
 	public static ConfigFrame config;
 	public static LauncherFrame frame;
 	public static LoginFrame loginFrame;
@@ -44,7 +42,7 @@ public class Launcher implements Runnable {
 	private static DownloadingManager downloader;
 
 	public static Launcher instance;
-	
+
 	private static volatile boolean launched;
 
 	public Launcher(String[] args) {
@@ -56,7 +54,7 @@ public class Launcher implements Runnable {
 			System.exit(1);
 			return;
 		}
-		
+
 		Runtime.getRuntime().addShutdownHook(new Thread(LauncherLock::unlock));
 
 		instance = this;
@@ -69,7 +67,7 @@ public class Launcher implements Runnable {
 		sanitizer = new SanitationManager();
 		downloader = new DownloadingManager();
 		VersionHelper versionHelper = new VersionHelper();
-		
+
 		if (versionHelper.shouldStartLauncher(args)) {
 			frame.showLauncher();
 			loginFrame.initialize();
@@ -102,10 +100,10 @@ public class Launcher implements Runnable {
 
 			Log.msg("Retrieving download info...");
 			resourceMaster.retrieveDownloadInformation();
-			
+
 			Log.msg("Retrieving hashes...");
 			resourceMaster.retrieveHashes();
-			
+
 			Log.msg("Sanitizing...");
 			List<Resource> toDownload = sanitizer.perform(resourceMaster);
 			if (!toDownload.isEmpty()) {
@@ -120,17 +118,18 @@ public class Launcher implements Runnable {
 			DialogUtils.showError("Ошибка загрузки файлов", t);
 			return;
 		}
-		
+
 		try {
 			Log.msg("STARTING GAYM!!1!");
 			statusFrame.setVisible(false);
 			config.setVisible(false);
-			
+
 			int exitCode = 0;
 			try {
 				exitCode = startGame();
 				Log.msg("---- GAME STOPPED WITH CODE %d ----", exitCode);
-			} catch (InterruptedException ignored) { }
+			} catch (InterruptedException ignored) {
+			}
 			launched = false;
 
 			if (exitCode != 0) {
@@ -140,7 +139,7 @@ public class Launcher implements Runnable {
 				JOptionPane.showMessageDialog(frame, "Игра была аварийно завершена с кодом " + exitCode, "Ошибка",
 						JOptionPane.ERROR_MESSAGE);
 			}
-			
+
 			frame.setVisible(true);
 		} catch (Throwable t) {
 			statusFrame.setVisible(false);
@@ -156,7 +155,7 @@ public class Launcher implements Runnable {
 		boolean customJava = true;
 		if (PlatformHelper.getOS() == PlatformOS.WINDOWS) {
 			Path javaPath = config.gameDirectoryPath.resolve(Paths.get("jre8", "bin", "java.exe"));
-			if (Files.exists(javaPath)) {
+			if (Files.isExecutable(javaPath)) {
 				command.add(javaPath.toAbsolutePath().toString());
 				customJava = false;
 			}
@@ -171,7 +170,7 @@ public class Launcher implements Runnable {
 		// логгинг вылетов
 		command.add("-XX:ErrorFile=crashes/fatal_pid_%p.log");
 		command.add("-XX:HeapDumpPath=crashes/heapdump_pid_%p.hprof");
-		
+
 		// оптимизация
 		command.add("-XX:+UnlockExperimentalVMOptions");
 		command.add("-XX:+UseG1GC");
@@ -191,19 +190,22 @@ public class Launcher implements Runnable {
 			command.add("-Xms256m");
 			command.add("-Xmx" + (config.memory) + "m");
 		}
-		
+
 		if (PlatformHelper.getOS() == PlatformOS.MAC) {
 			command.add("-XstartOnFirstThread");
 		}
-		
+
+		// вырубаем Ipv6 сокеты по дефолту для ускорения работы нетворкинга
+		command.add("-Djava.net.preferIPv4Stack=true");
+
 		// либрарипатх
 		command.add("-Djava.library.path=");
-		
+
 		// класспатх
 		command.add("-cp");
 		command.add("core.jar");
 		command.add("start.StartClient");
-		
+
 		// данные для входа
 		LoginHolder loginHolder = loginFrame.getLoginHolder();
 		command.add("--uuid");
@@ -222,17 +224,13 @@ public class Launcher implements Runnable {
 
 		ProcessBuilder pb = new ProcessBuilder(command);
 
-		Path logsPath = config.gameDirectoryPath.resolve("logs");
-		if (!Files.exists(logsPath)) {
-			Files.createDirectories(logsPath);
-		}
-		
+		Path logsPath = Files.createDirectories(config.gameDirectoryPath.resolve("logs"));
 		Path errorFilePath = logsPath.resolve("launcher-stderr.log");
 		Path outFilePath = logsPath.resolve("launcher-stdout.log");
-		
+
 		pb.redirectError(errorFilePath.toFile());
 		pb.redirectOutput(outFilePath.toFile());
-		
+
 		pb.directory(config.gameDirectoryPath.toFile());
 		Process process = pb.start();
 		return process.waitFor();

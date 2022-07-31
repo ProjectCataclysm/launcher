@@ -24,7 +24,7 @@ public class Main {
 			new Launcher(args);
 		} catch (Throwable t) {
 			DialogUtils.showError("Ошибка", t);
-			System.exit(1);
+			throw new RuntimeException(t);
 		}
 	}
 }

@@ -31,18 +31,17 @@ import cataclysm.utils.PlatformHelper;
  * @author Knoblul
  */
 public class ResourceMaster {
-	private Map<String, String> hashes = Maps.newHashMap();
-	private List<String> protectedFolders = Lists.newArrayList();
-	private List<Resource> resources = Lists.newArrayList();
+	private final Map<String, String> hashes = Maps.newHashMap();
+	private final List<String> protectedFolders = Lists.newArrayList();
+	private final List<Resource> resources = Lists.newArrayList();
 
 	private Resource parseResource(JSONObject node) {
-		Resource resource = new Resource(
+		return new Resource(
 			(String) node.get("local"),
 			(String) node.get("remote"),
 			(Boolean) node.get("hashed"),
 			(Boolean) node.get("archive")
 		);
-		return resource;
 	}
 
 	@SuppressWarnings("unchecked")

@@ -5,7 +5,6 @@ import cataclysm.launch.Launcher;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
@@ -15,10 +14,7 @@ public class LauncherLock {
 
 	public static void lock() throws IOException {
 		Path lockPath = Launcher.workDirPath.resolve("launcher.lock");
-		if (!Files.exists(lockPath)) {
-			Files.createFile(lockPath);
-		}
-		channel = FileChannel.open(lockPath, StandardOpenOption.WRITE);
+		channel = FileChannel.open(lockPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
 		lock = channel.tryLock();
 		if (lock == null) {
 			throw new IOException("Two instances cant run at the same time");

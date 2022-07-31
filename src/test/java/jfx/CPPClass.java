@@ -1,4 +1,4 @@
-package cataclysm.utils.jfx;
+package jfx;
 
 import com.sun.jna.Function;
 import com.sun.jna.Native;

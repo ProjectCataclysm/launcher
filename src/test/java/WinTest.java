@@ -1,9 +1,10 @@
-import cataclysm.utils.jfx.Kernel32Lib;
-import cataclysm.utils.jfx.Ole32Lib;
-import com.sun.jna.Pointer;
+import jfx.Kernel32Lib;
+import jfx.Ole32Lib;
 import com.sun.jna.ptr.PointerByReference;
 
 /**
+ * Тестируем таскбар хуки в винде
+ *
  * <br><br>REVOM ENGINE / ProjectCataclysm
  * <br>Created: 29.01.2022 16:53
  *

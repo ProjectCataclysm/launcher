@@ -1,9 +1,10 @@
 package cataclysm.launch;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import cataclysm.io.sanitation.Resource;
+import cataclysm.utils.HttpHelper;
+
+import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,13 +19,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JProgressBar;
-
-import cataclysm.io.sanitation.Resource;
-import cataclysm.utils.HttpHelper;
 
 /**
  * <br><br>REVOM ENGINE / ProjectCataclysm
@@ -125,11 +119,7 @@ public class DownloadingManager extends JComponent {
 
 	private void downloadFile(Path rootPath, Resource resource) throws IOException {
 		Path outputPath = rootPath.resolve(resource.getLocal());
-		Path parentPath = outputPath.getParent();
-		if (!Files.exists(parentPath)) {
-			Files.createDirectories(parentPath);
-		}
-		
+		Files.createDirectories(outputPath.getParent());
 		URL url = HttpHelper.clientURL(resource.getRemote());
 		URLConnection connection = url.openConnection();
 		connection.setConnectTimeout(0);
@@ -227,10 +217,7 @@ public class DownloadingManager extends JComponent {
 			while ((entry = zip.getNextEntry()) != null) {
 				if (!entry.isDirectory()) {
 					Path outputPath = unpackPath.resolve(entry.getName());
-					Path parentPath = outputPath.getParent();
-					if (!Files.exists(parentPath)) {
-						Files.createDirectories(parentPath);
-					}
+					Files.createDirectories(outputPath.getParent());
 
 					try (OutputStream out = Files.newOutputStream(outputPath)) {
 						int len;

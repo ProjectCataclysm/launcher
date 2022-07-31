@@ -8,6 +8,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.zip.CRC32;
 
 /**
@@ -71,7 +72,7 @@ public class ChecksumUtil {
 				}
 			}
 
-			return sb.toString().toUpperCase();
+			return sb.toString().toUpperCase(Locale.ROOT);
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}

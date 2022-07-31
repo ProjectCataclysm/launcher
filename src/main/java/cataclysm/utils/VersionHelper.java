@@ -1,31 +1,22 @@
 package cataclysm.utils;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import cataclysm.launch.Launcher;
+import cataclysm.ui.DialogUtils;
+import com.google.common.collect.Lists;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
-
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JProgressBar;
-
-import com.google.common.collect.Lists;
-
-import cataclysm.launch.Launcher;
-import cataclysm.ui.DialogUtils;
+import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Created 20 окт. 2018 г. / 22:51:07 
@@ -33,7 +24,7 @@ import cataclysm.ui.DialogUtils;
  */
 public class VersionHelper extends JComponent {
 	private static final long serialVersionUID = -6203764377406251750L;
-	private JProgressBar progress;
+	private final JProgressBar progress;
 	public static final String VERSION = "1.6.5";
 
 	public VersionHelper() {
@@ -63,7 +54,7 @@ public class VersionHelper extends JComponent {
 
 		gbc.gridy = 1;
 
-		ImageIcon icon = new ImageIcon(VersionHelper.class.getResource("/icons/loading.gif"));
+		ImageIcon icon = new ImageIcon(Objects.requireNonNull(VersionHelper.class.getResource("/icons/loading.gif")));
 		JLabel iconLabel = new JLabel();
 		iconLabel.setIcon(icon);
 		iconLabel.setOpaque(false);
@@ -103,8 +94,8 @@ public class VersionHelper extends JComponent {
 	private Path currentJarPath() throws IOException {
 		try {
 			Path path = Paths.get(VersionHelper.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-			if (Files.isDirectory(path) || !path.getFileName().toString().toLowerCase().endsWith(".jar")
-					&& !path.getFileName().toString().toLowerCase().endsWith(".exe")) {
+			if (Files.isDirectory(path) || !path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".jar")
+					&& !path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".exe")) {
 				return null;
 			}
 			return path;
@@ -127,16 +118,13 @@ public class VersionHelper extends JComponent {
 			Path stubJar = stubJarPath();
 			Path updateJar = updateJarPath();
 			
-			if (jar == null || jar.getFileName().toString().toLowerCase().endsWith(".exe")) {
+			if (jar == null || jar.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".exe")) {
 				return null;
 			}
 			
-			if (jar.equals(updateJar) || !Files.exists(stubJar)) {
+			if (jar.equals(updateJar) || !Files.isExecutable(stubJar)) {
 				try {
-					if (Files.exists(stubJar)) {
-						Files.deleteIfExists(stubJar);
-					}
-					Files.copy(jar, stubJar);
+					Files.copy(jar, stubJar, StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException e) {
 					DialogUtils.showError("failed to copy update/launcher jar", e);
 					throw new RuntimeException(e);
@@ -234,8 +222,8 @@ public class VersionHelper extends JComponent {
 		try {
 			Path jar = currentJarPath();
 			Path stub = stubJarPath();
-			if (jar != null && jar.getFileName().toString().toLowerCase().endsWith(".exe")) {
-				if (!Files.exists(stub)) {
+			if (jar != null && jar.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".exe")) {
+				if (!Files.isExecutable(stub)) {
 					Log.err("Launcher outdated!");
 					Launcher.frame.setVisible(false);
 					Launcher.frame.showVersionChecker(this);

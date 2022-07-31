@@ -10,8 +10,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.regex.Pattern;
@@ -23,8 +25,6 @@ import java.util.regex.Pattern;
  * @author Knoblul
  */
 public class LoginFrame extends JDialog {
-	private static final long serialVersionUID = 5381275121483993759L;
-
 	private static final Pattern EMAIL_PATTERN = Pattern.compile("^[\\w-_.+]*[\\w-_.]@([\\w]+\\.)+[\\w]+[\\w]$");
 
 	private Path sessionFilePath;
@@ -39,7 +39,7 @@ public class LoginFrame extends JDialog {
 
 	private LoginHolder loginHolder;
 
-	@SuppressWarnings("unused") // XXX Maybe later :)
+	@SuppressWarnings("unused") // XXX мб потом :)
 	private String accessDeniedString;
 
 	public LoginFrame() {
@@ -195,15 +195,12 @@ public class LoginFrame extends JDialog {
 	}
 
 	private void loadSessionFile() {
-		if (!Files.exists(sessionFilePath)) {
-			return;
-		}
-
 		try {
 			String sessionId = String.join("", Files.readAllLines(sessionFilePath));
 			if (!sessionId.isEmpty()) {
 				performValidateRequest(sessionId);
 			}
+		} catch (FileNotFoundException | NoSuchFileException ignored) {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -257,22 +254,20 @@ public class LoginFrame extends JDialog {
 	private static String translateError(IOException e) {
 		String code = e.getLocalizedMessage();
 		switch (code) {
-			case "error.internal":
+			case "api.error.unavailable":
+				return "Сервис временно недоступен";
+			case "api.error.internal":
 				return "Внутренняя ошибка сервера";
-			case "error.badsessionvalue":
-			case "error.invalidsession":
+			case "api.error.invalidSession":
 				return "Сессия устарела, повторите вход";
-			case "error.auth.invalid.login":
-			case "error.auth.invalid.password":
+			case "api.error.clientAuth.invalidCredentials":
 				return "Неверно введен логин или пароль";
-			case "error.auth.limitreached":
+			case "api.error.clientAuth.limitReached":
 				return "Превышено максимальное число допустимых попыток. Попробуйте через 5 минут.";
-			case "error.profile.notfound":
-				return "Профиль не найден";
-			case "error.banned":
+			case "api.error.clientBanned":
 				return "Вы забанены :/";
 			default:
-				return code;
+				return "Неизвестная ошибка (" + code + ")";
 		}
 	}
 
