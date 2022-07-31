@@ -1,4 +1,4 @@
-package cataclysm.io.sanitation;
+package cataclysm.launcher.download.santation;
 
 /**
  * <br><br>REVOM ENGINE / ProjectCataclysm

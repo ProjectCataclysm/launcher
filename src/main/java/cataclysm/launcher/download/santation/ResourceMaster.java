@@ -1,24 +1,22 @@
-package cataclysm.io.sanitation;
+package cataclysm.launcher.download.santation;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Map;
-
+import cataclysm.launcher.utils.HttpHelper;
+import cataclysm.launcher.utils.PlatformHelper;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import cataclysm.utils.HttpHelper;
-import cataclysm.utils.PlatformHelper;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -49,30 +47,35 @@ public class ResourceMaster {
 		resources.clear();
 		protectedFolders.clear();
 
-		JSONParser parser = new JSONParser();
-		try (InputStreamReader reader = new InputStreamReader(
-				HttpHelper.openStream(HttpHelper.clientURL("deploy.json")))) {
-			JSONObject root = (JSONObject) parser.parse(reader);
+		JSONObject root;
 
-			JSONArray pfnodes = (JSONArray) root.get("protected-folders");
-			pfnodes.forEach(t -> protectedFolders.add((String) t));
-
-			JSONArray rnodesdef = (JSONArray) root.get("resources-default");
-			rnodesdef.forEach(t -> resources.add(parseResource((JSONObject) t)));
-
-			JSONArray rnodesos = (JSONArray) root.get("resources-" + PlatformHelper.getOsArchIdentifier());
-			rnodesos.forEach(t -> resources.add(parseResource((JSONObject) t)));
+		String url = "https://" + HttpHelper.CLIENT_URL + "/deploy.json";
+		try (CloseableHttpResponse response = HttpHelper.get(url);
+		     BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(),
+				     StandardCharsets.UTF_8))) {
+			root = (JSONObject) new JSONParser().parse(reader);
 		} catch (ParseException e) {
 			throw new IOException("Failed to parse deploy.json", e);
 		}
+
+		JSONArray pfnodes = (JSONArray) root.get("protected-folders");
+		pfnodes.forEach(t -> protectedFolders.add((String) t));
+
+		JSONArray rnodesdef = (JSONArray) root.get("resources-default");
+		rnodesdef.forEach(t -> resources.add(parseResource((JSONObject) t)));
+
+		JSONArray rnodesos = (JSONArray) root.get("resources-" + PlatformHelper.getOsArchIdentifier());
+		rnodesos.forEach(t -> resources.add(parseResource((JSONObject) t)));
 	}
 
 	public void retrieveHashes() throws IOException {
 		hashes.clear();
 		for (Resource resource : resources) {
 			if (resource.isHashed()) {
-				try (InputStream in = HttpHelper.openStream(HttpHelper.clientURL(resource.getRemote() + ".hash"));
-						BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charsets.UTF_8))) {
+				String url = "https://" + HttpHelper.CLIENT_URL + "/" + resource.getRemote() + ".hash";
+				try (CloseableHttpResponse response = HttpHelper.get(url);
+				     BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(),
+						     StandardCharsets.UTF_8))) {
 					String ln;
 					while ((ln = reader.readLine()) != null) {
 						List<String> spl = Splitter.on('=').trimResults().splitToList(ln);

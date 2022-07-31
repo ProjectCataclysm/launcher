@@ -1,4 +1,4 @@
-package cataclysm.ui;
+package cataclysm.launcher.ui;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
@@ -7,9 +7,9 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import cataclysm.launch.Launcher;
-import cataclysm.utils.Icons;
-import cataclysm.utils.VersionHelper;
+import cataclysm.launcher.Launcher;
+import cataclysm.launcher.utils.Icons;
+import cataclysm.launcher.selfupdate.LauncherVersionManager;
 
 /**
  * Created 20 ���. 2018 �. / 21:36:58 
@@ -21,7 +21,7 @@ public class LaunchStatusFrame extends JFrame {
 	
 	public LaunchStatusFrame() {
 		Icons.setupIcons(this);
-		setTitle("Project Cataclysm Launcher v" + VersionHelper.VERSION);
+		setTitle("Project Cataclysm Launcher v" + LauncherVersionManager.VERSION);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setSize(600, 400);
 		setResizable(false);

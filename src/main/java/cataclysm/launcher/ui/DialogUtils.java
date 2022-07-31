@@ -1,4 +1,4 @@
-package cataclysm.ui;
+package cataclysm.launcher.ui;
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -13,8 +13,8 @@ import javax.swing.JTextArea;
 
 import com.google.common.base.Throwables;
 
-import cataclysm.launch.Launcher;
-import cataclysm.utils.Log;
+import cataclysm.launcher.Launcher;
+import cataclysm.launcher.utils.Log;
 
 /**
  * Created 16 ���. 2018 �. / 22:17:44 

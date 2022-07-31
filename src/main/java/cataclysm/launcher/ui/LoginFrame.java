@@ -1,9 +1,12 @@
-package cataclysm.ui;
+package cataclysm.launcher.ui;
 
-import cataclysm.io.sanitation.SanitationManager;
-import cataclysm.launch.Launcher;
-import cataclysm.utils.HttpHelper;
-import cataclysm.utils.LoginHolder;
+import cataclysm.launcher.Launcher;
+import cataclysm.launcher.account.Profile;
+import cataclysm.launcher.account.Session;
+import cataclysm.launcher.download.santation.SanitationManager;
+import cataclysm.launcher.utils.HttpHelper;
+import com.google.common.collect.Sets;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import javax.swing.*;
@@ -16,6 +19,8 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -27,7 +32,7 @@ import java.util.regex.Pattern;
 public class LoginFrame extends JDialog {
 	private static final Pattern EMAIL_PATTERN = Pattern.compile("^[\\w-_.+]*[\\w-_.]@([\\w]+\\.)+[\\w]+[\\w]$");
 
-	private Path sessionFilePath;
+	private final Path sessionFilePath;
 
 	private JPanel contentPanel;
 
@@ -37,7 +42,7 @@ public class LoginFrame extends JDialog {
 	private JPasswordField passwordField;
 	private JButton loginButton;
 
-	private LoginHolder loginHolder;
+	private Session session;
 
 	@SuppressWarnings("unused") // XXX мб потом :)
 	private String accessDeniedString;
@@ -151,7 +156,8 @@ public class LoginFrame extends JDialog {
 
 		setLoadingVisible(false);
 
-		ImageIcon icon = new ImageIcon(SanitationManager.class.getResource("/icons/loading.gif"));
+		ImageIcon icon = new ImageIcon(
+				Objects.requireNonNull(SanitationManager.class.getResource("/icons/loading.gif")));
 		iconLoading = new JLabel();
 		iconLoading.setIcon(icon);
 		iconLoading.setOpaque(false);
@@ -188,7 +194,7 @@ public class LoginFrame extends JDialog {
 
 	private void saveSessionFile() {
 		try {
-			Files.write(sessionFilePath, Collections.singletonList(loginHolder.getSessionId()));
+			Files.write(sessionFilePath, Collections.singletonList(session.getAccessToken()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -198,7 +204,7 @@ public class LoginFrame extends JDialog {
 		try {
 			String sessionId = String.join("", Files.readAllLines(sessionFilePath));
 			if (!sessionId.isEmpty()) {
-				performValidateRequest(sessionId);
+				validateAccessToken(sessionId);
 			}
 		} catch (FileNotFoundException | NoSuchFileException ignored) {
 		} catch (IOException e) {
@@ -206,42 +212,48 @@ public class LoginFrame extends JDialog {
 		}
 	}
 
-	private void createLoginHolder(JSONObject response) {
-		String uuid = (String) response.get("uuid");
-		String sessionId = (String) response.get("sessionId");
-		String username = (String) response.get("username");
-		boolean buildServerAccess = response.containsKey("buildServerAccess") && (Boolean) response.get("buildServerAccess");
-		loginHolder = new LoginHolder(uuid, sessionId, username, buildServerAccess);
+	private void parseSession(JSONObject response) {
+		JSONObject userNode = (JSONObject) response.get("user");
+		JSONObject profileNode = (JSONObject) userNode.get("profile");
+		Profile profile = new Profile((String) profileNode.get("uuid"), (String) profileNode.get("email"),
+				(String) profileNode.get("username"));
+
+		Set<String> ticketsRaw = Sets.newHashSet();
+		JSONArray ticketsNode = (JSONArray) userNode.get("tickets");
+		for (Object o : ticketsNode) {
+			JSONObject node = (JSONObject) o;
+			ticketsRaw.add(node.get("type") + ":" + node.get("name"));
+		}
+
+		session = new Session(profile, (String) response.get("accessToken"), ticketsRaw,
+				((Number) userNode.get("balance")).intValue());
 		setError(null);
 		Launcher.frame.updateLogin();
 	}
 
 	@SuppressWarnings("unchecked")
-	private void performValidateRequest(String sessionId) {
-		JSONObject request = new JSONObject();
-		request.put("sessionId", sessionId);
-
+	private void validateAccessToken(String accessToken) {
 		try {
-			JSONObject response = HttpHelper.postJsonRequest(HttpHelper.API_URL + "/validate", request);
-			response.put("sessionId", sessionId);
-			createLoginHolder(response);
+			JSONObject request = new JSONObject();
+			request.put("accessToken", accessToken);
+			parseSession(HttpHelper.postJsonRequest("client/validate", request));
 		} catch (IOException e) {
 			e.printStackTrace();
 			setError(translateError(e));
-			loginHolder = null;
+			session = null;
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	private void performAuthenticateRequest() {
-		JSONObject request = new JSONObject();
-		request.put("login", loginField.getText().trim());
-		request.put("password", new String(passwordField.getPassword()));
-
 		try {
-			JSONObject response = HttpHelper.postJsonRequest(HttpHelper.API_URL + "/auth", request);
+			JSONObject request = new JSONObject();
+			request.put("login", loginField.getText().trim());
+			request.put("password", new String(passwordField.getPassword()));
+
+			JSONObject response = HttpHelper.postJsonRequest("client/auth", request);
 			setLoadingVisible(false);
-			createLoginHolder(response);
+			parseSession(response);
 			saveSessionFile();
 			setVisible(false);
 		} catch (IOException e) {
@@ -285,12 +297,12 @@ public class LoginFrame extends JDialog {
 		}
 	}
 
-	public LoginHolder getLoginHolder() {
-		return loginHolder;
+	public Session getSession() {
+		return session;
 	}
 
 	public boolean isNotLoggedIn() {
-		return loginHolder == null;
+		return session == null;
 	}
 
 	public String getAccessDeniedString() {
@@ -306,11 +318,11 @@ public class LoginFrame extends JDialog {
 
 	@SuppressWarnings("unchecked")
 	public void logout(boolean showLoginFrame) {
-		if (loginHolder != null) {
+		if (session != null) {
 			JSONObject request = new JSONObject();
-			request.put("sessionId", loginHolder.getSessionId());
+			request.put("sessionId", session.getAccessToken());
 			try {
-				HttpHelper.postJsonRequest(HttpHelper.API_URL + "/invalidate", request);
+				HttpHelper.postJsonRequest("client/invalidate", request);
 			} catch (IOException e) {
 				e.printStackTrace();
 				setError(translateError(e));
@@ -323,7 +335,7 @@ public class LoginFrame extends JDialog {
 			e.printStackTrace();
 		}
 
-		loginHolder = null;
+		session = null;
 		Launcher.frame.updateLogin();
 		if (showLoginFrame) {
 			showFrame();

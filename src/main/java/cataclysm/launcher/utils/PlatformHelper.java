@@ -1,6 +1,6 @@
-package cataclysm.utils;
+package cataclysm.launcher.utils;
 
-import cataclysm.ui.ConfigFrame;
+import cataclysm.launcher.ui.ConfigFrame;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

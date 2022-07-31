@@ -5,15 +5,17 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'com.github.johnrengelman.shadow'
 
-compileJava.options.encoding = 'UTF-8'
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
 
 jar {
-    manifest.attributes.put('Main-Class', 'cataclysm.Main')
+    manifest.attributes.put('Main-Class', 'cataclysm.launcher.Main')
 }
 
 shadowJar {
     classifier 'fatjar'
-    manifest.attributes.put('Main-Class', 'cataclysm.Main')
+    manifest.attributes.put('Main-Class', 'cataclysm.launcher.Main')
 
     exclude '**/*.txt'
     exclude '**/*.java'
@@ -63,9 +65,7 @@ dependencies {
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     implementation 'com.saphir2:sphlib:3.0'
 
-    testImplementation 'org.slf4j:slf4j-api:1.7.30'
-    testImplementation 'org.slf4j:slf4j-simple:1.7.30'
-    testImplementation 'org.asynchttpclient:async-http-client:2.12.3'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
 
     testImplementation 'org.yaml:snakeyaml:1.29'
     testImplementation 'net.sf.jopt-simple:jopt-simple:5.0.3'

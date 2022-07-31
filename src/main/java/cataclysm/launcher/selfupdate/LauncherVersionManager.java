@@ -1,15 +1,19 @@
-package cataclysm.utils;
+package cataclysm.launcher.selfupdate;
 
-import cataclysm.launch.Launcher;
-import cataclysm.ui.DialogUtils;
+import cataclysm.launcher.Launcher;
+import cataclysm.launcher.ui.DialogUtils;
+import cataclysm.launcher.utils.HttpHelper;
+import cataclysm.launcher.utils.Log;
 import com.google.common.collect.Lists;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.util.EntityUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,12 +26,12 @@ import java.util.Objects;
  * Created 20 окт. 2018 г. / 22:51:07 
  * @author Knoblul
  */
-public class VersionHelper extends JComponent {
+public class LauncherVersionManager extends JComponent {
 	private static final long serialVersionUID = -6203764377406251750L;
 	private final JProgressBar progress;
 	public static final String VERSION = "1.6.5";
 
-	public VersionHelper() {
+	public LauncherVersionManager() {
 		progress = new JProgressBar();
 		progress.setBorderPainted(false);
 		progress.setForeground(Color.green.darker());
@@ -54,7 +58,7 @@ public class VersionHelper extends JComponent {
 
 		gbc.gridy = 1;
 
-		ImageIcon icon = new ImageIcon(Objects.requireNonNull(VersionHelper.class.getResource("/icons/loading.gif")));
+		ImageIcon icon = new ImageIcon(Objects.requireNonNull(LauncherVersionManager.class.getResource("/icons/loading.gif")));
 		JLabel iconLabel = new JLabel();
 		iconLabel.setIcon(icon);
 		iconLabel.setOpaque(false);
@@ -93,7 +97,7 @@ public class VersionHelper extends JComponent {
 
 	private Path currentJarPath() throws IOException {
 		try {
-			Path path = Paths.get(VersionHelper.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+			Path path = Paths.get(LauncherVersionManager.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 			if (Files.isDirectory(path) || !path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".jar")
 					&& !path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".exe")) {
 				return null;
@@ -151,13 +155,13 @@ public class VersionHelper extends JComponent {
 		}
 		
 		try {
-			URL url = HttpHelper.launcherURL("version.txt");
-			try (InputStream in = url.openStream();
-					BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
-				String version = reader.readLine();
-				if (version == null) {
+			String url = "https://" + HttpHelper.LAUNCHER_URL + "/version.txt";
+			try (CloseableHttpResponse response = HttpHelper.get(url)) {
+				if (response.getEntity() == null) {
 					throw new IOException("Malformed versions file");
 				}
+
+				String version = EntityUtils.toString(response.getEntity());
 				return version.equals(VERSION);
 			}
 		} catch (IOException e) {
@@ -188,15 +192,14 @@ public class VersionHelper extends JComponent {
 			
 			Log.msg("Downloading update...");
 
-			URL url = HttpHelper.launcherURL("launcher.jar");
-			URLConnection connection = HttpHelper.open(url);//url.openConnection();
-
-			progress.setMaximum(connection.getContentLength());
-			progress.setMinimum(0);
-			progress.setValue(0);
-			int total = 0;
-			try (InputStream in = url.openStream();
-					OutputStream out = Files.newOutputStream(updateJar)) {
+			String url = "https://" + HttpHelper.LAUNCHER_URL + "/launcher.jar";
+			try (CloseableHttpResponse response = HttpHelper.get(url);
+			     InputStream in = response.getEntity().getContent();
+			     OutputStream out = Files.newOutputStream(updateJar)) {
+				progress.setMaximum((int) response.getEntity().getContentLength());
+				progress.setMinimum(0);
+				progress.setValue(0);
+				int total = 0;
 				int len;
 				byte[] buffer = new byte[4096];
 				while ((len = in.read(buffer)) > 0) {
@@ -204,7 +207,7 @@ public class VersionHelper extends JComponent {
 					progress.setValue(total += len);
 				}
 			}
-			
+
 			List<String> command = Lists.newArrayList();
 			command.add("java");
 			command.add("-jar");

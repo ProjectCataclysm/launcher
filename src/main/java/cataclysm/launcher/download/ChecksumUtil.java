@@ -1,4 +1,4 @@
-package cataclysm.io;
+package cataclysm.launcher.download;
 
 import java.io.IOException;
 import java.io.InputStream;

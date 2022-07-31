@@ -1,8 +1,8 @@
-package cataclysm.io.sanitation;
+package cataclysm.launcher.download.santation;
 
-import cataclysm.io.ChecksumUtil;
-import cataclysm.launch.Launcher;
-import cataclysm.utils.Log;
+import cataclysm.launcher.download.ChecksumUtil;
+import cataclysm.launcher.Launcher;
+import cataclysm.launcher.utils.Log;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 

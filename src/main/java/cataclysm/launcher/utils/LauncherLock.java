@@ -1,6 +1,6 @@
-package cataclysm.utils;
+package cataclysm.launcher.utils;
 
-import cataclysm.launch.Launcher;
+import cataclysm.launcher.Launcher;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;

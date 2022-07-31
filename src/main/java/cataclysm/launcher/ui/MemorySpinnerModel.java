@@ -1,6 +1,6 @@
-package cataclysm.ui;
+package cataclysm.launcher.ui;
 
-import cataclysm.utils.PlatformHelper;
+import cataclysm.launcher.utils.PlatformHelper;
 
 import javax.swing.*;
 

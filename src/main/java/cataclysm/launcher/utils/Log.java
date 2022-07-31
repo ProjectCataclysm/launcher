@@ -1,4 +1,4 @@
-package cataclysm.utils;
+package cataclysm.launcher.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.logging.ConsoleHandler;

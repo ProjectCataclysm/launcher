@@ -1,9 +1,9 @@
-package cataclysm.ui;
+package cataclysm.launcher.ui;
 
-import cataclysm.launch.Launcher;
-import cataclysm.utils.Log;
-import cataclysm.utils.LoginHolder;
-import cataclysm.utils.PlatformHelper;
+import cataclysm.launcher.Launcher;
+import cataclysm.launcher.utils.Log;
+import cataclysm.launcher.account.Session;
+import cataclysm.launcher.utils.PlatformHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -69,9 +69,9 @@ public class ConfigFrame extends JDialog {
 	}
 
 	public void updateLogin() {
-		LoginHolder holder = Launcher.loginFrame.getLoginHolder();
+		Session holder = Launcher.loginFrame.getSession();
 		if (holder != null) {
-			loginStatusLabel.setText("Вы вошли как " + holder.getUsername());
+			loginStatusLabel.setText("Вы вошли как " + holder.getProfile().getUsername());
 			signOutButton.setEnabled(true);
 		} else {
 			loginStatusLabel.setText(" ");

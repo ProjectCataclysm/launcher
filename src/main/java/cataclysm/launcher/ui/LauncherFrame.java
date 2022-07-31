@@ -1,4 +1,4 @@
-package cataclysm.ui;
+package cataclysm.launcher.ui;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -14,9 +14,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
-import cataclysm.launch.Launcher;
-import cataclysm.utils.Icons;
-import cataclysm.utils.VersionHelper;
+import cataclysm.launcher.Launcher;
+import cataclysm.launcher.utils.Icons;
+import cataclysm.launcher.selfupdate.LauncherVersionManager;
 
 /**
  * Created 28 ����. 2018 �. / 16:55:45 
@@ -32,7 +32,7 @@ public class LauncherFrame extends JFrame {
 	
 	public LauncherFrame() {
 		Icons.setupIcons(this);
-		setTitle("Project Cataclysm Launcher v" + VersionHelper.VERSION);
+		setTitle("Project Cataclysm Launcher v" + LauncherVersionManager.VERSION);
 		setSize(350, 400);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setResizable(false);

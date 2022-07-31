@@ -1,4 +1,4 @@
-package cataclysm.launch;
+package cataclysm.launcher.utils;
 
 import java.io.IOException;
 import java.io.OutputStream;

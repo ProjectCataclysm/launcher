@@ -1,8 +1,7 @@
-package cataclysm;
+package cataclysm.launcher;
 
-import cataclysm.launch.Launcher;
-import cataclysm.ui.DialogUtils;
-import cataclysm.utils.VersionHelper;
+import cataclysm.launcher.ui.DialogUtils;
+import cataclysm.launcher.selfupdate.LauncherVersionManager;
 
 import java.io.PrintWriter;
 
@@ -16,7 +15,7 @@ public class Main {
 			// для градла - создаём текстовый файл с версией
 			if (args.length > 0 && args[0].equals("-version")) {
 				try (PrintWriter pw = new PrintWriter("version.txt")) {
-					pw.println(VersionHelper.VERSION);
+					pw.println(LauncherVersionManager.VERSION);
 				}
 				return;
 			}

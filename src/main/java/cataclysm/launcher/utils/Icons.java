@@ -1,4 +1,4 @@
-package cataclysm.utils;
+package cataclysm.launcher.utils;
 
 import java.awt.Image;
 import java.io.FileNotFoundException;
@@ -10,7 +10,7 @@ import javax.swing.JFrame;
 
 import com.google.common.collect.Lists;
 
-import cataclysm.ui.DialogUtils;
+import cataclysm.launcher.ui.DialogUtils;
 
 /**
  * Created 28 . 2018 . / 18:09:34
