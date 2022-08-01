@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<stringer-v3>
+    <signMode>none</signMode>
+    <verbose>false</verbose>
+    <optimize>false</optimize>
+    <protectionElements>
+        <protectionElement>
+            <stringEncryption>
+                <mode>filter</mode>
+                <filters>
+                    <filter><![CDATA[cataclysm/**]]></filter>
+                </filters>
+                <checkCaller>true</checkCaller>
+            </stringEncryption>
+        </protectionElement>
+    </protectionElements>
+</stringer-v3>
