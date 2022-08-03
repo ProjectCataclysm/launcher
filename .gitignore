@@ -1,4 +1,7 @@
 /.gradle/
+/gradle/
+gradlew.bat
+gradlew
 /bin/
 /build/
 /game/
@@ -6,6 +9,7 @@
 /logs/
 out
 build
+launcher.map
 .settings
 .classpath
 .project
