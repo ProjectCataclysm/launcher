@@ -9,10 +9,13 @@ import cataclysm.launcher.utils.PlatformHelper;
 import com.google.common.collect.Lists;
 import javafx.application.Platform;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -84,7 +87,28 @@ public class GameLauncher {
 
 		// класспатх
 		command.add("-cp");
-		command.add("core.jar");
+
+		List<String> classPath = Lists.newArrayList();
+		Path binPath = config.gameDirectoryPath.resolve("bin");
+		try (DirectoryStream<Path> ds = Files.newDirectoryStream(binPath)) {
+			for (Path path : ds) {
+				Path relativePath = config.gameDirectoryPath.relativize(path);
+				classPath.add(relativePath.toString());
+			}
+		}
+
+		Path binNativesPath = binPath.resolve("natives");
+		try (DirectoryStream<Path> ds = Files.newDirectoryStream(binNativesPath)) {
+			for (Path path : ds) {
+				Path relativePath = config.gameDirectoryPath.relativize(path);
+				classPath.add(relativePath.toString());
+			}
+		}
+
+		Collections.sort(classPath);
+		classPath.add(0, "core.jar");
+
+		command.add(String.join(File.pathSeparator, classPath));
 		command.add("start.StartClient");
 
 		// данные для входа
@@ -106,6 +130,9 @@ public class GameLauncher {
 
 		ProcessBuilder pb = new ProcessBuilder(command);
 		pb.directory(config.gameDirectoryPath.toFile());
+
+		pb.inheritIO();
+
 		Process process = pb.start();
 		return process.waitFor();
 	}
