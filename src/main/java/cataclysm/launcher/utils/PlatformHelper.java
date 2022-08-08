@@ -1,9 +1,8 @@
 package cataclysm.launcher.utils;
 
-import cataclysm.launcher.ui.ConfigFrame;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import java.lang.management.ManagementFactory;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -13,18 +12,20 @@ import java.nio.file.Paths;
  * @author Knoblul
  */
 public class PlatformHelper {
-	private static final PlatformOS PLATFORM;
-	private static String osArchIdentifier;
+	private static final Platform PLATFORM;
+	private static final boolean IS_64BIT;
+	private static final String PLATFORM_IDENTIFIER;
+	private static final int MAX_MEMORY;
 
 	static {
 		String osName = System.getProperty("os.name");
 		if (osName.startsWith("Windows")) {
-			PLATFORM = PlatformOS.WINDOWS;
+			PLATFORM = Platform.WINDOWS;
 		} else if (osName.startsWith("Linux") || osName.startsWith("FreeBSD") || osName.startsWith("SunOS")
 				|| osName.startsWith("Unix")) {
-			PLATFORM = PlatformOS.LINUX;
+			PLATFORM = Platform.LINUX;
 		} else if (osName.startsWith("Mac OS X") || osName.startsWith("Darwin")) {
-			PLATFORM = PlatformOS.MAC;
+			PLATFORM = Platform.MAC;
 		} else {
 			throw new RuntimeException("Unknown platform: " + osName);
 		}
@@ -32,30 +33,50 @@ public class PlatformHelper {
 		String arch = System.getProperty("os.arch");
 		switch (PLATFORM) {
 			case LINUX:
-				osArchIdentifier = arch.startsWith("arm") || arch.startsWith("aarch64")
+				PLATFORM_IDENTIFIER = arch.startsWith("arm") || arch.startsWith("aarch64")
 						? "linux-" + (arch.contains("64") || arch.contains("armv8") ? "arm64" : "arm32")
 						: "linux";
 				break;
 			case MAC:
-				osArchIdentifier = "macos";
+				PLATFORM_IDENTIFIER = "macos";
 				break;
 			case WINDOWS:
-				osArchIdentifier = System.getenv("ProgramFiles(x86)") != null ? "win64" : "win32";
+				PLATFORM_IDENTIFIER = System.getenv("ProgramFiles(x86)") != null ? "win64" : "win32";
 				break;
+			default:
+				throw new IllegalArgumentException("Unknown platform: " + PLATFORM);
 		}
+
+		IS_64BIT = PLATFORM_IDENTIFIER.contains("64");
+
+		int maxMemory = 0;
+		try {
+			MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+			Object attribute = mBeanServer.getAttribute(new ObjectName("java.lang", "type", "OperatingSystem"),
+					"TotalPhysicalMemorySize");
+			if (!(attribute instanceof Long)) {
+				throw new IllegalArgumentException("No such attribute: TotalPhysicalMemorySize");
+			}
+
+			maxMemory = LauncherConfig.roundUpToPowerOfTwo((int) ((Long) attribute / 1024 / 1024));
+		} catch (Throwable t) {
+			Log.err(t, "Failed to determine max physical memory size");
+		}
+
+		MAX_MEMORY = maxMemory;
 	}
 
-	public static String getOsArchIdentifier() {
-		return osArchIdentifier;
+	public static String getPlatformIdentifier() {
+		return PLATFORM_IDENTIFIER;
 	}
 
-	public static PlatformOS getOS() {
+	public static Platform getPlatform() {
 		return PLATFORM;
 	}
 
 	public static Path getDefaultGameDirectory() {
 		String path = ".project-cataclysm/";
-		switch (getOS()) {
+		switch (getPlatform()) {
 			case WINDOWS:
 				return Paths.get(System.getenv("APPDATA"), path);
 			case MAC:
@@ -65,27 +86,13 @@ public class PlatformHelper {
 		}
 	}
 
-	public static int getAvailableMemory() {
-		long maxMemory = Runtime.getRuntime().maxMemory();
-		return ConfigFrame.roundUpToPowerOfTwo((int) (maxMemory / 1024 / 1024));
+	public static int getMaxMemory() {
+		// Ограничиваем в 32 гб
+		return Math.min(32 * 1024, MAX_MEMORY != 0 ? MAX_MEMORY : (IS_64BIT ? 16 * 1024 : 2048));
+//		return 4 * 1024;
 	}
 
-	public static int getMaximumMemory() {
-		return osArchIdentifier.contains("64") ? 16 * 1024 : 2048;
-	}
-
-	public static void setLookAndFeel() {
-		ImageIO.setUseCache(false); // Disable on-disc stream cache should speed up texture pack reloading.
-
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-				| UnsupportedLookAndFeelException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public enum PlatformOS {
+	public enum Platform {
 		WINDOWS,
 		MAC,
 		LINUX

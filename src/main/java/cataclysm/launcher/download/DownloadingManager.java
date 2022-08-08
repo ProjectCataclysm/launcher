@@ -1,24 +1,33 @@
 package cataclysm.launcher.download;
 
-import cataclysm.launcher.Launcher;
-import cataclysm.launcher.download.santation.Resource;
-import cataclysm.launcher.utils.HttpHelper;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import cataclysm.launcher.assets.AssetInfo;
+import cataclysm.launcher.assets.AssetInfoContainer;
+import cataclysm.launcher.utils.HttpClientWrapper;
+import cataclysm.launcher.utils.LauncherConstants;
+import cataclysm.launcher.utils.Log;
+import cataclysm.launcher.utils.PlatformHelper;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import okio.BufferedSource;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.text.DecimalFormat;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.nio.file.StandardCopyOption;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletionException;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipFile;
 
 /**
  * <br><br>REVOM ENGINE / ProjectCataclysm
@@ -26,216 +35,146 @@ import java.util.zip.ZipInputStream;
  *
  * @author Knoblul
  */
-public class DownloadingManager extends JComponent {
-	private static final String[] STORAGE_UNITS = new String[] { "Б", "КБ", "МБ", "ГБ", "ТБ" };
-	private static final int DL_SPEED_MEASURE_PERIOD = 500;
-	private static final byte[] buffer = new byte[8192];
+public class DownloadingManager {
 
-	private JProgressBar downloadProgress;
-	private JProgressBar overallProgress;
 
-	private JLabel currentFileLoading;
-	private JLabel currentSpeed;
-
-	private final Object speedLock = new Object();
-
-	private int downloadedBytes;
-	private boolean measureDownloadSpeed;
-
-	public DownloadingManager() {
-		fill();
-
-		Timer timerDownloadSpeed = new Timer("DownloadSpeedCalculator", true);
-		TimerTask task = new TimerTask() {
-			@Override
-			public void run() {
-				synchronized (speedLock) {
-					if (measureDownloadSpeed) {
-						int speed = (int)(downloadedBytes/(double) DL_SPEED_MEASURE_PERIOD * 1000.0);
-						currentSpeed.setText(readableSpeed(speed));
-						downloadedBytes = 0;
-					}
-				}
+	@SuppressWarnings("unchecked")
+	public AssetInfoContainer loadAssetContainer() throws IOException {
+		JSONObject root;
+		String url = "https://" + LauncherConstants.CLIENT_URL + "/deploy.json";
+		try (HttpClientWrapper.HttpResponse response = HttpClientWrapper.get(url);
+		     Reader reader = response.getBody().charStream()) {
+			try {
+				root = (JSONObject) new JSONParser().parse(reader);
+			} catch (ParseException e) {
+				throw new IOException("Failed to parse response json", e);
 			}
-		};
-		timerDownloadSpeed.schedule(task, 0, DL_SPEED_MEASURE_PERIOD);
-	}
-	
-	private static String readableSpeed(int size) {
-		if (size <= 0) {
-			return "0 Б/сек";
 		}
 
-		int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
-		return new DecimalFormat("#,##0.#")
-				.format(size / Math.pow(1024, digitGroups)) + " " + STORAGE_UNITS[digitGroups] + "/сек";
+		Set<String> protectedFolders = Sets.newHashSet();
+		((JSONArray) root.get("protected_folders")).forEach(t -> protectedFolders.add((String) t));
+
+		Map<String, String> hashes = Maps.newHashMap();
+		Set<AssetInfo> assets = Sets.newHashSet();
+		((JSONArray) root.get("resources_default"))
+				.forEach(t -> assets.add(parseAsset((JSONObject) t, hashes)));
+		((JSONArray) root.get("resources_" + PlatformHelper.getPlatformIdentifier()))
+				.forEach(t -> assets.add(parseAsset((JSONObject) t, hashes)));
+
+		return new AssetInfoContainer(Collections.unmodifiableSet(protectedFolders),
+				Collections.unmodifiableSet(assets), Collections.unmodifiableMap(hashes));
 	}
 
-	private void fill() {
-		setLayout(new GridBagLayout());
+	private static AssetInfo parseAsset(JSONObject node, Map<String, String> hashes) {
+		String local = (String) node.get("local");
+		String remote = (String) node.get("remote");
+		Object hash = node.get("hash");
 
-		GridBagConstraints gbc = new GridBagConstraints();
+		if (hash != null) {
+			if (hash instanceof JSONObject) {
+				@SuppressWarnings("unchecked")
+				Set<Map.Entry<String, Object>> hashEntries = ((JSONObject) hash).entrySet();
+				for (Map.Entry<String, Object> e : hashEntries) {
+					hashes.put(local + "/" + e.getKey(), (String) e.getValue());
+				}
+			} else if (hash instanceof String) {
+				hashes.put(local, (String) hash);
+			} else {
+				throw new IllegalArgumentException("Invalid hash type " + hash + " in asset " + remote);
+			}
+		}
 
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-
-		JLabel title = new JLabel("Загружаем файлы...");
-		title.setHorizontalAlignment(JLabel.CENTER);
-		title.setFont(title.getFont().deriveFont(Font.BOLD, 40));
-
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.weighty = 1;
-		gbc.anchor = GridBagConstraints.CENTER;
-		add(title, gbc);
-
-		gbc.gridy++;
-		gbc.fill = GridBagConstraints.NONE;
-		gbc.anchor = GridBagConstraints.SOUTHEAST;
-		gbc.insets.set(2, 2, 2, 2);
-		add(currentSpeed = new JLabel(), gbc);
-		currentSpeed.setFont(currentSpeed.getFont().deriveFont(Font.PLAIN, 20));
-
-		gbc.gridy++;
-		gbc.weighty = 0;
-		add(currentFileLoading = new JLabel(), gbc);
-		currentFileLoading.setFont(currentFileLoading.getFont().deriveFont(Font.PLAIN, 20));
-
-		downloadProgress = new JProgressBar();
-		downloadProgress.setBorderPainted(false);
-		downloadProgress.setForeground(Color.GREEN.darker());
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.gridy++;
-		gbc.anchor = GridBagConstraints.SOUTH;
-		add(downloadProgress, gbc);
-
-		overallProgress = new JProgressBar();
-		overallProgress.setBorderPainted(false);
-		overallProgress.setForeground(Color.GREEN.darker());
-		gbc.gridy++;
-		gbc.weightx = 1;
-		add(overallProgress, gbc);
-
-		currentFileLoading.setText("...");
+		return new AssetInfo(local, remote, (Boolean) node.get("archive"), hash != null);
 	}
 
-	private void downloadFile(Path localFilePath, Resource resource) throws IOException {
+	private void downloadFile(Path localFilePath, AssetInfo asset, DownloadProgressListener listener) throws IOException {
 		Files.createDirectories(localFilePath.getParent());
-
-		String url = "https://" + HttpHelper.CLIENT_URL + "/" + resource.getRemote();
-		try (CloseableHttpResponse response = HttpHelper.get(url)) {
-			if (response.getEntity() == null) {
-				throw new IOException("Server does not sent any file");
-			}
-
-			downloadProgress.setMinimum(0);
-			downloadProgress.setValue(0);
-			downloadProgress.setMaximum((int) response.getEntity().getContentLength());
-
-			currentFileLoading.setText("Загружаем " + resource.getRemote());
-
-			long totalLen = 0;
-			try (InputStream in = response.getEntity().getContent();
-			     OutputStream out = Files.newOutputStream(localFilePath)) {
+		String url = "https://" + LauncherConstants.CLIENT_URL + "/" + asset.getRemote();
+		try (HttpClientWrapper.HttpResponse responseBody = HttpClientWrapper.get(url);
+		     BufferedSource source = responseBody.getBody().source()) {
+			listener.newDownloadFile("Загрузка " + asset.getRemote(), responseBody.getBody().contentLength());
+			try (OutputStream out = Files.newOutputStream(localFilePath)) {
 				int len;
-				while ((len = in.read(buffer)) != -1) {
+				byte[] buffer = new byte[8 * 1024];
+				while ((len = source.read(buffer)) != -1) {
 					out.write(buffer, 0, len);
-					totalLen += len;
-					downloadProgress.setValue((int) totalLen);
-					synchronized (speedLock) {
-						downloadedBytes += len;
+					listener.fileBytesProgressAdded(len);
+				}
+			}
+		}
+	}
+
+	private void downloadAndUnpackArchive(Path rootPath, AssetInfo asset, DownloadProgressListener listener) throws IOException {
+		Path zipPath = rootPath.resolve(asset.getRemote());
+		downloadFile(zipPath, asset, listener);
+
+		Path unpackPath = rootPath.resolve(asset.getLocal());
+
+		try {
+			int entryCount = 0;
+			try (ZipFile zip = new ZipFile(zipPath.toFile())) {
+				Enumeration<? extends ZipEntry> entries = zip.entries();
+				while (entries.hasMoreElements()) {
+					ZipEntry entry = entries.nextElement();
+					if (!entry.isDirectory()) {
+						entryCount++;
 					}
 				}
 			}
 
+			listener.newDownloadFile("Распаковка " + asset.getRemote(), entryCount);
 
-		} catch (IOException e) {
-			throw new IOException("Could not download " + resource.getRemote(), e);
-		}
-
-		currentFileLoading.setText("");
-
-		synchronized (speedLock) {
-			measureDownloadSpeed = false;
-			currentSpeed.setText("");
-		}
-	}
-
-	private void downloadAndUnpackArchive(Path rootPath, Resource resource) throws IOException {
-		Path zipPath = rootPath.resolve(resource.getRemote());
-		downloadFile(zipPath, resource);
-
-		Path unpackPath = rootPath.resolve(resource.getLocal());
-
-		downloadProgress.setMinimum(0);
-		downloadProgress.setValue(0);
-		currentFileLoading.setText("Распаковываем " + zipPath.getFileName().toString());
-		int entryCount = 0;
-
-		try (InputStream in = Files.newInputStream(zipPath);
-				ZipInputStream zip = new ZipInputStream(in)) {
-			ZipEntry entry;
-			while ((entry = zip.getNextEntry()) != null) {
-				if (!entry.isDirectory()) {
-					entryCount++;
-				}
-				zip.closeEntry();
-			}
-		}
-
-		downloadProgress.setMaximum(entryCount);
-		
-		try (InputStream in = Files.newInputStream(zipPath, StandardOpenOption.DELETE_ON_CLOSE);
-			 ZipInputStream zip = new ZipInputStream(in)) {
-			ZipEntry entry;
-			int index = 0;
-			while ((entry = zip.getNextEntry()) != null) {
-				if (!entry.isDirectory()) {
-					Path outputPath = unpackPath.resolve(entry.getName());
-					Files.createDirectories(outputPath.getParent());
-
-					try (OutputStream out = Files.newOutputStream(outputPath)) {
-						int len;
-						while ((len = zip.read(buffer)) > 0) {
-							out.write(buffer, 0, len);
+			try (ZipFile zip = new ZipFile(zipPath.toFile())) {
+				Enumeration<? extends ZipEntry> entries = zip.entries();
+				while (entries.hasMoreElements()) {
+					ZipEntry entry = entries.nextElement();
+					if (!entry.isDirectory()) {
+						Path outputPath = unpackPath.resolve(entry.getName());
+						Files.createDirectories(outputPath.getParent());
+						try (InputStream in = zip.getInputStream(entry)) {
+							Files.copy(in, outputPath, StandardCopyOption.REPLACE_EXISTING);
 						}
 					}
-
-					downloadProgress.setValue(index++);
 				}
-				zip.closeEntry();
 			}
 		} catch (Throwable e) {
 			throw new IOException("Could not unpack " + zipPath, e);
-		} finally {
-			currentFileLoading.setText("");
-			synchronized (speedLock) {
-				measureDownloadSpeed = true;
+		}
+
+		try {
+			Files.deleteIfExists(zipPath);
+		} catch (IOException e) {
+			Log.err(e, "Failed to delete temporary file " + zipPath);
+		}
+	}
+
+	private void downloadAsset(Path rootPath, AssetInfo asset, DownloadProgressListener listener) {
+		try {
+			if (asset.isArchive()) {
+				downloadAndUnpackArchive(rootPath, asset, listener);
+			} else {
+				downloadFile(rootPath.resolve(asset.getLocal()), asset, listener);
 			}
+		} catch (IOException e) {
+			throw new CompletionException(new IOException("Failed to download " + asset.getRemote(), e));
 		}
 	}
 
-	private void performDownload(Path rootPath, Resource resource) throws IOException {
-		synchronized (speedLock) {
-			measureDownloadSpeed = true;
-		}
-
-		if (resource.isFolder()) {
-			downloadAndUnpackArchive(rootPath, resource);
-		} else {
-			downloadFile(rootPath.resolve(resource.getLocal()), resource);
+	public void downloadAssets(Set<AssetInfo> assets, Path rootPath, DownloadProgressListener listener) {
+		listener.setDownloadFileCount(assets.size());
+		for (AssetInfo asset : assets) {
+			downloadAsset(rootPath, asset, listener);
+			listener.fileCountProgressAdded(1);
 		}
 	}
 
-	public void perform(List<Resource> resources) throws IOException {
-		Path root = Launcher.config.gameDirectoryPath;
+	public interface DownloadProgressListener {
+		void setDownloadFileCount(int count);
 
-		overallProgress.setMinimum(0);
-		overallProgress.setMaximum(resources.size()+1);
-		overallProgress.setValue(1);
+		void fileCountProgressAdded(int added);
 
-		for (int i = 0; i < resources.size(); i++) {
-			performDownload(root, resources.get(i));
-			overallProgress.setValue(i+2);
-		}
+		void newDownloadFile(String name, long contentLength);
+
+		void fileBytesProgressAdded(int added);
 	}
 }

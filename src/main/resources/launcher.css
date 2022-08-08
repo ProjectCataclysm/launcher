@@ -1,0 +1,221 @@
+@font-face {
+    -fx-font-family: 'Roboto Regular';
+    src: url('/Roboto-Regular.ttf');
+}
+
+@font-face {
+    -fx-font-family: 'Roboto Bold';
+    src: url('/Roboto-Bold.ttf');
+}
+
+.root {
+    -fx-font-size: 14px;
+    -fx-font-family: 'Roboto Regular';
+}
+
+.bold-font {
+    -fx-font-family: 'Roboto Bold';
+}
+
+.launcher {
+    -fx-padding: 1em;
+}
+
+.launcher .account-info {
+    -fx-font-size: 1.5em;
+    -fx-alignment: center-right;
+    -fx-spacing: 0.5em;
+}
+
+.launcher .account-info .quit-button {
+    -fx-background-color: transparent, transparent;
+    -fx-pref-width: 1.8em;
+    -fx-pref-height: 1.8em;
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+}
+
+.launcher .settings-button {
+    -fx-background-color: transparent;
+    -fx-background-image: url('/icons/settings.png');
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+    -fx-background-size: auto;
+    -fx-padding: 5em;
+    -fx-pref-width: 15em;
+    -fx-pref-height: 15em;
+}
+
+.launcher .start-game-button {
+    -fx-background-radius: 8px, 8px;
+    -fx-pref-height: 5em;
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.7) , 10,0,0,1 );
+}
+
+.launcher .start-game-button * {
+    -fx-font-size: 1.5em;
+}
+
+.settings {
+    -fx-alignment: center;
+    -fx-padding: 2em;
+}
+
+.settings .spaced-wrapper {
+    -fx-spacing: 1em;
+    -fx-vgap: 1em;
+    -fx-hgap: 1em;
+}
+
+.settings .game-path-wrapper {
+    -fx-spacing: 0.5em;
+}
+
+.settings .game-path-buttons {
+    -fx-alignment: bottom-left;
+}
+
+.settings .controls {
+    -fx-padding: 0.5em 0 0 0;
+    -fx-alignment: center;
+}
+
+.download-progress {
+    -fx-accent: green;
+    -fx-indeterminate-bar-length: 10em;
+    -fx-indeterminate-bar-animation-time: 1.25;
+}
+
+.launcher-update-dialog {
+    -fx-padding: 1em;
+}
+
+.launcher-update-dialog .checking-label * {
+    -fx-font-size: 1.2em;
+}
+
+.launcher-update-dialog .update-progress > .bar {
+    -fx-padding: 0.25em;
+}
+
+.launcher-update-dialog .update-progress > .bar, .progress-bar > .track {
+    -fx-background-insets: 0;
+}
+
+.launcher-update-dialog .update-progress {
+    -fx-padding: 0.5em 0 0 0;
+}
+
+.launcher-update-dialog .update-progress .track {
+    -fx-background-color: #AAAAAA;
+}
+
+.launcher-update-dialog .error-message {
+    -fx-padding: 1em;
+    -fx-spacing: 1em;
+    -fx-background-color: rgba(255, 100, 100, 0.5);
+    -fx-background-radius: 6px;
+}
+
+.launcher-update-dialog .error-message .controls {
+    -fx-alignment: center-right;
+    -fx-spacing: 1em;
+}
+
+.launcher-update-dialog .error-message .controls .button {
+    -fx-background-color: rgba(255, 255, 255, 0.5);
+}
+
+.launcher-update-dialog .error-message .controls .button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.7);
+}
+
+.launcher-update-dialog .error-message .controls .button:pressed {
+    -fx-background-color: rgba(200, 200, 200, 1.0);
+}
+
+.login-form-overlay {
+    -fx-background-color: rgba(50, 50, 50, 0.5);
+}
+
+.login-form {
+    -fx-background-color: rgba(255, 255, 255, 0.8);
+    -fx-background-radius: 8px;
+    -fx-border-color: #ABABAB;
+    -fx-border-radius: 8px;
+}
+
+.login-form .login-fields {
+    -fx-vgap: 0.5em;
+    -fx-hgap: 2em;
+    -fx-padding: 2em;
+}
+
+.login-form .title {
+    -fx-alignment: center;
+    -fx-padding: 0 0 0.5em 0;
+}
+
+.login-form .title * {
+    -fx-font-size: 1.5em;
+}
+
+.login-form .submit {
+    -fx-padding: 0.25em 2em 0.25em 2em;
+    -fx-pref-width: 8em;
+}
+
+.login-form .logging-in-indicator {
+    -fx-indeterminate-bar-length: 20em;
+    -fx-indeterminate-bar-animation-time: 1.0;
+    -fx-accent: rgba(0, 0, 0, 0.7);
+}
+
+.login-form .logging-in-indicator > .bar {
+    -fx-padding: 0.3em;
+}
+
+.login-form .logging-in-indicator .track {
+    -fx-background-color: transparent;
+}
+
+.login-form .help-questions {
+    -fx-alignment: center-right;
+    -fx-spacing: 0.5em;
+}
+
+.login-form .label.help-question * {
+    -fx-font-size: 0.8em;
+}
+
+.login-form .label.help-question {
+    -fx-underline: true;
+}
+
+.login-form .label.help-question:hover {
+    -fx-cursor: hand;
+    -fx-underline: false;
+}
+
+.login-form .error-message {
+    -fx-text-fill: red;
+    -fx-max-width: 18em;
+    -fx-wrap-text: true;
+}
+
+.login-form .error-message * {
+    -fx-font-size: 0.85em;
+}
+
+.login-form .error-message.error-clickable:hover {
+    -fx-cursor: hand;
+    -fx-text-fill: #FF8888;
+}
+
+.login-form .text-field:wrong-input {
+    -fx-background-color: red, white;
+}
+
+.game-loading-overlay {
+    -fx-background-color: white;
+}

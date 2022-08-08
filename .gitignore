@@ -9,8 +9,6 @@ gradlew
 /logs/
 out
 build
-launcher.map
-.settings
 .classpath
 .project
 /configurations/launcher.map

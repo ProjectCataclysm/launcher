@@ -1,15 +1,20 @@
 package cataclysm.launcher.launch;
 
+import cataclysm.launcher.LauncherApplication;
 import cataclysm.launcher.account.Session;
-import cataclysm.launcher.ui.ConfigFrame;
+import cataclysm.launcher.ui.DialogUtils;
+import cataclysm.launcher.utils.LauncherConfig;
+import cataclysm.launcher.utils.Log;
 import cataclysm.launcher.utils.PlatformHelper;
 import com.google.common.collect.Lists;
+import javafx.application.Platform;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * <br><br>REVOM ENGINE / ProjectCataclysm
@@ -18,17 +23,18 @@ import java.util.List;
  * @author Knoblul
  */
 public class GameLauncher {
-	private final ConfigFrame config;
+	private final LauncherApplication application;
+	private final AtomicBoolean launched = new AtomicBoolean();
 
-	public GameLauncher(ConfigFrame config) {
-		this.config = config;
+	public GameLauncher(LauncherApplication application) {
+		this.application = application;
 	}
 
-	public int startGame(Session session) throws IOException, InterruptedException {
+	private int startGame(LauncherConfig config, Session session) throws IOException, InterruptedException {
 		List<String> command = Lists.newArrayList();
 
 		boolean customJava = true;
-		if (PlatformHelper.getOS() == PlatformHelper.PlatformOS.WINDOWS) {
+		if (PlatformHelper.getPlatform() == PlatformHelper.Platform.WINDOWS) {
 			Path javaPath = config.gameDirectoryPath.resolve(Paths.get("jre8", "bin", "java.exe"));
 			if (Files.isExecutable(javaPath)) {
 				command.add(javaPath.toAbsolutePath().toString());
@@ -61,12 +67,12 @@ public class GameLauncher {
 		command.add("-XX:+DisableAttachMechanism");
 
 		// память
-		if (config.limitMemory) {
+		if (config.limitMemoryMegabytes > 0) {
 			command.add("-Xms256m");
-			command.add("-Xmx" + (config.memory) + "m");
+			command.add("-Xmx" + (config.limitMemoryMegabytes) + "m");
 		}
 
-		if (PlatformHelper.getOS() == PlatformHelper.PlatformOS.MAC) {
+		if (PlatformHelper.getPlatform() == PlatformHelper.Platform.MAC) {
 			command.add("-XstartOnFirstThread");
 		}
 
@@ -89,65 +95,58 @@ public class GameLauncher {
 		command.add("--accessToken");
 		command.add(session.getAccessToken());
 
+		if (config.fullscreen) {
+			command.add("--fullscreen");
+		}
+
 		// проверяем тикеты на наличие тикета билд-сервера
 		if (session.getTickets().contains("e:build")) {
 			command.add("--buildServerAccess");
 		}
 
-		command.add("--texturesQuality");
-		command.add(Integer.toString(config.texturesQuality));
-
 		ProcessBuilder pb = new ProcessBuilder(command);
-
-		Path logsPath = Files.createDirectories(config.gameDirectoryPath.resolve("logs"));
-		Path errorFilePath = logsPath.resolve("launcher-stderr.log");
-		Path outFilePath = logsPath.resolve("launcher-stdout.log");
-
-		pb.redirectError(errorFilePath.toFile());
-		pb.redirectOutput(outFilePath.toFile());
-
 		pb.directory(config.gameDirectoryPath.toFile());
 		Process process = pb.start();
 		return process.waitFor();
-
-//		// https://stackoverflow.com/questions/5483830/process-waitfor-never-returns
-//		BufferedReader tr = new BufferedReader(new InputStreamReader(processInputStream));
-//		while ((tr.readLine()) != null) { }
-//
-//		tr = new BufferedReader(new InputStreamReader(processErrorStream));
-//		while ((tr.readLine()) != null) { }
-//		//---------------------------
-//
-//		int exitCode = process.waitFor();
-//		if (exitCode == 1) {
-//			try (PrintWriter pw = new PrintWriter(new File(logsDir, "launch_error.txt"))) {
-//				try (BufferedReader reader = new BufferedReader(
-//						new InputStreamReader(processErrorStream, Charsets.UTF_8))) {
-//					String ln;
-//					while ((ln = reader.readLine()) != null) {
-//						pw.println(ln);
-//					}
-//				}
-//
-//				try (BufferedReader reader = new BufferedReader(
-//						new InputStreamReader(processInputStream, Charsets.UTF_8))) {
-//					String ln;
-//					while ((ln = reader.readLine()) != null) {
-//						pw.println(ln);
-//					}
-//				}
-//			}
-//		} else {
-//			try (BufferedReader reader = new BufferedReader(new InputStreamReader(processInputStream))) {
-//				while ((tr.readLine()) != null) { }
-//			}
-//
-//			try (BufferedReader reader = new BufferedReader(new InputStreamReader(processErrorStream))) {
-//				while ((tr.readLine()) != null) { }
-//			}
-//		}
-//
-//		return exitCode;
 	}
 
+	public void startGame() {
+		if (launched.get()) {
+			throw new IllegalStateException("Игра уже запущена!");
+		}
+
+		Session session = application.getAccountManager().getSession();
+		if (session == null) {
+			throw new IllegalStateException("Вход в аккаунт не был выполнен!");
+		}
+
+		launched.set(true);
+		LauncherConfig config = application.getConfig();
+		Thread t = new Thread(() -> {
+			Platform.runLater(() -> application.getPrimaryStage().hide());
+			Log.msg("Starting game process...");
+
+			int exitCode = 0;
+			try {
+				exitCode = startGame(config, session);
+			} catch (InterruptedException e) {
+				Platform.runLater(() -> DialogUtils.showError("Ошибка: доступ к процессу игры был прерван", e, true));
+			} catch (IOException e) {
+				Platform.runLater(() -> DialogUtils.showError("Ошибка запуска процесса игры", e, true));
+			} finally {
+				Platform.runLater(() -> application.getPrimaryStage().show());
+				launched.set(false);
+			}
+
+			application.getOverlays().hideAll();
+
+			if (exitCode != 0) {
+				String message = String.format("Игра была аварийно завершена с кодом %d (0x%X)", exitCode, exitCode);
+				Platform.runLater(() -> DialogUtils.showError(message, null, true));
+			}
+		});
+		t.setDaemon(false);
+		t.setName("Game Process Thread");
+		t.start();
+	}
 }

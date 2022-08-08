@@ -5,53 +5,104 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'com.github.johnrengelman.shadow'
 
+def props = new Properties()
+file("$projectDir/src/main/resources/build.properties").withInputStream { props.load(it) }
+if (props.getProperty('version') == null) {
+    throw new GradleException("Missing build.properties");
+}
+
+project.version = props.getProperty('version')
+
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
+sourceSets {
+    coreCommon {
+        compileClasspath += sourceSets.main.compileClasspath
+    }
+
+    main {
+        compileClasspath += sourceSets.coreCommon.runtimeClasspath
+        runtimeClasspath += sourceSets.coreCommon.runtimeClasspath
+    }
+}
+
+configurations {
+    commonJars {
+        canBeConsumed = true
+        canBeResolved = false
+        extendsFrom implementation
+    }
+}
+
 jar {
-    manifest.attributes.put('Main-Class', 'cataclysm.launcher.Main')
+    manifest.attributes.put('Main-Class', 'Main')
+    from sourceSets.coreCommon.output
 }
 
 shadowJar {
-    classifier 'fatjar'
-    manifest.attributes.put('Main-Class', 'cataclysm.launcher.Main')
+    classifier 'all'
+    manifest.attributes.put('Main-Class', 'Main')
 
     exclude '**/*.txt'
     exclude '**/*.java'
     exclude '**/*.html'
-    exclude 'META-INF/maven/**'
+    from sourceSets.coreCommon.output
+}
+
+task commonJar(type: Jar) {
+    classifier 'common'
+    from sourceSets.coreCommon.output
 }
 
 artifacts {
+    commonJars commonJar
     archives jar
     archives shadowJar
 }
 
-task proguard(type: Exec, dependsOn: build) {
-    workingDir '.'
-    commandLine 'java',
-            '-jar', '../core/obfuscation/proguard/lib/proguard.jar', '@proguard.pro',
-            '-injars', 'build/libs/Launcher-fatjar.jar',
-            '-outjars', 'build/libs/launcher_obf.jar'
+task obfuscate(type: JavaExec, dependsOn: shadowJar) {
+    main = 'cataclysm.build.BuildTools'
+    jvmArgs = ['-Dfile.encoding=UTF-8']
+
+    doFirst {
+        classpath = project.files("${project.projectDir}/../tools/build-tools/build/libs/build-tools.jar")
+        classpath += project.project(':tools:build-tools').sourceSets.main.runtimeClasspath
+
+        args = [
+                '-job', 'transformObf',
+                '-i', project.shadowJar.getArchiveFile().get().getAsFile(),
+                '-o', "${project.buildDir}/libs/launcher-final.jar",
+                '-cp', "${System.getProperty('java.home')}/lib/rt.jar",
+                '-pm', "${project.buildDir}/libs/launcher-final.map",
+                '-mainClass', 'Main',
+                '-packageFilter', 'cataclysm.',
+                '-m', 'launcher'
+        ]
+    }
 }
 
-task stringer(type: Exec, dependsOn: proguard) {
-    workingDir '.'
-    commandLine 'java', '-jar', '../core/obfuscation/stringer/stringer.jar',
-         '-configFile', 'stringer.xml',
-          'build/libs/launcher_obf.jar',
-          'build/libs/launcher.jar',
-          '-verbose', 'off'
+task generateVersion(dependsOn: obfuscate) {
+    description = 'Создает текстовый файл с версией лаунчера'
+    try (PrintWriter pw = new PrintWriter("$buildDir/libs/version.txt")) {
+        pw.println(project.version)
+    }
 }
 
-task generateVersion(type: Exec, dependsOn: stringer) {
-    workingDir 'build/libs'
-    commandLine 'java', '-jar', 'launcher.jar', '-version'
-}
+task deploy(type: Copy, dependsOn: generateVersion) {
+    group = 'deploying'
 
-task finalJar(dependsOn: generateVersion) {
-    group = 'Building'
+    from("$buildDir/libs") {
+        include 'launcher-final.jar'
+        include 'version.txt'
+    }
+
+    into "$projectDir/../production/launcher/"
+
+    rename { String fileName ->
+        fileName.replace('launcher-final.jar', 'launcher.jar')
+    }
 }
 
 repositories {
@@ -60,13 +111,16 @@ repositories {
 }
 
 dependencies {
-    implementation 'net.java.dev.jna:jna:4.4.0'
+//    implementation 'org.openjfx:javafx:11:pom'
+    implementation 'org.jetbrains:annotations:15.0'
+
     implementation 'com.google.guava:guava:31.0.1-jre'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
-    implementation 'com.saphir2:sphlib:3.0'
 
-    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+    implementation 'org.libtorrent4j:libtorrent4j:2.0.6-26'
 
+    testImplementation 'net.java.dev.jna:jna:4.4.0'
     testImplementation 'org.yaml:snakeyaml:1.29'
     testImplementation 'net.sf.jopt-simple:jopt-simple:5.0.3'
 }

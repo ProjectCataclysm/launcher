@@ -1,5 +1,6 @@
 package cataclysm.launcher.account;
 
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -15,9 +16,9 @@ public class Session {
 	private final int balance;
 
 	public Session(Profile profile, String accessToken, Set<String> tickets, int balance) {
-		this.profile = profile;
-		this.accessToken = accessToken;
-		this.tickets = tickets;
+		this.profile = Objects.requireNonNull(profile);
+		this.accessToken = Objects.requireNonNull(accessToken);
+		this.tickets = Objects.requireNonNull(tickets);
 		this.balance = balance;
 	}
 

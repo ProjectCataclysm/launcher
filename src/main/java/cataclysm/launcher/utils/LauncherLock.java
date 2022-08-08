@@ -1,7 +1,5 @@
 package cataclysm.launcher.utils;
 
-import cataclysm.launcher.Launcher;
-
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -9,37 +7,26 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 public class LauncherLock {
-	private static FileChannel channel;
-	private static FileLock lock;
-
-	public static void lock() throws IOException {
-		Path lockPath = Launcher.workDirPath.resolve("launcher.lock");
-		channel = FileChannel.open(lockPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-		lock = channel.tryLock();
-		if (lock == null) {
-			throw new IOException("Two instances cant run at the same time");
-		}
-	}
-
-	public static boolean isAvailable() {
+	public static void lock() {
 		try {
-			lock();
-			return true;
+			Path lockPath = LauncherConfig.LAUNCHER_DIR_PATH.resolve("launcher.lock");
+			FileChannel channel = FileChannel.open(lockPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+			FileLock lock = channel.tryLock();
+			if (lock == null) {
+				throw new AlreadyLaunchedException();
+			}
 		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
+			throw new RuntimeException("Failed to create file lock", e);
 		}
 	}
 
-	public static void unlock() {
-		try {
-			lock.close();
-		} catch (IOException ignored) {
-		}
+	/**
+	 * <br><br>REVOM ENGINE / ProjectCataclysm
+	 * <br>Created: 07.08.2022 15:32
+	 *
+	 * @author Knoblul
+	 */
+	public static class AlreadyLaunchedException extends RuntimeException {
 
-		try {
-			channel.close();
-		} catch (Throwable ignored) {
-		}
 	}
 }

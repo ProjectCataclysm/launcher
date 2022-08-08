@@ -1,5 +1,7 @@
 package cataclysm.launcher.account;
 
+import java.util.Objects;
+
 /**
  * <br><br>REVOM ENGINE / ProjectCataclysm
  * <br>Created: 31.07.2022 18:57
@@ -12,9 +14,9 @@ public class Profile {
 	private final String username;
 
 	public Profile(String uuid, String email, String username) {
-		this.uuid = uuid;
-		this.email = email;
-		this.username = username;
+		this.uuid = Objects.requireNonNull(uuid);
+		this.email = Objects.requireNonNull(email);
+		this.username = Objects.requireNonNull(username);
 	}
 
 	public String getUuid() {

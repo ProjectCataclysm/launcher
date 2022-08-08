@@ -2,7 +2,7 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>C:\Dev\ProjectCataclysm\launcher\build\libs\launcher.jar</jar>
+  <jar>C:\Dev\ProjectCataclysm\launcher\build\libs\launcher-final.jar</jar>
   <outfile>C:\Dev\ProjectCataclysm\Launcher\build\libs\ProjectCataclysm.exe</outfile>
   <errTitle>Error</errTitle>
   <cmdLine></cmdLine>
@@ -13,7 +13,7 @@
   <stayAlive>false</stayAlive>
   <restartOnCrash>false</restartOnCrash>
   <manifest></manifest>
-  <icon>C:\Dev\ProjectCataclysm\Launcher\configurations\icon.ico</icon>
+  <icon>C:\Dev\ProjectCataclysm\launcher\src\main\resources\icons\favicon.ico</icon>
   <jre>
     <path>./java</path>
     <bundledJre64Bit>false</bundledJre64Bit>
