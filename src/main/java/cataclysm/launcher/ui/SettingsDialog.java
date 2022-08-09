@@ -11,6 +11,7 @@ import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import proguard.annotation.Keep;
 
 import java.io.File;
 import java.util.List;
@@ -88,20 +89,6 @@ public class SettingsDialog extends VBox {
 			}
 		}
 
-		class MemoryListCell extends ListCell<Integer> {
-			@Override
-			protected void updateItem(Integer item, boolean empty) {
-				super.updateItem(item, empty);
-				if (item != null) {
-					if (item == 0) {
-						setText("<по умолчанию>");
-					} else {
-						setText(String.format(Locale.ROOT, "%dMB (%.1fGB)", item, item / 1024.0));
-					}
-				}
-			}
-		}
-
 		ComboBox<Integer> memoryCombo = new ComboBox<>(FXCollections.observableArrayList(values));
 		memoryCombo.setMaxWidth(Double.MAX_VALUE);
 		memoryCombo.setCellFactory(param -> new MemoryListCell());
@@ -155,5 +142,20 @@ public class SettingsDialog extends VBox {
 		stage.initModality(Modality.WINDOW_MODAL);
 		stage.initOwner(application.getPrimaryStage());
 		stage.show();
+	}
+
+	private static final class MemoryListCell extends ListCell<Integer> {
+		@Keep
+		@Override
+		protected void updateItem(Integer item, boolean empty) {
+			super.updateItem(item, empty);
+			if (item != null) {
+				if (item == 0) {
+					setText("<по умолчанию>");
+				} else {
+					setText(String.format(Locale.ROOT, "%dMB (%.1fGB)", item, item / 1024.0));
+				}
+			}
+		}
 	}
 }

@@ -48,6 +48,7 @@ shadowJar {
     exclude '**/*.txt'
     exclude '**/*.java'
     exclude '**/*.html'
+    exclude 'proguard/**'
     from sourceSets.coreCommon.output
 }
 
@@ -78,6 +79,7 @@ task obfuscate(type: JavaExec, dependsOn: shadowJar) {
                 '-pm', "${project.buildDir}/libs/launcher-final.map",
                 '-mainClass', 'Main',
                 '-packageFilter', 'cataclysm.',
+                '-keepAnnotations', 'proguard.annotation.Keep',
                 '-m', 'launcher'
         ]
     }
@@ -119,6 +121,7 @@ dependencies {
 
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'org.libtorrent4j:libtorrent4j:2.0.6-26'
+    implementation 'com.guardsquare:proguard-annotations:7.0.1'
 
     testImplementation 'net.java.dev.jna:jna:4.4.0'
     testImplementation 'org.yaml:snakeyaml:1.29'
