@@ -85,7 +85,7 @@ public class SettingsDialog extends VBox {
 			values.add(value);
 
 			if (value == selectedValue) {
-				selectedIndex = i - 10;
+				selectedIndex = i - 9;
 			}
 		}
 
