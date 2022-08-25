@@ -75,6 +75,12 @@ public class GameLauncher {
 		command.add("-XX:MaxGCPauseMillis=50");
 		command.add("-XX:G1HeapRegionSize=32M");
 
+		// показывать стектрейсы из JVM
+		command.add("-XX:-OmitStackTraceInFastThrow");
+
+		// создаем хипдамп при недостатке памяти
+		command.add("-XX:+HeapDumpOnOutOfMemoryError");
+
 		// макс. размер стека вызова
 		command.add("-Xss1M");
 
