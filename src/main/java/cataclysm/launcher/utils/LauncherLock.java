@@ -7,11 +7,28 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 public class LauncherLock {
+	private static FileChannel channel;
+	private static FileLock lock;
+
+	public static void unlock() {
+		try {
+			lock.release();
+		} catch (IOException e) {
+			Log.err(e, "failed to release file lock");
+		}
+
+		try {
+			channel.close();
+		} catch (IOException e) {
+			Log.err(e, "failed to close lock file");
+		}
+	}
+
 	public static void lock() {
 		try {
 			Path lockPath = LauncherConfig.LAUNCHER_DIR_PATH.resolve("launcher.lock");
-			FileChannel channel = FileChannel.open(lockPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
-			FileLock lock = channel.tryLock();
+			channel = FileChannel.open(lockPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+			lock = channel.tryLock();
 			if (lock == null) {
 				throw new AlreadyLaunchedException();
 			}

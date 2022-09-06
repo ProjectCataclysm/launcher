@@ -1,6 +1,7 @@
 package cataclysm.launcher.selfupdate;
 
 import cataclysm.launcher.utils.LauncherConfig;
+import cataclysm.launcher.utils.LauncherLock;
 import cataclysm.launcher.utils.Log;
 import com.google.common.collect.Lists;
 
@@ -65,6 +66,7 @@ public class StubChecker {
 
 	static void restart(Path path) {
 		try {
+			LauncherLock.unlock();
 			List<String> command = Lists.newArrayList();
 			command.add("java");
 			command.add("-Xmx256m"); // Так как лаунчер по кд висит в фоне, ему надо как можно минимум памяти задать
