@@ -146,6 +146,11 @@ public class GameLauncher {
 			command.add("--buildServerAccess");
 		}
 
+		// проверяем тикеты на наличие тикета тест-сервера
+		if (session.getTickets().contains("e:test")) {
+			command.add("--testServerAccess");
+		}
+
 		ProcessBuilder pb = new ProcessBuilder(command);
 		pb.directory(config.gameDirectoryPath.toFile());
 
