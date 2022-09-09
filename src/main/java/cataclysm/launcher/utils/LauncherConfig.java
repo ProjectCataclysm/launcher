@@ -17,11 +17,15 @@ import java.util.Properties;
  * @author Knoblul
  */
 public class LauncherConfig {
+	public static final boolean IS_INSTALLATION = Files.isRegularFile(Paths.get(".setup"));
 	public static final Path LAUNCHER_DIR_PATH;
 
-	public Path gameDirectoryPath = PlatformHelper.getDefaultGameDirectory();
+	public Path gameDirectoryPath = IS_INSTALLATION && LAUNCHER_DIR_PATH.getParent() != null
+	                                ? LAUNCHER_DIR_PATH.getParent().resolve("client")
+	                                : PlatformHelper.getDefaultGameDirectory();
 	public int limitMemoryMegabytes;
 	public boolean fullscreen = true;
+	public boolean forwardCompatRender = true;
 	private final Path configFile = LAUNCHER_DIR_PATH.resolve("launcher.cfg");
 
 	public LauncherConfig() {
@@ -39,6 +43,7 @@ public class LauncherConfig {
 			limitMemoryMegabytes = roundUpToPowerOfTwo(
 					Integer.parseInt(props.getProperty("limitMemory", Integer.toString(limitMemoryMegabytes))));
 			fullscreen = Boolean.parseBoolean(props.getProperty("fullscreen", Boolean.toString(fullscreen)));
+			forwardCompatRender = Boolean.parseBoolean(props.getProperty("forwardCompatRender", Boolean.toString(forwardCompatRender)));
 		} catch (FileNotFoundException | NoSuchFileException e) {
 			save();
 		} catch (Exception e) {
@@ -59,6 +64,7 @@ public class LauncherConfig {
 			props.setProperty("gameDirectory", gameDirectoryPath.toAbsolutePath().toString());
 			props.setProperty("limitMemory", Integer.toString(limitMemoryMegabytes));
 			props.setProperty("fullscreen", Boolean.toString(fullscreen));
+			props.setProperty("forwardCompatRender", Boolean.toString(forwardCompatRender));
 			props.store(out, "");
 		} catch (IOException e) {
 			Log.err(e, "Can't save config file");
@@ -79,10 +85,14 @@ public class LauncherConfig {
 	}
 
 	static {
-		try {
-			LAUNCHER_DIR_PATH = Files.createDirectories(Paths.get(System.getProperty("user.home"), "ProjectCataclysm"));
-		} catch (IOException e) {
-			throw new RuntimeException("Failed to create work directory", e);
+		if (IS_INSTALLATION) {
+			LAUNCHER_DIR_PATH = Paths.get("").toAbsolutePath();
+		} else {
+			try {
+				LAUNCHER_DIR_PATH = Files.createDirectories(Paths.get(System.getProperty("user.home"), "ProjectCataclysm"));
+			} catch (IOException e) {
+				throw new RuntimeException("Failed to create work directory", e);
+			}
 		}
 	}
 }

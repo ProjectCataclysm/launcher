@@ -44,6 +44,10 @@ public class StubChecker {
 		Path stubJar = stubJarPath();
 		Path updateJar = AutoUpdater.updateJarPath();
 
+		Log.msg("JAR: " + jar);
+		Log.msg("STUB: " + stubJar);
+		Log.msg("UPD: " + updateJar);
+
 		// Если запуск из IDE, то игнорим всю логику
 		// Если запуск из exe-файла, то смотрим есть ли файл стаба на компе, если есть запускаем через него
 		//  если нет, то AutoUpdater должен его скачать
@@ -68,7 +72,7 @@ public class StubChecker {
 		try {
 			LauncherLock.unlock();
 			List<String> command = Lists.newArrayList();
-			command.add("java");
+			command.add(LauncherConfig.IS_INSTALLATION ? "java/bin/java" : "java");
 			command.add("-Xmx256m"); // Так как лаунчер по кд висит в фоне, ему надо как можно минимум памяти задать
 			command.add("-jar");
 			command.add(path.toAbsolutePath().toString());

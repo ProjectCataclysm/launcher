@@ -3,7 +3,7 @@
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
   <jar>C:\Dev\ProjectCataclysm\launcher\build\libs\launcher-final.jar</jar>
-  <outfile>C:\Dev\ProjectCataclysm\Launcher\build\libs\ProjectCataclysm.exe</outfile>
+  <outfile>C:\Dev\ProjectCataclysm\production\launcher\launcher_wrapper.exe</outfile>
   <errTitle>Error</errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
@@ -15,13 +15,14 @@
   <manifest></manifest>
   <icon>C:\Dev\ProjectCataclysm\launcher\src\main\resources\icons\favicon.ico</icon>
   <jre>
-    <path>./java</path>
+    <path>java</path>
     <bundledJre64Bit>false</bundledJre64Bit>
     <bundledJreAsFallback>false</bundledJreAsFallback>
     <minVersion>1.8.0_200</minVersion>
     <maxVersion></maxVersion>
     <jdkPreference>preferJre</jdkPreference>
     <runtimeBits>64/32</runtimeBits>
+    <maxHeapSize>256</maxHeapSize>
   </jre>
   <versionInfo>
     <fileVersion>1.0.0.0</fileVersion>
@@ -33,7 +34,7 @@
     <productName>Project Cataclsym</productName>
     <companyName>Project Cataclsym Team</companyName>
     <internalName>Project Cataclsym</internalName>
-    <originalFilename>ProjectCataclsym.exe</originalFilename>
+    <originalFilename>launcher.exe</originalFilename>
     <trademarks></trademarks>
     <language>RUSSIAN</language>
   </versionInfo>
