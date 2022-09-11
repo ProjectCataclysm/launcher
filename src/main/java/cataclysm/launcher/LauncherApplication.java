@@ -1,6 +1,7 @@
 package cataclysm.launcher;
 
 import cataclysm.launcher.account.AccountManager;
+import cataclysm.launcher.launch.TrayManager;
 import cataclysm.launcher.selfupdate.AutoUpdater;
 import cataclysm.launcher.selfupdate.LauncherRestartedException;
 import cataclysm.launcher.ui.*;
@@ -35,6 +36,8 @@ public class LauncherApplication {
 	private Stage primaryStage;
 	private LauncherOverlayManager overlays;
 	private SessionInfoPane sessionInfoPane;
+	private Button startButton;
+	private TrayManager trayManager;
 
 	public LauncherApplication() {
 		instance = this;
@@ -107,7 +110,7 @@ public class LauncherApplication {
 		this.primaryStage = primaryStage;
 
 		sessionInfoPane = new SessionInfoPane(this);
-		Button startButton = createStartGameButton();
+		startButton = createStartGameButton();
 		AnchorPane launcherNode = new AnchorPane();
 		launcherNode.getStyleClass().add("launcher");
 		launcherNode.getChildren().addAll(createSettingsButton(), sessionInfoPane, startButton);
@@ -118,11 +121,22 @@ public class LauncherApplication {
 		primaryStage.setScene(StageUtils.createScene(new StackPane(launcherNode, overlays), 400, 400));
 		primaryStage.setTitle("ProjectCataclysm Launcher v" + AutoUpdater.VERSION);
 
-		primaryStage.setOnCloseRequest(event -> Platform.exit());
+		primaryStage.setOnCloseRequest(event -> closeApplication());
 		primaryStage.setOnShown(event -> checkForUpdates(0));
 		primaryStage.show();
 
+		trayManager = new TrayManager();
+
 		Platform.setImplicitExit(false);
+	}
+
+	public TrayManager getTrayManager() {
+		return trayManager;
+	}
+
+	private void closeApplication() {
+		Platform.exit();
+		trayManager.uninstall();
 	}
 
 	private void checkForUpdates(int delay) {
@@ -216,5 +230,27 @@ public class LauncherApplication {
 		AnchorPane.setRightAnchor(button, 1.0);
 		AnchorPane.setLeftAnchor(button, 1.0);
 		return button;
+	}
+
+	public void setStartGameAvailable(boolean available) {
+		if (available) {
+			primaryStage.setOnCloseRequest(__ -> closeApplication());
+			primaryStage.setOnShown(event -> checkForUpdates(0));
+			if (primaryStage.isShowing()) {
+				checkForUpdates(0);
+			} else {
+				primaryStage.show();
+			}
+			overlays.hideAll();
+			startButton.setDisable(false);
+			startButton.setText("Запуск");
+		} else {
+			primaryStage.setOnCloseRequest(__ -> trayManager.install());
+			primaryStage.setOnShown(null);
+			primaryStage.hide();
+			overlays.hideAll();
+			startButton.setDisable(true);
+			startButton.setText("Игра запущена");
+		}
 	}
 }

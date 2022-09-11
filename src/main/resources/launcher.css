@@ -219,3 +219,19 @@
 .game-loading-overlay {
     -fx-background-color: white;
 }
+
+.report-archive-dialog {
+    -fx-padding: 2em;
+    -fx-spacing: 1em;
+    -fx-border-color: black;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.report-archive-dialog .title {
+    -fx-font-size: 1.5em;
+}
+
+.report-archive-dialog .creation-progress {
+    -fx-progress-color: black;
+}

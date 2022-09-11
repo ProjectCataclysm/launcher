@@ -86,6 +86,10 @@ public class PlatformHelper {
 		}
 	}
 
+	public static boolean is64bit() {
+		return IS_64BIT;
+	}
+
 	public static int getMaxMemory() {
 		// Ограничиваем в 32 гб
 		return Math.min(32 * 1024, MAX_MEMORY != 0 ? MAX_MEMORY : (IS_64BIT ? 16 * 1024 : 2048));
