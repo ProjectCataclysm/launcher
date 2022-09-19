@@ -57,6 +57,9 @@ public class GameLauncher {
 			}
 		}
 
+		// для репортов JVM
+		Files.createDirectories(config.gameDirectoryPath.resolve("crashes"));
+
 		if (customJava) {
 			command.add("java");
 		}
@@ -76,7 +79,7 @@ public class GameLauncher {
 		command.add("-XX:G1HeapRegionSize=32M");
 
 		// показывать стектрейсы из JVM
-		command.add("-XX:-OmitStackTraceInFastThrow");
+//		command.add("-XX:-OmitStackTraceInFastThrow");
 
 		// создаем хипдамп при недостатке памяти
 		command.add("-XX:+HeapDumpOnOutOfMemoryError");
@@ -141,6 +144,10 @@ public class GameLauncher {
 			command.add("--fullscreen");
 		}
 
+		if (!config.forwardCompatRender) {
+			command.add("--forwardCompatRenderDisabled");
+		}
+
 		// проверяем тикеты на наличие тикета билд-сервера
 		if (session.getTickets().contains("e:build")) {
 			command.add("--buildServerAccess");
@@ -170,12 +177,15 @@ public class GameLauncher {
 			throw new IllegalStateException("Вход в аккаунт не был выполнен!");
 		}
 
+		Log.msg("Starting game process...");
+		Platform.runLater(() -> {
+			application.getTrayManager().install();
+			application.setStartGameAvailable(false);
+		});
+
 		launched.set(true);
 		LauncherConfig config = application.getConfig();
 		Thread t = new Thread(() -> {
-			Platform.runLater(() -> application.getPrimaryStage().hide());
-			Log.msg("Starting game process...");
-
 			int exitCode = 0;
 			try {
 				exitCode = startGame(config, session);
@@ -184,19 +194,28 @@ public class GameLauncher {
 			} catch (IOException e) {
 				Platform.runLater(() -> DialogUtils.showError("Ошибка запуска процесса игры", e, true));
 			} finally {
-				Platform.runLater(() -> application.getPrimaryStage().show());
 				launched.set(false);
 			}
 
-			application.getOverlays().hideAll();
-
-			if (exitCode != 0) {
-				String message = String.format("Игра была аварийно завершена с кодом %d (0x%X)", exitCode, exitCode);
-				Platform.runLater(() -> DialogUtils.showError(message, null, true));
-			}
+			int finalExitCode = exitCode;
+			Platform.runLater(() -> {
+				application.setStartGameAvailable(true);
+				if (finalExitCode != 0) {
+					if (finalExitCode == -1337) {
+						DialogUtils.showError("Файлы игры устарели."
+								+ " Необходимо перезапустить игру, чтобы скачать последнюю версию.", null, false);
+					} else {
+						DialogUtils.showGameError(finalExitCode);
+					}
+				}
+			});
 		});
 		t.setDaemon(false);
 		t.setName("Game Process Thread");
 		t.start();
+	}
+
+	public boolean isLaunched() {
+		return launched.get();
 	}
 }

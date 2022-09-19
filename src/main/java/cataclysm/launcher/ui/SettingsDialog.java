@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 import proguard.annotation.Keep;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -32,6 +33,7 @@ public class SettingsDialog extends VBox {
 		gp.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		ColumnConstraints mainConstraint = new ColumnConstraints();
 		mainConstraint.setHgrow(Priority.ALWAYS);
+		mainConstraint.setMaxWidth(250);
 		gp.getColumnConstraints().add(0, mainConstraint);
 		ColumnConstraints secondaryConstraint = new ColumnConstraints();
 		secondaryConstraint.setFillWidth(true);
@@ -41,6 +43,8 @@ public class SettingsDialog extends VBox {
 		gamePathOption(config, gp);
 		memoryOption(config, gp);
 		fullscreenOption(config, gp);
+		forwardCompatRender(config, gp);
+		createReportButton(gp);
 
 		VBox.setVgrow(gp, Priority.ALWAYS);
 
@@ -52,6 +56,29 @@ public class SettingsDialog extends VBox {
 		HBox e = new HBox(okButton);
 		e.getStyleClass().add("controls");
 		getChildren().add(e);
+	}
+
+	private void createReportButton(GridPane gp) {
+		Button button = new Button("Создать отчет");
+		Tooltip t = new Tooltip("Создает архив, в который складывает всю необходимую информацию для "
+				+ "диагностики и исправления ошибок. Папка, содержащая созданный архив будет открыта. "
+				+ "Данный архив вы можете отправить нам, чтобы мы могли решить возникшую у вас проблему.");
+		t.setWrapText(true);
+		t.setMaxWidth(300);
+		Tooltip.install(button, t);
+		button.setOnAction(__ -> DialogUtils.createReportArchive(0));
+		gp.add(button, 0, 4);
+	}
+
+	private void forwardCompatRender(LauncherConfig config, GridPane gp) {
+		Label label = new Label("Разрешить использование OpenGL Core Profile");
+		label.setWrapText(true);
+		gp.add(label, 0, 3);
+
+		CheckBox checkBox = new CheckBox();
+		checkBox.setSelected(config.forwardCompatRender);
+		checkBox.setOnMouseClicked(event -> config.forwardCompatRender = checkBox.isSelected());
+		gp.add(checkBox, 1, 3);
 	}
 
 	private void fullscreenOption(LauncherConfig config, GridPane gp) {
@@ -112,13 +139,16 @@ public class SettingsDialog extends VBox {
 		innerGP.getStyleClass().addAll("spaced-wrapper", "game-path-wrapper");
 		gp.add(innerGP, 0, 0);
 
-		DirectoryChooser pathChooser =new DirectoryChooser();
+		DirectoryChooser pathChooser = new DirectoryChooser();
 		pathChooser.setTitle("Выбор папки с игрой");
-		pathChooser.setInitialDirectory(config.gameDirectoryPath.toFile());
+		if (Files.isDirectory(config.gameDirectoryPath)) {
+			pathChooser.setInitialDirectory(config.gameDirectoryPath.toFile());
+		}
 		Button browseButton = new Button("Выбрать...");
 		browseButton.setOnMouseClicked(event -> {
 			File file = pathChooser.showDialog(getScene().getWindow());
 			if (file != null) {
+				pathField.setText(file.getAbsolutePath());
 				config.gameDirectoryPath = file.toPath();
 			}
 		});

@@ -18,6 +18,7 @@ public class Main extends Application {
 
 	public static void main(String[] args) {
 		try {
+			Thread.sleep(300);
 			LauncherLock.lock();
 		} catch (LauncherLock.AlreadyLaunchedException e) {
 			AwtErrorDialog.showError("Лаунчер уже запущен", null);
