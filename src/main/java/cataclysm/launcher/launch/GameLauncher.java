@@ -94,9 +94,11 @@ public class GameLauncher {
 		command.add("-XX:+DisableAttachMechanism");
 
 		// память
+		command.add("-Xms256m");
 		if (config.limitMemoryMegabytes > 0) {
-			command.add("-Xms256m");
 			command.add("-Xmx" + (config.limitMemoryMegabytes) + "m");
+		} else if (!PlatformHelper.is64bit()) {
+			command.add("-Xmx1024m");
 		}
 
 		if (PlatformHelper.getPlatform() == PlatformHelper.Platform.MAC) {
