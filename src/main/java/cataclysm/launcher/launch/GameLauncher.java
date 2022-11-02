@@ -34,17 +34,6 @@ public class GameLauncher {
 	}
 
 	private int startGame(LauncherConfig config, Session session) throws IOException, InterruptedException {
-		/*
-		TODO добавить в лаунчер функцию формирования архива после краша
-			crash-report-<date>.zip
-			- exit.txt (там код ошибки и pid)
-			- launcher.log
-			- fatal.log
-			- heapdump.hprof
-			- crashx.log
-			- log0.log
-		 */
-
 		// Может быть проблема при закрытии игры через диспетчер задач, код завершения 1
 		List<String> command = Lists.newArrayList();
 
@@ -82,6 +71,7 @@ public class GameLauncher {
 		command.add("-XX:G1HeapRegionSize=32M");
 
 		// показывать стектрейсы из JVM
+		// убрал из-за падения производительности
 //		command.add("-XX:-OmitStackTraceInFastThrow");
 
 		// создаем хипдамп при недостатке памяти
