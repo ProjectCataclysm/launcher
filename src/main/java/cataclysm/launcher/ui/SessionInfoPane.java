@@ -19,7 +19,7 @@ public class SessionInfoPane extends HBox {
 
 	public SessionInfoPane(LauncherApplication application) {
 		getStyleClass().add("account-info");
-		username = new Label("Knoblul");
+		username = new Label();
 		username.getStyleClass().addAll("username", "bold-font");
 		ImageView icon = new ImageView("/icons/logout.png");
 		Button quitButton = new Button(null, icon);

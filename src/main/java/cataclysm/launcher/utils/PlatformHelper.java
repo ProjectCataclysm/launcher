@@ -27,7 +27,7 @@ public class PlatformHelper {
 		} else if (osName.startsWith("Mac OS X") || osName.startsWith("Darwin")) {
 			PLATFORM = Platform.MAC;
 		} else {
-			throw new RuntimeException("Unknown platform: " + osName);
+			throw new IllegalArgumentException("Unknown platform: " + osName);
 		}
 
 		String arch = System.getProperty("os.arch");
