@@ -42,7 +42,6 @@ public class SettingsDialog extends VBox {
 
 		gamePathOption(config, gp);
 		memoryOption(config, gp);
-		fullscreenOption(config, gp);
 		forwardCompatRender(config, gp);
 		createReportButton(gp);
 
@@ -79,16 +78,6 @@ public class SettingsDialog extends VBox {
 		checkBox.setSelected(config.forwardCompatRender);
 		checkBox.setOnMouseClicked(event -> config.forwardCompatRender = checkBox.isSelected());
 		gp.add(checkBox, 1, 3);
-	}
-
-	private void fullscreenOption(LauncherConfig config, GridPane gp) {
-		Label label = new Label("Запускать на весь экран");
-		gp.add(label, 0, 2);
-
-		CheckBox checkBox = new CheckBox();
-		checkBox.setSelected(config.fullscreen);
-		checkBox.setOnMouseClicked(event -> config.fullscreen = checkBox.isSelected());
-		gp.add(checkBox, 1, 2);
 	}
 
 	private void memoryOption(LauncherConfig config, GridPane gp) {

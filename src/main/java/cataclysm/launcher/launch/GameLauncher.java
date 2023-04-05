@@ -135,10 +135,6 @@ public class GameLauncher {
 		command.add("--accessToken");
 		command.add(session.getAccessToken());
 
-		if (config.fullscreen) {
-			command.add("--fullscreen");
-		}
-
 		if (!config.forwardCompatRender) {
 			command.add("--forwardCompatRenderDisabled");
 		}

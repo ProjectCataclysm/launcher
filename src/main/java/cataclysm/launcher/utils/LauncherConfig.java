@@ -24,7 +24,6 @@ public class LauncherConfig {
 	                                ? LAUNCHER_DIR_PATH.getParent().resolve("client")
 	                                : PlatformHelper.getDefaultGameDirectory();
 	public int limitMemoryMegabytes;
-	public boolean fullscreen = true;
 	public boolean forwardCompatRender = true;
 	private final Path configFile = LAUNCHER_DIR_PATH.resolve("launcher.cfg");
 
@@ -42,7 +41,6 @@ public class LauncherConfig {
 			gameDirectoryPath = Paths.get(props.getProperty("gameDirectory", gameDirectoryPath.toString()));
 			limitMemoryMegabytes = roundUpToPowerOfTwo(
 					Integer.parseInt(props.getProperty("limitMemory", Integer.toString(limitMemoryMegabytes))));
-			fullscreen = Boolean.parseBoolean(props.getProperty("fullscreen", Boolean.toString(fullscreen)));
 			forwardCompatRender = Boolean.parseBoolean(props.getProperty("forwardCompatRender", Boolean.toString(forwardCompatRender)));
 		} catch (FileNotFoundException | NoSuchFileException e) {
 			save();
@@ -63,7 +61,6 @@ public class LauncherConfig {
 			Properties props = new Properties();
 			props.setProperty("gameDirectory", gameDirectoryPath.toAbsolutePath().toString());
 			props.setProperty("limitMemory", Integer.toString(limitMemoryMegabytes));
-			props.setProperty("fullscreen", Boolean.toString(fullscreen));
 			props.setProperty("forwardCompatRender", Boolean.toString(forwardCompatRender));
 			props.store(out, "");
 		} catch (IOException e) {
