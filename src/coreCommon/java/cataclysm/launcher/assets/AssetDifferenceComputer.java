@@ -174,7 +174,7 @@ public class AssetDifferenceComputer {
 						if (cause instanceof CompletionException) {
 							throw (CompletionException) cause;
 						} else {
-							throw new CompletionException(cause);
+							throw new RuntimeException(cause);
 						}
 					}
 

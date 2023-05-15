@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * Помощники для генерации хешей.
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 30.09.2020 3:00
  * @author Knoblul
  */
