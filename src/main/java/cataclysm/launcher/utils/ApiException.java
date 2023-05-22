@@ -1,7 +1,7 @@
 package cataclysm.launcher.utils;
 
 /**
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 07.08.2022 9:55
  *
  * @author Knoblul

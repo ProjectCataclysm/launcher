@@ -5,7 +5,7 @@ import com.sun.jna.ptr.PointerByReference;
 /**
  * Тестируем таскбар хуки в винде
  *
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 29.01.2022 16:53
  *
  * @author Knoblul

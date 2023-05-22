@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.concurrent.CompletionException;
 
 /**
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 06.08.2022 21:19
  *
  * @author Knoblul
@@ -53,7 +53,7 @@ public class AccountManager {
 					saveSession();
 				}
 
-				throw new CompletionException(e);
+				throw new RuntimeException("Failed to validate session", e);
 			}
 		}
 	}
@@ -66,7 +66,7 @@ public class AccountManager {
 			request.put("password", password);
 			parseSession(Objects.requireNonNull(HttpClientWrapper.postJsonRequest("client/auth", request)));
 		} catch (Exception e) {
-			throw new CompletionException(e);
+			throw new RuntimeException("Failed to authorize", e);
 		}
 	}
 

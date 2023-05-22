@@ -19,7 +19,7 @@ import java.util.Properties;
 import java.util.concurrent.CompletionException;
 
 /**
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 05.08.2022 16:42
  *
  * @author Knoblul
@@ -52,7 +52,7 @@ public class AutoUpdater {
 
 			StubChecker.restart(updateJar);
 		} catch (IOException e) {
-			throw new CompletionException(e);
+			throw new RuntimeException("Failed to update launcher", e);
 		}
 	}
 
@@ -62,7 +62,7 @@ public class AutoUpdater {
 		try (HttpClientWrapper.HttpResponse response = HttpClientWrapper.get(url)) {
 			version = response.getBody().string().trim();
 		} catch (IOException e) {
-			throw new CompletionException(e);
+			throw new RuntimeException("Failed to check version", e);
 		}
 
 		if (!VERSION.equals(version)) {

@@ -20,7 +20,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 /**
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 06.08.2022 15:27
  *
  * @author Knoblul

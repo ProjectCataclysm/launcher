@@ -5,7 +5,7 @@ import java.net.SocketTimeoutException;
 import java.util.concurrent.TimeoutException;
 
 /**
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 08.08.2022 15:02
  *
  * @author Knoblul

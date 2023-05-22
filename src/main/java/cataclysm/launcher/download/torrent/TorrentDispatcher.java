@@ -1,7 +1,7 @@
 package cataclysm.launcher.download.torrent;
 
 /**
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 24.11.2022 9:28
  *
  * @author Knoblul

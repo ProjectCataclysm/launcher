@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 /**
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 06.08.2022 13:32
  *
  * @author Knoblul

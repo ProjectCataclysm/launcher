@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 07.08.2022 18:26
  *
  * @author Knoblul
@@ -104,7 +104,7 @@ public class GameLoadingWindow extends LoadingOverlay implements DownloadingMana
 					try {
 						return downloadingManager.loadAssetContainer();
 					} catch (IOException e) {
-						throw new CompletionException(e);
+						throw new RuntimeException("Failed to retrieve assets info", e);
 					}
 				}, application.getDelayedExecutor(delay))
 				.handleAsync(this::handleGameFilesInfoRetrieved, Platform::runLater)
@@ -170,7 +170,11 @@ public class GameLoadingWindow extends LoadingOverlay implements DownloadingMana
 	}
 
 	private void startGame() {
-		CompletableFuture.runAsync(gameLauncher::startGame);
+		CompletableFuture.runAsync(gameLauncher::startGame).whenComplete((result, cause) -> {
+			if (cause != null) {
+				Log.err(cause, "Game launcher error");
+			}
+		});
 	}
 
 	@Override

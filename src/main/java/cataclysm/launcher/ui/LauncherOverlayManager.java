@@ -8,7 +8,7 @@ import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
 /**
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 07.08.2022 13:19
  *
  * @author Knoblul

@@ -8,7 +8,7 @@ import javafx.scene.Node;
 import javafx.util.Duration;
 
 /**
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 07.08.2022 17:46
  *
  * @author Knoblul

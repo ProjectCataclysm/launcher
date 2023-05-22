@@ -3,7 +3,7 @@ package cataclysm.launcher.account;
 import java.util.Objects;
 
 /**
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 31.07.2022 18:57
  *
  * @author Knoblul

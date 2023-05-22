@@ -8,19 +8,23 @@ import cataclysm.launcher.utils.Log;
 import cataclysm.launcher.utils.PlatformHelper;
 import com.google.common.collect.Lists;
 import javafx.application.Platform;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 31.07.2022 19:06
  *
  * @author Knoblul
@@ -135,18 +139,11 @@ public class GameLauncher {
 		command.add("--accessToken");
 		command.add(session.getAccessToken());
 
+		command.add("--session");
+		command.add(buildSessionString(session));
+
 		if (!config.forwardCompatRender) {
 			command.add("--forwardCompatRenderDisabled");
-		}
-
-		// проверяем тикеты на наличие тикета билд-сервера
-		if (session.getTickets().contains("e:build")) {
-			command.add("--buildServerAccess");
-		}
-
-		// проверяем тикеты на наличие тикета тест-сервера
-		if (session.getTickets().contains("e:test")) {
-			command.add("--testServerAccess");
 		}
 
 		ProcessBuilder pb = new ProcessBuilder(command);
@@ -156,6 +153,35 @@ public class GameLauncher {
 
 		Process process = pb.start();
 		return process.waitFor();
+	}
+
+	@SuppressWarnings("unchecked")
+	private static String buildSessionString(Session session) {
+		JSONObject root = new JSONObject();
+
+		JSONObject profile = new JSONObject();
+		profile.put("username", session.getProfile().getUsername());
+//		profile.put("email", session.getProfile().getEmail());
+		profile.put("uuid", session.getProfile().getUuid());
+		root.put("profile", profile);
+
+		root.put("accessToken", session.getAccessToken());
+
+		JSONArray tickets = new JSONArray();
+
+		for (String ticket : session.getTickets()) {
+			String[] split = ticket.split(":");
+			JSONObject t = new JSONObject();
+			t.put("type", split[0]);
+			t.put("name", split[1]);
+			tickets.add(t);
+		}
+
+		root.put("tickets", tickets);
+
+		return Base64.getEncoder()
+			.withoutPadding()
+			.encodeToString(JSONObject.toJSONString(root).getBytes(StandardCharsets.UTF_8));
 	}
 
 	public void startGame() {

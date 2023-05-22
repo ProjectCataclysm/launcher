@@ -4,7 +4,7 @@ import com.sun.jna.IntegerType;
 import com.sun.jna.Native;
 
 /**
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 29.01.2022 17:36
  *
  * @author Knoblul

@@ -4,7 +4,7 @@ import javafx.application.Platform;
 import javafx.scene.control.ProgressBar;
 
 /**
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 06.08.2022 20:09
  *
  * @author Knoblul

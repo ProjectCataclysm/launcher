@@ -30,7 +30,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
- * <br><br>REVOM ENGINE / ProjectCataclysm
+ * <br><br>ProjectCataclysm
  * <br>Created: 16 окт. 2018 г. / 21:32:13
  *
  * @author Knoblul
@@ -156,7 +156,7 @@ public class DownloadingManager {
 				downloadFile(rootPath.resolve(asset.getLocal()), asset, listener);
 			}
 		} catch (IOException e) {
-			throw new CompletionException(new IOException("Failed to download " + asset.getRemote(), e));
+			throw new RuntimeException("Failed to download " + asset.getRemote(), e);
 		}
 	}
 

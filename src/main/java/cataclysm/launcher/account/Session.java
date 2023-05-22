@@ -5,7 +5,6 @@ import java.util.Set;
 
 /**
  * <br><br><i>Created 23 июл. 2019 г. / 20:16:17</i><br>
- * SME REDUX / NOT FOR FREE USE!
  *
  * @author Knoblul
  */
