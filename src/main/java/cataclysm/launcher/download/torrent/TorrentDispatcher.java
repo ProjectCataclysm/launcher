@@ -25,7 +25,7 @@ public class TorrentDispatcher {
 		System.out.println("Using libtorrent version: " + LibTorrent.version());
 
 		settings_pack settings = libtorrent.default_settings();
-		settings.set_int();
+//		settings.set_int();
 
 		SessionManager s = new SessionManager();
 		s.start(new SessionParams(new SettingsPack(settings)));
