@@ -24,7 +24,6 @@ public class LauncherConfig {
 	                                ? LAUNCHER_DIR_PATH.getParent().resolve("client")
 	                                : PlatformHelper.getDefaultGameDirectory();
 	public int limitMemoryMegabytes;
-	public boolean forwardCompatRender = true;
 	private final Path configFile = LAUNCHER_DIR_PATH.resolve("launcher.cfg");
 
 	public LauncherConfig() {
@@ -41,7 +40,6 @@ public class LauncherConfig {
 			gameDirectoryPath = Paths.get(props.getProperty("gameDirectory", gameDirectoryPath.toString()));
 			limitMemoryMegabytes = roundUpToPowerOfTwo(
 					Integer.parseInt(props.getProperty("limitMemory", Integer.toString(limitMemoryMegabytes))));
-			forwardCompatRender = Boolean.parseBoolean(props.getProperty("forwardCompatRender", Boolean.toString(forwardCompatRender)));
 		} catch (FileNotFoundException | NoSuchFileException e) {
 			save();
 		} catch (Exception e) {
@@ -61,7 +59,6 @@ public class LauncherConfig {
 			Properties props = new Properties();
 			props.setProperty("gameDirectory", gameDirectoryPath.toAbsolutePath().toString());
 			props.setProperty("limitMemory", Integer.toString(limitMemoryMegabytes));
-			props.setProperty("forwardCompatRender", Boolean.toString(forwardCompatRender));
 			props.store(out, "");
 		} catch (IOException e) {
 			Log.err(e, "Can't save config file");

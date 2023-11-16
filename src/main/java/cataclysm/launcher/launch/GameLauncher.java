@@ -131,20 +131,8 @@ public class GameLauncher {
 		command.add(String.join(File.pathSeparator, classPath));
 		command.add("start.StartClient");
 
-		// данные для входа
-		command.add("--uuid");
-		command.add(session.getProfile().getUuid());
-		command.add("--username");
-		command.add(session.getProfile().getUsername());
-		command.add("--accessToken");
-		command.add(session.getAccessToken());
-
 		command.add("--session");
 		command.add(buildSessionString(session));
-
-		if (!config.forwardCompatRender) {
-			command.add("--forwardCompatRenderDisabled");
-		}
 
 		ProcessBuilder pb = new ProcessBuilder(command);
 		pb.directory(config.gameDirectoryPath.toFile());

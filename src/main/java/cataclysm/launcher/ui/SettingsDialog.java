@@ -42,7 +42,6 @@ public class SettingsDialog extends VBox {
 
 		gamePathOption(config, gp);
 		memoryOption(config, gp);
-		forwardCompatRender(config, gp);
 		createReportButton(gp);
 
 		VBox.setVgrow(gp, Priority.ALWAYS);
@@ -67,17 +66,6 @@ public class SettingsDialog extends VBox {
 		Tooltip.install(button, t);
 		button.setOnAction(__ -> DialogUtils.createReportArchive(0));
 		gp.add(button, 0, 4);
-	}
-
-	private void forwardCompatRender(LauncherConfig config, GridPane gp) {
-		Label label = new Label("Разрешить использование OpenGL Core Profile");
-		label.setWrapText(true);
-		gp.add(label, 0, 3);
-
-		CheckBox checkBox = new CheckBox();
-		checkBox.setSelected(config.forwardCompatRender);
-		checkBox.setOnMouseClicked(event -> config.forwardCompatRender = checkBox.isSelected());
-		gp.add(checkBox, 1, 3);
 	}
 
 	private void memoryOption(LauncherConfig config, GridPane gp) {
