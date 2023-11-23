@@ -69,7 +69,7 @@ artifacts {
 }
 
 task obfuscate(type: JavaExec, dependsOn: shadowJar) {
-    main = 'cataclysm.build.BuildTools'
+	setMainClass('cataclysm.build.BuildTools')
     jvmArgs = ['-Dfile.encoding=UTF-8']
 
     doFirst {
@@ -105,7 +105,7 @@ task deploy(type: Copy, dependsOn: generateVersion) {
         include 'version.txt'
     }
 
-    into "$projectDir/../production/launcher/"
+	into "${project.getProperty('projectCataclysm.deployDirPath')}/launcher/"
 
     rename { String fileName ->
         fileName.replace('launcher-final.jar', 'launcher.jar')
@@ -120,6 +120,7 @@ repositories {
 dependencies {
 //    implementation 'org.openjfx:javafx:11:pom'
     implementation 'org.jetbrains:annotations:15.0'
+	implementation 'com.guardsquare:proguard-annotations:7.0.1'
 
     implementation 'com.google.guava:guava:31.0.1-jre'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
@@ -131,11 +132,9 @@ dependencies {
 //    implementation 'com.github.atomashpolskiy:bt-http-tracker-client:1.10'
 //    implementation 'com.github.atomashpolskiy:bt-dht:1.10'
 //    implementation 'com.github.atomashpolskiy:bt-upnp:1.10'
-	implementation 'com.frostwire:jlibtorrent:1.2.0.18'
 
-    implementation 'com.guardsquare:proguard-annotations:7.0.1'
-
-    testImplementation 'net.java.dev.jna:jna:4.4.0'
+	testImplementation 'com.frostwire:jlibtorrent:1.2.0.18'
+	testImplementation 'net.java.dev.jna:jna:4.4.0'
     testImplementation 'org.yaml:snakeyaml:1.29'
     testImplementation 'net.sf.jopt-simple:jopt-simple:5.0.3'
 }
