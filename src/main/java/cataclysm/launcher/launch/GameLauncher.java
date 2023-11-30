@@ -147,25 +147,30 @@ public class GameLauncher {
 	private static String buildSessionString(Session session) {
 		JSONObject root = new JSONObject();
 
-		JSONObject profile = new JSONObject();
-		profile.put("username", session.getProfile().getUsername());
-//		profile.put("email", session.getProfile().getEmail());
-		profile.put("uuid", session.getProfile().getUuid());
-		root.put("profile", profile);
+		JSONObject user = new JSONObject();
+		{
+			JSONObject profile = new JSONObject();
+			{
+				profile.put("username", session.getProfile().getUsername());
+//		        profile.put("email", session.getProfile().getEmail());
+				profile.put("uuid", session.getProfile().getUuid());
+			}
+			user.put("profile", profile);
 
-		root.put("accessToken", session.getAccessToken());
-
-		JSONArray tickets = new JSONArray();
-
-		for (String ticket : session.getTickets()) {
-			String[] split = ticket.split(":");
-			JSONObject t = new JSONObject();
-			t.put("type", split[0]);
-			t.put("name", split[1]);
-			tickets.add(t);
+			JSONArray tickets = new JSONArray();
+			{
+				for (String ticket : session.getTickets()) {
+					String[] split = ticket.split(":");
+					JSONObject t = new JSONObject();
+					t.put("type", split[0]);
+					t.put("name", split[1]);
+					tickets.add(t);
+				}
+			}
+			user.put("tickets", tickets);
 		}
-
-		root.put("tickets", tickets);
+		root.put("user", user);
+		root.put("accessToken", session.getAccessToken());
 
 		return Base64.getEncoder()
 			.withoutPadding()
