@@ -16,7 +16,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CompletionException;
 
 /**
  * <br><br>ProjectCataclysm
@@ -65,6 +64,8 @@ public class AccountManager {
 			request.put("login", login);
 			request.put("password", password);
 			parseSession(Objects.requireNonNull(HttpClientWrapper.postJsonRequest("client/auth", request)));
+		} catch (ApiException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to authorize", e);
 		}

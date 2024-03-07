@@ -3,6 +3,7 @@ import cataclysm.launcher.selfupdate.LauncherRestartedException;
 import cataclysm.launcher.selfupdate.StubChecker;
 import cataclysm.launcher.ui.AwtErrorDialog;
 import cataclysm.launcher.utils.LauncherLock;
+import cataclysm.launcher.utils.Log;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -17,6 +18,9 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
+		Log.configureLogging();
+		Log.msg("Starting launcher...");
+
 		try {
 			Thread.sleep(300);
 			LauncherLock.lock();

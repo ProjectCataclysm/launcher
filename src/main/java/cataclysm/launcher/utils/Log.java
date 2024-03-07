@@ -1,66 +1,43 @@
 package cataclysm.launcher.utils;
 
-import com.google.common.base.Throwables;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.RollingFileAppender;
+import org.apache.logging.log4j.core.appender.rolling.DefaultRolloverStrategy;
+import org.apache.logging.log4j.core.appender.rolling.OnStartupTriggeringPolicy;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.ConfigurationSource;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 
-import java.io.*;
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.text.SimpleDateFormat;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.logging.*;
 
 /**
  * Created 28 . 2018 . / 18:03:14
  * @author Knoblul
  */
 public class Log {
-	private static final Logger logger;
-	
-	static {
-		PrintStream out = System.out;
-		PrintStream err = System.err;
+	private static Logger logger;
 
-		Logger rootLogger = Logger.getLogger("");
-		Handler[] handlers = rootLogger.getHandlers();
-		for (Handler handler : handlers) {
-			rootLogger.removeHandler(handler);
+	private static Logger getLogger() {
+		if (logger == null) {
+			logger = LogManager.getLogger("ProjectCataclysm/Launcher");
 		}
 
-		rootLogger.setUseParentHandlers(false);
-		rootLogger.addHandler(new RvmLoggingPrintHandler(out, err));
-
-		try {
-			Path logsDir = Files.createDirectories(LauncherConfig.LAUNCHER_DIR_PATH.resolve("logs"));
-			String pattern = logsDir.toAbsolutePath() + "/launcher-%g.log";
-			FileHandler fileHandler = new FileHandler(pattern, 1024 * 1024 * 100, 3, false);
-			rootLogger.addHandler(fileHandler);
-		} catch (IOException e) {
-			err.printf("Failed to set file handler for logger: %n%s%n", Throwables.getStackTraceAsString(e));
-		}
-
-		RvmLogFormatter formatter = new RvmLogFormatter();
-		handlers = rootLogger.getHandlers();
-		for (Handler handler : handlers) {
-			handler.setFormatter(formatter);
-			try {
-				handler.setEncoding("UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				err.printf("Failed to set encoding for log handler %s:%n%s%n",
-						handler, Throwables.getStackTraceAsString(e));
-			}
-		}
-
-		System.setOut(new LoggingPrintStream(out, Logger.getLogger("STDOUT"), Level.INFO));
-		System.setErr(new LoggingPrintStream(err, Logger.getLogger("STDERR"), Level.SEVERE));
-
-		logger = Logger.getLogger("LAUNCHER");
+		return logger;
 	}
-	
+
 	public static void err(Throwable t, String msg, Object... args) {
-		logger.log(Level.SEVERE, "! " + String.format(msg, args), t);
+		getLogger().log(Level.ERROR, "! " + String.format(msg, args), t);
 	}
 	
 	public static void err(String msg, Object... args) {
@@ -68,7 +45,7 @@ public class Log {
 	}
 	
 	public static void msg(String msg, Object... args) {
-		logger.log(Level.INFO, "* " + String.format(msg, args));
+		getLogger().log(Level.INFO, "* " + String.format(msg, args));
 	}
 
 	public static void logFutureErrors(Object ignored, Throwable cause) {
@@ -77,90 +54,47 @@ public class Log {
 		}
 	}
 
-	private static final class RvmLoggingPrintHandler extends Handler {
-		private final PrintStream out;
-		private final PrintStream err;
+	public static void configureLogging() {
+		PrintStream out = System.out;
+		PrintStream err = System.err;
 
-		private static final SimpleFormatter DEFAULT_FORMATTER = new SimpleFormatter();
-
-		RvmLoggingPrintHandler(PrintStream out, PrintStream err) {
-			this.out = out;
-			this.err = err;
-		}
-
-		@Override
-		public void publish(LogRecord record) {
-			Formatter formatter = getFormatter();
-			if (formatter == null) {
-				formatter = DEFAULT_FORMATTER;
+		// из-за fat-jar приходится юзать программную загрузку файла конфигурации log4j
+		try (InputStream in = Log.class.getResourceAsStream("/log4j2.xml")) {
+			if (in == null) {
+				throw new NoSuchFileException("Resource not found");
 			}
 
-			String message = formatter.format(record);
-			if (record.getLevel().intValue() >= Level.WARNING.intValue()) {
-				err.print(message);
-			} else {
-				out.print(message);
-			}
+			ConfigurationSource source = new ConfigurationSource(in);
+			Configurator.initialize(null, source);
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to load log4j configuration file", e);
 		}
 
-		@Override
-		public void flush() {
-			err.flush();
-			out.flush();
+		LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+		Configuration config = ctx.getConfiguration();
+
+		RollingFileAppender.Builder<?> builder = new RollingFileAppender.Builder<>();
+		builder.setName("RootFile");
+		builder.setLayout(PatternLayout.newBuilder()
+			.withPattern(config.getStrSubstitutor().getVariableResolver().lookup("pattern"))
+			.build());
+		builder.withFileName("logs/latest-launcher.log");
+		builder.withFilePattern("logs/latest-launcher-%i.log");
+		builder.withPolicy(OnStartupTriggeringPolicy.createPolicy(0));
+		builder.withStrategy(DefaultRolloverStrategy.newBuilder().withMax("6").build());
+		RollingFileAppender appender = builder.build();
+		if (appender == null) {
+			throw new RuntimeException("Failed to create file appender for root logger");
 		}
 
-		@Override
-		public void close() throws SecurityException {
-			err.close();
-			out.close();
-		}
-	}
+		appender.start();
+		config.addAppender(appender);
+		config.getRootLogger().addAppender(appender, Level.INFO, null);
 
-	private static final class RvmLogFormatter extends Formatter {
-		// используем SimpleDateFormat из-за того что он быстрее нового Java Time API
-		private final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("[yyyy-MM-dd HH:mm:ss]");
+		ctx.updateLoggers();
 
-		private final String LINE_SEPARATOR = System.getProperty("line.separator");
-		private final ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-
-		@Override
-		public String format(LogRecord record) {
-			StringBuilder message = new StringBuilder();
-
-			Level level = record.getLevel();
-			String name = level.getLocalizedName();
-			if (name == null) {
-				name = level.getName();
-			}
-
-			String threadName = threadMXBean.getThreadInfo(record.getThreadID()).getThreadName();
-			name = threadName + "/" + Optional.ofNullable(name).orElse("");
-
-			message.append(DATE_FORMATTER.format(record.getMillis()));
-			message.append(" [").append(name).append("] ");
-
-			if (record.getLoggerName() != null) {
-				message.append("[").append(record.getLoggerName()).append("] ");
-			} else {
-				message.append("[] ");
-			}
-
-			message.append(record.getMessage());
-			message.append(LINE_SEPARATOR);
-			Throwable thr = record.getThrown();
-
-			if (thr != null) {
-				message.append(getStackTraceAsString(thr));
-			}
-
-			return message.toString();
-		}
-
-		private static String getStackTraceAsString(Throwable throwable) {
-			StringWriter stringWriter = new StringWriter();
-			throwable.printStackTrace(new PrintWriter(stringWriter));
-			return stringWriter.toString();
-		}
+		System.setOut(new LoggingPrintStream(out, LogManager.getLogger("STDOUT"), Level.INFO));
+		System.setErr(new LoggingPrintStream(err, LogManager.getLogger("STDERR"), Level.ERROR));
 	}
 
 	private static final class LoggingPrintStream extends PrintStream {

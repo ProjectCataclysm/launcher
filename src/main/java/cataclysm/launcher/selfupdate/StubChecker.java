@@ -3,18 +3,21 @@ package cataclysm.launcher.selfupdate;
 import cataclysm.launcher.utils.LauncherConfig;
 import cataclysm.launcher.utils.LauncherLock;
 import cataclysm.launcher.utils.Log;
-import com.google.common.collect.Lists;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 /**
+ * // XXX НЕ ИСПОЛЬЗОВАТЬ СТОРОННИЕ БИБЛИОТЕКИ В ЭТОМ КЛАССЕ!
+ *
  * <br><br>ProjectCataclysm
  * <br>Created: 05.08.2022 16:41
  *
@@ -71,11 +74,15 @@ public class StubChecker {
 	static void restart(Path path) {
 		try {
 			LauncherLock.unlock();
-			List<String> command = Lists.newArrayList();
+			List<String> command = new ArrayList<>();
 			command.add(LauncherConfig.IS_INSTALLATION ? "java/bin/java" : "java");
 			command.add("-Xmx256m"); // Так как лаунчер по кд висит в фоне, ему надо как можно минимум памяти задать
+//			command.add("-cp");
+//			String libPath = LauncherConfig.LAUNCHER_DIR_PATH.resolve("lib").toAbsolutePath().toString();
+//			command.add(path.toAbsolutePath() + File.pathSeparator + libPath + File.separator + "*");
 			command.add("-jar");
 			command.add(path.toAbsolutePath().toString());
+			command.add("--restarted");
 			new ProcessBuilder(command).start();
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to restart launcher as " + path, e);
@@ -85,7 +92,7 @@ public class StubChecker {
 	}
 
 	public static void check(String[] args) {
-		if (args.length > 0) {
+		if (args.length > 0 && !args[0].equals("--restarted")) {
 			// Если в параметр был передан файл с окночнанием .jar, то удаляем
 			// этот файл
 			// нужно для удаления родительского джарника, напр. при запуске

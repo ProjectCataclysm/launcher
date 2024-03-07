@@ -97,12 +97,19 @@ task generateVersion(dependsOn: obfuscate) {
     }
 }
 
-task deploy(type: Copy, dependsOn: generateVersion) {
+task bundleDependenciesZip(dependsOn: generateVersion) {
+
+
+
+}
+
+task deploy(type: Copy, dependsOn: bundleDependenciesZip) {
     group = 'deploying'
 
     from("$buildDir/libs") {
         include 'launcher-final.jar'
         include 'version.txt'
+		include 'libs.zip'
     }
 
 	into "${project.getProperty('projectCataclysm.deployDirPath')}/launcher/"
@@ -124,6 +131,9 @@ dependencies {
 
     implementation 'com.google.guava:guava:31.0.1-jre'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+
+	implementation 'org.apache.logging.log4j:log4j-api:2.19.0'
+	implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
 
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
 //    implementation 'org.libtorrent4j:libtorrent4j:2.0.6-26'
