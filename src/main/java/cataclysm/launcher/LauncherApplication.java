@@ -45,7 +45,6 @@ public class LauncherApplication {
 						.setNameFormat("Main Task Executor")
 						.setDaemon(true)
 						.build());
-
 		parallelExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
 				.setNameFormat("Parallel Task Executor")
 				.setDaemon(true)
