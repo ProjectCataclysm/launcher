@@ -1,7 +1,3 @@
-/.gradle/
-/gradle/
-gradlew.bat
-gradlew
 /bin/
 /build/
 /game/
