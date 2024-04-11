@@ -5,13 +5,14 @@ plugins {
 	id("com.github.johnrengelman.shadow").version("7.1.0")
 }
 
-var props = Properties().apply {
+val props = Properties().apply {
 	file("$projectDir/src/main/resources/build.properties").inputStream().use { fis ->
 		load(fis)
 	}
 }
 
-project.version = props.getProperty("version")
+version = props.getProperty("version")
+
 tasks.withType<JavaCompile> {
 	options.encoding = "UTF-8"
 }
