@@ -35,8 +35,6 @@ sourceSets {
 
 configurations {
 	create("commonJars") {
-		isCanBeConsumed = true
-		isCanBeResolved = false
 		extendsFrom(configurations.implementation.get())
 	}
 }
