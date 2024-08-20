@@ -76,16 +76,15 @@ tasks.register<JavaExec>("obfuscate") {
 	mainClass = "cataclysm.build.BuildTools"
 
 	doFirst {
-		classpath =
-			files("${projectDir}/../tools/build-tools/build/libs/build-tools.jar") +
-				project(":buildtools").sourceSets.main.get().runtimeClasspath
+		classpath = files(project(":build-tools").layout.buildDirectory.file("libs/build-tools.jar")) +
+			project(":build-tools").sourceSets.main.get().runtimeClasspath
 
 		args(
 			"-job", "transformObf",
 			"-i", tasks.shadowJar.get().archiveFile.get().asFile,
-			"-o", layout.buildDirectory.file("lib/launcher-final.jar"),
+			"-o", layout.buildDirectory.file("lib/launcher-final.jar").get(),
 			"-cp", "${System.getProperty("java.home")}/lib/rt.jar",
-			"-pm", layout.buildDirectory.file("lib/launcher-final.map"),
+			"-pm", layout.buildDirectory.file("lib/launcher-final.map").get(),
 			"-mainClass", "Main",
 			"-packageFilter", "cataclysm.",
 			"-keepAnnotations", "proguard.annotation.Keep",

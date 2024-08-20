@@ -77,12 +77,12 @@ public class LoginOverlay extends AbstractLauncherOverlay {
 
 		Label restoreLabel = new Label("Восстановление аккаунта");
 		restoreLabel.getStyleClass().add("help-question");
-		restoreLabel.setOnMouseClicked(event -> HttpClientWrapper.browse("https://" + LauncherConstants.WORK_SITE_URL + "/passreset"));
+		restoreLabel.setOnMouseClicked(event -> HttpClientWrapper.browse("https://" + LauncherConstants.WORK_SITE_URL + "/password?action=restorePassword"));
 		grid.add(restoreLabel, 1, 4);
 
 		Label registerLabel = new Label("Регистрация");
 		registerLabel.getStyleClass().add("help-question");
-		registerLabel.setOnMouseClicked(event -> HttpClientWrapper.browse("https://" + LauncherConstants.WORK_SITE_URL + "/registration"));
+		registerLabel.setOnMouseClicked(event -> HttpClientWrapper.browse("https://" + LauncherConstants.WORK_SITE_URL + "/signup"));
 		grid.add(registerLabel, 1, 5);
 
 		Button submitButton = new Button("Войти");
