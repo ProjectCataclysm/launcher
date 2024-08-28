@@ -46,7 +46,7 @@ tasks.jar {
 }
 
 tasks.shadowJar {
-
+	from(sourceSets.named("coreCommon").get().output)
 }
 
 ////shadowJar {
