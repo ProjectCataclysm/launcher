@@ -3,22 +3,11 @@ package cataclysm.launcher.utils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.appender.RollingFileAppender;
-import org.apache.logging.log4j.core.appender.rolling.DefaultRolloverStrategy;
-import org.apache.logging.log4j.core.appender.rolling.OnStartupTriggeringPolicy;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
-import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.apache.logging.log4j.core.config.builder.api.*;
+import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Paths;
 import java.util.Objects;
 
 /**
@@ -58,40 +47,68 @@ public class Log {
 		PrintStream out = System.out;
 		PrintStream err = System.err;
 
-		// из-за fat-jar приходится юзать программную загрузку файла конфигурации log4j
-		try (InputStream in = Log.class.getResourceAsStream("/log4j2.xml")) {
-			if (in == null) {
-				throw new NoSuchFileException("Resource not found");
-			}
+//		String pattern = "[%d{yyyy-MM-dd HH:mm:ss}] [%t/%level] [%c] %msg%n";
+//		LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+//		Configuration config = ctx.getConfiguration();
+//
+//		AbstractAppender appender = new ConsoleAppender.Builder<>()
+//			.setName("stdout")
+//			.setLayout(PatternLayout.newBuilder()
+//				.withPattern(pattern)
+//				.build())
+//			.build();
+//		if (appender == null) {
+//			throw new RuntimeException("Failed to create console appender for root logger");
+//		}
+//		appender.start();
+//		config.addAppender(appender);
+//		config.getRootLogger().addAppender(appender, Level.INFO, null);
+//
+//		appender = new RollingFileAppender.Builder<>()
+//			.setName("RootFile")
+//			.setLayout(PatternLayout.newBuilder()
+//				.withPattern(pattern)
+//				.build())
+//			.withFileName("logs/latest-launcher.log")
+//			.withFilePattern("logs/latest-launcher-%i.log")
+//			.withPolicy(OnStartupTriggeringPolicy.createPolicy(0))
+//			.withStrategy(DefaultRolloverStrategy.newBuilder().withMax("6").build())
+//			.build();
+//		if (appender == null) {
+//			throw new RuntimeException("Failed to create file appender for root logger");
+//		}
+//
+//		appender.start();
+//		config.addAppender(appender);
+//		config.getRootLogger().addAppender(appender, Level.INFO, null);
+//
+//		ctx.updateLoggers();
 
-			ConfigurationSource source = new ConfigurationSource(in);
-			Configurator.initialize(null, source);
-		} catch (IOException e) {
-			throw new RuntimeException("Failed to load log4j configuration file", e);
-		}
+		ConfigurationBuilder<BuiltConfiguration> configBuilder = ConfigurationBuilderFactory.newConfigurationBuilder();
+		LayoutComponentBuilder pattern = configBuilder.newLayout("PatternLayout");
+		pattern.addAttribute("pattern", "[%d{yyyy-MM-dd HH:mm:ss}] [%t/%level] [%c] %msg%n");
 
-		LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-		Configuration config = ctx.getConfiguration();
+		AppenderComponentBuilder console = configBuilder.newAppender("stdout", "Console");
+		console.add(pattern);
+		configBuilder.add(console);
 
-		RollingFileAppender.Builder<?> builder = new RollingFileAppender.Builder<>();
-		builder.setName("RootFile");
-		builder.setLayout(PatternLayout.newBuilder()
-			.withPattern(config.getStrSubstitutor().getVariableResolver().lookup("pattern"))
-			.build());
-		builder.withFileName("logs/latest-launcher.log");
-		builder.withFilePattern("logs/latest-launcher-%i.log");
-		builder.withPolicy(OnStartupTriggeringPolicy.createPolicy(0));
-		builder.withStrategy(DefaultRolloverStrategy.newBuilder().withMax("6").build());
-		RollingFileAppender appender = builder.build();
-		if (appender == null) {
-			throw new RuntimeException("Failed to create file appender for root logger");
-		}
+		AppenderComponentBuilder rollingFile = configBuilder.newAppender("file", "RollingFile");
+		rollingFile.addAttribute("fileName", "logs/latest-launcher.log");
+		rollingFile.addAttribute("filePattern", "logs/latest-launcher-%i.log");
+		rollingFile.addComponent(configBuilder.newComponent("Policies")
+			.addComponent(configBuilder.newComponent("OnStartupTriggeringPolicy")
+				.addAttribute("minSize", 0)));
+		rollingFile.addComponent(configBuilder.newComponent("DefaultRolloverStrategy")
+				.addAttribute("max", 6));
+		rollingFile.add(pattern);
+		configBuilder.add(rollingFile);
 
-		appender.start();
-		config.addAppender(appender);
-		config.getRootLogger().addAppender(appender, Level.INFO, null);
+		RootLoggerComponentBuilder rootLogger = configBuilder.newRootLogger(Level.INFO);
+		rootLogger.add(configBuilder.newAppenderRef("stdout"));
+		rootLogger.add(configBuilder.newAppenderRef("file"));
+		configBuilder.add(rootLogger);
 
-		ctx.updateLoggers();
+		Configurator.initialize(configBuilder.build());
 
 		System.setOut(new LoggingPrintStream(out, LogManager.getLogger("STDOUT"), Level.INFO));
 		System.setErr(new LoggingPrintStream(err, LogManager.getLogger("STDERR"), Level.ERROR));
