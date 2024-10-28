@@ -135,7 +135,7 @@ public class DialogUtils {
 	}
 
 	private static void createReportArchiveImpl(int exitCode) throws IOException {
-		Path gameDirPath = LauncherApplication.getInstance().getConfig().gameDirectoryPath;
+		Path gameDirPath = LauncherApplication.getInstance().getConfig().getCurrentGameDirectoryPath();
 		Path launcherDir = LauncherConfig.LAUNCHER_DIR_PATH;
 		Path reportsPath = Files.createDirectories(gameDirPath.resolve("reports"));
 		Path archivePath = reportsPath.resolve(

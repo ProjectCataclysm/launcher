@@ -1,5 +1,9 @@
 package cataclysm.launcher.utils;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -17,18 +23,30 @@ import java.util.Properties;
  * @author Knoblul
  */
 public class LauncherConfig {
+	private static final Map<String, ClientBranch> CLIENT_BRANCH_NAME_MAP = Maps.newHashMap();
+
 	public static final boolean IS_INSTALLATION = Files.isRegularFile(Paths.get(".setup"));
 	public static final Path LAUNCHER_DIR_PATH;
 
 	public Path gameDirectoryPath = IS_INSTALLATION && LAUNCHER_DIR_PATH.getParent() != null
 	                                ? LAUNCHER_DIR_PATH.getParent().resolve("client")
 	                                : PlatformHelper.getDefaultGameDirectory();
+
 	public int limitMemoryMegabytes;
+
 	private final Path configFile = LAUNCHER_DIR_PATH.resolve("launcher.cfg");
+
+	public ClientBranch clientBranch = ClientBranch.PRODUCTION;
 
 	public LauncherConfig() {
 		Log.msg("Config file %s", configFile);
 		load();
+	}
+
+	public Path getCurrentGameDirectoryPath() {
+		return clientBranch.getSubDirName() != null
+		       ? gameDirectoryPath.resolve(clientBranch.getSubDirName())
+		       : gameDirectoryPath;
 	}
 
 	public void load() {
@@ -40,6 +58,8 @@ public class LauncherConfig {
 			gameDirectoryPath = Paths.get(props.getProperty("gameDirectory", gameDirectoryPath.toString()));
 			limitMemoryMegabytes = roundUpToPowerOfTwo(
 					Integer.parseInt(props.getProperty("limitMemory", Integer.toString(limitMemoryMegabytes))));
+			clientBranch = CLIENT_BRANCH_NAME_MAP.getOrDefault(Strings.nullToEmpty(props.getProperty("clientUpdateBranch")).toLowerCase(Locale.ROOT),
+				ClientBranch.PRODUCTION);
 		} catch (FileNotFoundException | NoSuchFileException e) {
 			save();
 		} catch (Exception e) {
@@ -59,6 +79,7 @@ public class LauncherConfig {
 			Properties props = new Properties();
 			props.setProperty("gameDirectory", gameDirectoryPath.toAbsolutePath().toString());
 			props.setProperty("limitMemory", Integer.toString(limitMemoryMegabytes));
+			props.setProperty("clientUpdateBranch", clientBranch.getName());
 			props.store(out, "");
 		} catch (IOException e) {
 			Log.err(e, "Can't save config file");
@@ -78,7 +99,40 @@ public class LauncherConfig {
 		return result + 1;
 	}
 
+	public enum ClientBranch {
+		PRODUCTION("production", "Основной клиент", null),
+		TEST("test", "Тестовый клиент", "branch_test"),
+
+		;
+
+		private final String name;
+		private final String title;
+		private final @Nullable String subDirName;
+
+		ClientBranch(String name, String title, @Nullable String subDirName) {
+			this.name = name;
+			this.title = title;
+			this.subDirName = subDirName;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public String getTitle() {
+			return title;
+		}
+
+		public @Nullable String getSubDirName() {
+			return subDirName;
+		}
+	}
+
 	static {
+		for (ClientBranch v : ClientBranch.values()) {
+			CLIENT_BRANCH_NAME_MAP.put(v.getName().toLowerCase(Locale.ROOT), v);
+		}
+
 		if (IS_INSTALLATION) {
 			LAUNCHER_DIR_PATH = Paths.get("").toAbsolutePath();
 		} else {

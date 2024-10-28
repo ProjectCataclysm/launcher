@@ -102,6 +102,7 @@ public class GameLoadingWindow extends LoadingOverlay implements DownloadingMana
 				.runAsync(() -> showLoading("Получение информации о файлах...", 0), Platform::runLater)
 				.thenApplyAsync(__ -> {
 					try {
+						downloadingManager.setClientBranch(application.getConfig().clientBranch);
 						return downloadingManager.loadAssetContainer();
 					} catch (IOException e) {
 						throw new RuntimeException("Failed to retrieve assets info", e);
@@ -121,7 +122,7 @@ public class GameLoadingWindow extends LoadingOverlay implements DownloadingMana
 					int nThreads = Runtime.getRuntime().availableProcessors();
 					ExecutorService executor = Executors.newFixedThreadPool(nThreads, threadFactory);
 					executorReference.set(executor);
-					return sanitationManager.sanitize(assets, executor, application.getConfig().gameDirectoryPath);
+					return sanitationManager.sanitize(assets, executor, application.getConfig().getCurrentGameDirectoryPath());
 				}, application.getMainExecutor())
 				.whenCompleteAsync((result, cause) -> {
 					//noinspection UnstableApiUsage
@@ -152,7 +153,7 @@ public class GameLoadingWindow extends LoadingOverlay implements DownloadingMana
 					updatePane.getChildren().setAll(loadingTitleLabel, new AnchorPane(percentLabel, speedLabel), fileProgress, loadingProgress);
 					super.showLoading("Загружаем файлы игры...", 0);
 				}, Platform::runLater)
-				.thenRunAsync(() -> downloadingManager.downloadAssets(assets, application.getConfig().gameDirectoryPath,
+				.thenRunAsync(() -> downloadingManager.downloadAssets(assets, application.getConfig().getCurrentGameDirectoryPath(),
 						this), application.getMainExecutor())
 				.handleAsync((result, cause) -> handleDownloadResult(assets, cause), Platform::runLater)
 				.whenComplete(Log::logFutureErrors);

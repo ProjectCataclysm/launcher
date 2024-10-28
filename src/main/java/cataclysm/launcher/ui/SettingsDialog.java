@@ -1,11 +1,14 @@
 package cataclysm.launcher.ui;
 
 import cataclysm.launcher.LauncherApplication;
+import cataclysm.launcher.account.Session;
 import cataclysm.launcher.utils.HttpClientWrapper;
 import cataclysm.launcher.utils.LauncherConfig;
 import cataclysm.launcher.utils.PlatformHelper;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
@@ -15,9 +18,8 @@ import proguard.annotation.Keep;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
 
 /**
  * <br><br>ProjectCataclysm
@@ -26,10 +28,15 @@ import java.util.Objects;
  * @author Knoblul
  */
 public class SettingsDialog extends VBox {
-	private SettingsDialog(LauncherConfig config) {
+	private ComboBox<LauncherConfig.ClientBranch> clientBranchComboBox;
+
+	private SettingsDialog(LauncherApplication application) {
+		LauncherConfig config = application.getConfig();
+
 		getStyleClass().add("settings");
 
 		GridPane gp = new GridPane();
+		gp.getStyleClass().addAll("options", "spaced-wrapper");
 		gp.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		ColumnConstraints mainConstraint = new ColumnConstraints();
 		mainConstraint.setHgrow(Priority.ALWAYS);
@@ -38,11 +45,10 @@ public class SettingsDialog extends VBox {
 		ColumnConstraints secondaryConstraint = new ColumnConstraints();
 		secondaryConstraint.setFillWidth(true);
 		gp.getColumnConstraints().add(1, secondaryConstraint);
-		gp.getStyleClass().addAll("options", "spaced-wrapper");
 
 		gamePathOption(config, gp);
 		memoryOption(config, gp);
-		createReportButton(gp);
+		clientBranchOption(application, gp);
 
 		VBox.setVgrow(gp, Priority.ALWAYS);
 
@@ -51,21 +57,65 @@ public class SettingsDialog extends VBox {
 		Button okButton = new Button("Сохранить");
 		okButton.getStyleClass().add("ok-button");
 		okButton.setOnMouseClicked(event -> ((Stage) getScene().getWindow()).close());
-		HBox e = new HBox(okButton);
-		e.getStyleClass().add("controls");
-		getChildren().add(e);
+		BorderPane bp2 = new BorderPane();
+		bp2.getStyleClass().add("controls");
+		bp2.setLeft(createReportButton());
+		bp2.setRight(okButton);
+		getChildren().add(bp2);
 	}
 
-	private void createReportButton(GridPane gp) {
+	private Button createReportButton() {
 		Button button = new Button("Создать отчет");
 		Tooltip t = new Tooltip("Создает архив, в который складывает всю необходимую информацию для "
-				+ "диагностики и исправления ошибок. Папка, содержащая созданный архив будет открыта. "
-				+ "Данный архив вы можете отправить нам, чтобы мы могли решить возникшую у вас проблему.");
+			+ "диагностики и исправления ошибок. Папка, содержащая созданный архив будет открыта. "
+			+ "Данный архив вы можете отправить нам, чтобы мы могли решить возникшую у вас проблему.");
 		t.setWrapText(true);
 		t.setMaxWidth(300);
 		Tooltip.install(button, t);
 		button.setOnAction(__ -> DialogUtils.createReportArchive(0));
-		gp.add(button, 0, 4);
+		return button;
+	}
+
+	private void clientBranchOption(LauncherApplication application, GridPane gp) {
+		Set<LauncherConfig.ClientBranch> accessibleBranches = Sets.newHashSet();
+		Set<String> tickets = Optional.ofNullable(application.getAccountManager().getSession())
+			.map(Session::getTickets)
+			.orElse(Collections.emptySet());
+
+		accessibleBranches.add(LauncherConfig.ClientBranch.PRODUCTION);
+		if (tickets.contains("e:test")) {
+			accessibleBranches.add(LauncherConfig.ClientBranch.TEST);
+		}
+
+		Label label = new Label("Ветка обновлений");
+		gp.add(label, 0, 2);
+
+		Function<LauncherConfig.ClientBranch, LauncherConfig.ClientBranch> convFun =
+			b -> accessibleBranches.contains(b) ? b : LauncherConfig.ClientBranch.PRODUCTION;
+
+		ObservableList<LauncherConfig.ClientBranch> optionList = FXCollections.observableArrayList(accessibleBranches);
+		optionList.sort(Comparator.comparingInt(Enum::ordinal));
+		clientBranchComboBox = new ComboBox<>(optionList);
+		clientBranchComboBox.setMaxWidth(Double.MAX_VALUE);
+		clientBranchComboBox.setCellFactory(param -> new ListCell<LauncherConfig.ClientBranch>() {
+			@Override
+			protected void updateItem(LauncherConfig.ClientBranch item, boolean empty) {
+				super.updateItem(item, empty);
+
+				if (item == null) {
+					item = LauncherConfig.ClientBranch.PRODUCTION;
+				}
+
+				setText(item.getTitle());
+			}
+		});
+		clientBranchComboBox.setButtonCell(clientBranchComboBox.getCellFactory().call(null));
+		clientBranchComboBox.getSelectionModel().select(convFun.apply(application.getConfig().clientBranch));
+		clientBranchComboBox.setDisable(accessibleBranches.size() == 1);
+		clientBranchComboBox.setOnAction(event -> application.getConfig().clientBranch
+			= convFun.apply(clientBranchComboBox.getSelectionModel().getSelectedItem()));
+
+		gp.add(clientBranchComboBox, 1, 2);
 	}
 
 	private void memoryOption(LauncherConfig config, GridPane gp) {
@@ -138,12 +188,10 @@ public class SettingsDialog extends VBox {
 	}
 
 	public static void show(LauncherApplication application) {
-		LauncherConfig config = application.getConfig();
-
 		Stage stage = new Stage();
 		stage.setResizable(false);
-		stage.setOnHiding(event -> config.save());
-		stage.setScene(StageUtils.createScene(new SettingsDialog(config), 500, 400));
+		stage.setOnHiding(event -> application.getConfig().save());
+		stage.setScene(StageUtils.createScene(new SettingsDialog(application), 500, 400));
 		StageUtils.setupIcons(stage);
 		stage.setTitle("Настройки");
 		stage.initModality(Modality.WINDOW_MODAL);

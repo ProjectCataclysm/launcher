@@ -2,10 +2,7 @@ package cataclysm.launcher.download;
 
 import cataclysm.launcher.assets.AssetInfo;
 import cataclysm.launcher.assets.AssetInfoContainer;
-import cataclysm.launcher.utils.HttpClientWrapper;
-import cataclysm.launcher.utils.LauncherConstants;
-import cataclysm.launcher.utils.Log;
-import cataclysm.launcher.utils.PlatformHelper;
+import cataclysm.launcher.utils.*;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import okio.BufferedSource;
@@ -25,7 +22,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletionException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -36,12 +32,28 @@ import java.util.zip.ZipFile;
  * @author Knoblul
  */
 public class DownloadingManager {
+	private LauncherConfig.ClientBranch clientBranch = LauncherConfig.ClientBranch.PRODUCTION;
 
+	public LauncherConfig.ClientBranch getClientBranch() {
+		return clientBranch;
+	}
+
+	public void setClientBranch(LauncherConfig.ClientBranch clientBranch) {
+		this.clientBranch = clientBranch;
+	}
+
+	private String getCurrentClientUrl() {
+		String url = "https://" + LauncherConstants.CLIENT_URL;
+		if (clientBranch.getSubDirName() != null) {
+			url = url + "/" + clientBranch.getSubDirName();
+		}
+		return url;
+	}
 
 	@SuppressWarnings("unchecked")
 	public AssetInfoContainer loadAssetContainer() throws IOException {
 		JSONObject root;
-		String url = "https://" + LauncherConstants.CLIENT_URL + "/deploy.json";
+		String url = getCurrentClientUrl() + "/deploy.json";
 		try (HttpClientWrapper.HttpResponse response = HttpClientWrapper.get(url);
 		     Reader reader = response.getBody().charStream()) {
 			try {
@@ -89,7 +101,7 @@ public class DownloadingManager {
 
 	private void downloadFile(Path localFilePath, AssetInfo asset, DownloadProgressListener listener) throws IOException {
 		Files.createDirectories(localFilePath.getParent());
-		String url = "https://" + LauncherConstants.CLIENT_URL + "/" + asset.getRemote();
+		String url = getCurrentClientUrl() + "/" + asset.getRemote();
 		try (HttpClientWrapper.HttpResponse responseBody = HttpClientWrapper.get(url);
 		     BufferedSource source = responseBody.getBody().source()) {
 			listener.newDownloadFile("Загрузка " + asset.getRemote(), responseBody.getBody().contentLength());

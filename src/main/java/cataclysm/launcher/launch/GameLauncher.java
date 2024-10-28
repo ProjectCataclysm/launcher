@@ -38,12 +38,14 @@ public class GameLauncher {
 	}
 
 	private int startGame(LauncherConfig config, Session session) throws IOException, InterruptedException {
+		Path gameDirPath = config.getCurrentGameDirectoryPath();
+
 		// Может быть проблема при закрытии игры через диспетчер задач, код завершения 1
 		List<String> command = Lists.newArrayList();
 
 		boolean customJava = true;
 		if (PlatformHelper.getPlatform() == PlatformHelper.Platform.WINDOWS) {
-			Path javaPath = config.gameDirectoryPath.resolve(Paths.get("jre8", "bin", "java.exe"));
+			Path javaPath = gameDirPath.resolve(Paths.get("jre8", "bin", "java.exe"));
 			if (Files.isExecutable(javaPath)) {
 				command.add(javaPath.toAbsolutePath().toString());
 				customJava = false;
@@ -54,7 +56,7 @@ public class GameLauncher {
 		//Command Line: exit -Xms128m -Xmx750m -XX:ReservedCodeCacheSize=512m -XX:+IgnoreUnrecognizedVMOptions -XX:+UseG1GC -XX:SoftRefLRUPolicyMSPerMB=50 -XX:CICompilerCount=2 -XX:+HeapDumpOnOutOfMemoryError -XX:-OmitStackTraceInFastThrow -ea -Dsun.io.useCanonCaches=false -Djdk.http.auth.tunneling.disabledSchemes="" -Djdk.attach.allowAttachSelf=true -Djdk.module.illegalAccess.silent=true -Dkotlinx.coroutines.debug=off -Xmx8192m -Djb.vmOptionsFile=C:\Users\Mihail\AppData\Roaming\JetBrains\IdeaIC2021.3\idea64.exe.vmoptions -Djava.system.class.loader=com.intellij.util.lang.PathClassLoader -Didea.vendor.name=JetBrains -Didea.paths.selector=IdeaIC2021.3 -Didea.platform.prefix=Idea -Didea.jre.check=true -Dsplash=true -Dide.native.launcher=true -XX:ErrorFile=C:\Users\Mihail\java_error_in_idea64_%p.log -XX:HeapDumpPath=C:\Users\Mihail\java_error_in_idea64.hprof
 
 		// для репортов JVM
-		Files.createDirectories(config.gameDirectoryPath.resolve("crashes"));
+		Files.createDirectories(gameDirPath.resolve("crashes"));
 
 		if (customJava) {
 			command.add("java");
@@ -109,10 +111,10 @@ public class GameLauncher {
 		command.add("-cp");
 
 		List<String> classPath = Lists.newArrayList();
-		Path binPath = config.gameDirectoryPath.resolve("bin");
+		Path binPath = gameDirPath.resolve("bin");
 		try (DirectoryStream<Path> ds = Files.newDirectoryStream(binPath)) {
 			for (Path path : ds) {
-				Path relativePath = config.gameDirectoryPath.relativize(path);
+				Path relativePath = gameDirPath.relativize(path);
 				classPath.add(relativePath.toString());
 			}
 		}
@@ -120,7 +122,7 @@ public class GameLauncher {
 		Path binNativesPath = binPath.resolve("natives");
 		try (DirectoryStream<Path> ds = Files.newDirectoryStream(binNativesPath)) {
 			for (Path path : ds) {
-				Path relativePath = config.gameDirectoryPath.relativize(path);
+				Path relativePath = gameDirPath.relativize(path);
 				classPath.add(relativePath.toString());
 			}
 		}
@@ -135,7 +137,7 @@ public class GameLauncher {
 		command.add(buildSessionString(session));
 
 		ProcessBuilder pb = new ProcessBuilder(command);
-		pb.directory(config.gameDirectoryPath.toFile());
+		pb.directory(gameDirPath.toFile());
 
 		pb.inheritIO();
 
