@@ -136,6 +136,11 @@ public class GameLauncher {
 		command.add("--session");
 		command.add(buildSessionString(session));
 
+		if (config.clientBranch != LauncherConfig.ClientBranch.PRODUCTION) {
+			command.add("--updateBranch");
+			command.add(config.clientBranch.getSubDirName());
+		}
+
 		ProcessBuilder pb = new ProcessBuilder(command);
 		pb.directory(gameDirPath.toFile());
 
