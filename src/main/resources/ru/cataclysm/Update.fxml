@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<VBox prefHeight="45.0" prefWidth="345.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+   <HBox prefWidth="200.0">
+      <SVGPath
+              content="M11.9456 2.83926L11.1448 3.99826C11.531 4.73943 11.7201 5.56123 11.6951 6.39C11.6701 7.21878 11.4318 8.02864 11.0016 8.74702H1.97789C1.41874 7.81362 1.18704 6.73169 1.31715 5.66162C1.44726 4.59155 1.93225 3.5903 2.70023 2.80632C3.4682 2.02234 4.47827 1.49735 5.58069 1.30919C6.68311 1.12102 7.8192 1.2797 8.82054 1.7617L10.025 0.991123C8.79872 0.234463 7.34414 -0.104598 5.89395 0.0281741C4.44375 0.160946 3.08173 0.75788 2.02574 1.72349C0.969746 2.6891 0.280807 3.9676 0.0691186 5.35448C-0.14257 6.74136 0.135223 8.15649 0.858063 9.3735C0.97168 9.56288 1.13482 9.72034 1.33127 9.83024C1.52773 9.94015 1.75065 9.99867 1.97789 9.99999H10.9951C11.2245 10.0009 11.4501 9.94339 11.6491 9.83337C11.848 9.72336 12.0132 9.56471 12.1279 9.3735C12.7278 8.37358 13.0288 7.2336 12.9978 6.07941C12.9668 4.92523 12.6049 3.80174 11.9521 2.83299L11.9456 2.83926Z"
+              fill="WHITE">
+         <HBox.margin>
+            <Insets top="2.0"/>
+         </HBox.margin>
+      </SVGPath>
+      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Обновление...">
+         <font>
+            <Font name="Gilroy-Medium" size="14.0"/>
+         </font>
+         <HBox.margin>
+            <Insets left="9.0" right="210.0"/>
+         </HBox.margin>
+      </Text>
+      <SVGPath fx:id="continueUpdateButton"
+               content="M1.1875 1.35542C1.1875 0.998753 1.56958 0.77292 1.88208 0.944586L6.69042 3.58917C6.76401 3.6296 6.8254 3.68906 6.86815 3.76133C6.91091 3.8336 6.93346 3.91603 6.93346 4C6.93346 4.08397 6.91091 4.1664 6.86815 4.23867C6.8254 4.31094 6.76401 4.3704 6.69042 4.41084L1.88208 7.05542C1.8107 7.09466 1.73033 7.11463 1.64888 7.11335C1.56743 7.11207 1.48772 7.08959 1.41761 7.04812C1.3475 7.00665 1.28941 6.94762 1.24905 6.87686C1.2087 6.8061 1.18749 6.72604 1.1875 6.64459V1.35542Z"
+               layoutX="10.0" layoutY="12.0" stroke="WHITE" strokeLineCap="ROUND" strokeLineJoin="ROUND"
+               strokeWidth="1.5">
+         <HBox.margin>
+            <Insets top="4.0"/>
+         </HBox.margin>
+      </SVGPath>
+      <SVGPath fx:id="pauseUpdateButton" content="M6.5625 2.1875V7.8125&#10;M3.4375 2.1875V7.8125" fill="WHITE"
+               layoutX="124.0" layoutY="14.0" stroke="WHITE" strokeLineCap="ROUND" strokeLineJoin="ROUND"
+               strokeWidth="1.5">
+         <HBox.margin>
+            <Insets top="4.0"/>
+         </HBox.margin>
+      </SVGPath>
+   </HBox>
+   <ProgressBar fx:id="updateProgressBar" minHeight="5.0" prefHeight="5.0" prefWidth="345.0" progress="0.72"
+                stylesheets="@progress.css">
+      <VBox.margin>
+         <Insets bottom="5.0" top="5.0"/>
+      </VBox.margin>
+      <opaqueInsets>
+         <Insets/>
+      </opaqueInsets>
+   </ProgressBar>
+   <AnchorPane minWidth="345.0">
+      <VBox.margin>
+         <Insets right="40.0"/>
+      </VBox.margin>
+      <Text fx:id="downloadedSizeLabel" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="0 мб / 245 мб"
+            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0">
+         <font>
+            <Font name="Gilroy-Medium" size="14.0"/>
+         </font>
+      </Text>
+      <Text fx:id="downloadSpeedLabel" fill="WHITE" layoutX="10.0" layoutY="10.0" strokeType="OUTSIDE"
+            strokeWidth="0.0" text="8,2 мб/c" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0">
+         <font>
+            <Font name="Gilroy-Medium" size="14.0"/>
+         </font>
+      </Text>
+   </AnchorPane>
+</VBox>

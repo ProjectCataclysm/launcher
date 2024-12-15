@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0"
+      prefWidth="1000.0" style="-fx-background-color: #0E0E0E;" xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1">
+   <VBox alignment="TOP_CENTER" prefHeight="600.0" prefWidth="200.0" style="-fx-background-color: #171717;">
+      <ImageView fitWidth="130.0" pickOnBounds="true" preserveRatio="true">
+         <Image url="@Logo.png"/>
+         <VBox.margin>
+            <Insets top="35.0"/>
+         </VBox.margin>
+      </ImageView>
+      <HBox alignment="CENTER_LEFT" maxWidth="160.0" prefWidth="160.0" VBox.vgrow="NEVER">
+         <VBox.margin>
+            <Insets bottom="7.0" top="70.0"/>
+         </VBox.margin>
+         <fx:include source="Play-long.fxml"/>
+      </HBox>
+      <HBox fx:id="supportBlock" alignment="CENTER_LEFT" layoutX="10.0" layoutY="162.0" maxWidth="160.0"
+            prefHeight="45.0" prefWidth="200.0">
+         <padding>
+            <Insets left="15.0"/>
+         </padding>
+         <VBox.margin>
+            <Insets bottom="7.0"/>
+         </VBox.margin>
+         <SVGPath
+                 content="M7.50001 2.16667C6.77144 2.16667 3.34287 2.71917 3.22501 6.37C5.06787 5.93667 6.50358 4.4525 6.86787 2.5675C7.43572 3.81333 8.96787 5.60083 11.6143 5.38417C11.1322 3.53167 9.48215 2.16667 7.50001 2.166M7.50001 2.16667C6.77144 2.16667 3.34287 2.71917 3.22501 6.37C5.06787 5.93667 6.50358 4.4525 6.86787 2.5675C7.43572 3.81333 8.96787 5.60083 11.6143 5.38417C11.1322 3.53167 9.48215 2.16667 7.50001 2.16667Z&#10;M4.82143 8.125C5.26523 8.125 5.625 7.76123 5.625 7.3125C5.625 6.86377 5.26523 6.5 4.82143 6.5C4.37763 6.5 4.01786 6.86377 4.01786 7.3125C4.01786 7.76123 4.37763 8.125 4.82143 8.125Z&#10;M10.1786 8.125C10.6224 8.125 10.9821 7.76123 10.9821 7.3125C10.9821 6.86377 10.6224 6.5 10.1786 6.5C9.73477 6.5 9.375 6.86377 9.375 7.3125C9.375 7.76123 9.73477 8.125 10.1786 8.125Z&#10;M1.07143 10.8333H1.60714C1.90714 10.8333 2.14286 10.595 2.14286 10.2917V6.68417C2.14286 3.8025 4.29643 1.27833 7.14643 1.09417C10.2643 0.888334 12.8571 3.39083 12.8571 6.5V11.9167H6.96429C6.66429 11.9167 6.42857 12.155 6.42857 12.4583C6.42857 12.7617 6.66429 13 6.96429 13H12.8571C13.4464 13 13.9286 12.5125 13.9286 11.9167V10.8333C14.5179 10.8333 15 10.3458 15 9.75V7.58333C15 6.9875 14.5179 6.5 13.9286 6.5C13.9286 2.91417 11.0464 0 7.5 0C3.95357 0 1.07143 2.91417 1.07143 6.5C0.482143 6.5 0 6.9875 0 7.58333V9.75C0 10.3458 0.482143 10.8333 1.07143 10.8333Z"
+                 fill="#686868"/>
+         <Text fill="#686868" strokeType="OUTSIDE" strokeWidth="0.0" text="Поддержка">
+            <font>
+               <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+            <HBox.margin>
+               <Insets left="15.0"/>
+            </HBox.margin>
+         </Text>
+      </HBox>
+      <HBox fx:id="siteBlock" alignment="CENTER_LEFT" layoutX="10.0" layoutY="208.0" maxWidth="160.0"
+            prefHeight="45.0" prefWidth="200.0">
+         <padding>
+            <Insets left="15.0"/>
+         </padding>
+         <VBox.margin>
+            <Insets bottom="7.0"/>
+         </VBox.margin>
+         <SVGPath
+                 content="M6.4935 0C2.9055 0 0 2.912 0 6.5C0 10.088 2.9055 13 6.4935 13C10.088 13 13 10.088 13 6.5C13 2.912 10.088 0 6.4935 0ZM10.998 3.9H9.0805C8.8725 3.0875 8.5735 2.3075 8.1835 1.586C9.3795 1.9955 10.374 2.8275 10.998 3.9ZM6.5 1.326C7.0395 2.106 7.462 2.9705 7.7415 3.9H5.2585C5.538 2.9705 5.9605 2.106 6.5 1.326ZM1.469 7.8C1.365 7.384 1.3 6.9485 1.3 6.5C1.3 6.0515 1.365 5.616 1.469 5.2H3.666C3.614 5.629 3.575 6.058 3.575 6.5C3.575 6.942 3.614 7.371 3.666 7.8H1.469ZM2.002 9.1H3.9195C4.1275 9.9125 4.4265 10.6925 4.8165 11.414C3.6205 11.0045 2.626 10.179 2.002 9.1ZM3.9195 3.9H2.002C2.626 2.821 3.6205 1.9955 4.8165 1.586C4.4265 2.3075 4.1275 3.0875 3.9195 3.9ZM6.5 11.674C5.9605 10.894 5.538 10.0295 5.2585 9.1H7.7415C7.462 10.0295 7.0395 10.894 6.5 11.674ZM8.021 7.8H4.979C4.9205 7.371 4.875 6.942 4.875 6.5C4.875 6.058 4.9205 5.6225 4.979 5.2H8.021C8.0795 5.6225 8.125 6.058 8.125 6.5C8.125 6.942 8.0795 7.371 8.021 7.8ZM8.1835 11.414C8.5735 10.6925 8.8725 9.9125 9.0805 9.1H10.998C10.374 10.1725 9.3795 11.0045 8.1835 11.414ZM9.334 7.8C9.386 7.371 9.425 6.942 9.425 6.5C9.425 6.058 9.386 5.629 9.334 5.2H11.531C11.635 5.616 11.7 6.0515 11.7 6.5C11.7 6.9485 11.635 7.384 11.531 7.8H9.334Z"
+                 fill="#686868"/>
+         <Text fill="#686868" strokeType="OUTSIDE" strokeWidth="0.0" text="Сайт">
+            <font>
+               <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+            <HBox.margin>
+               <Insets left="15.0"/>
+            </HBox.margin>
+         </Text>
+      </HBox>
+      <HBox fx:id="discordBlock" alignment="CENTER_LEFT" layoutX="10.0" layoutY="253.0" maxWidth="160.0"
+            prefHeight="45.0" prefWidth="200.0">
+         <padding>
+            <Insets left="15.0"/>
+         </padding>
+         <VBox.margin>
+            <Insets bottom="7.0"/>
+         </VBox.margin>
+         <SVGPath
+                 content="M15.5057 1.44149C13.9474 0.217924 11.4834 0.0106472 11.3792 0.00185364C11.2146 -0.0119648 11.0584 0.0791116 10.9909 0.22609C10.9884 0.231115 10.8508 0.621172 10.7177 0.997411C12.5286 1.30707 13.7591 1.99422 13.8246 2.03191C14.1319 2.20653 14.2348 2.59156 14.0554 2.89117C13.9365 3.09091 13.7211 3.20271 13.5 3.20271C13.3901 3.20271 13.2795 3.1757 13.1779 3.11792C13.1599 3.10724 11.3548 2.10352 9.00129 2.10352C6.64714 2.10352 4.84136 3.10787 4.82336 3.11792C4.51671 3.2919 4.12329 3.18952 3.94521 2.88928C3.76714 2.5903 3.87064 2.20653 4.17664 2.03191C4.24221 1.99422 5.47714 1.30456 7.29321 0.995527C7.15307 0.614891 7.01164 0.231115 7.00907 0.22609C6.94157 0.0784835 6.78536 -0.0144773 6.62079 0.00185364C6.51664 0.0100191 4.05257 0.217296 2.47371 1.45782C1.64829 2.20276 0 6.55808 0 10.3236C0 10.3902 0.0173572 10.4549 0.0514286 10.5127C1.18993 12.4661 4.29364 12.9774 5.00079 12.9994C5.00529 13 5.00914 13 5.013 13C5.13771 13 5.25536 12.9416 5.32929 12.843L6.09429 11.8305C4.41643 11.4354 3.52929 10.8142 3.47593 10.7759C3.1905 10.5705 3.12879 10.1773 3.339 9.89776C3.54857 9.6195 3.94971 9.55795 4.23514 9.76208C4.25893 9.77716 5.89629 10.8971 9 10.8971C12.1159 10.8971 13.7488 9.77276 13.7649 9.76146C14.0503 9.5592 14.4527 9.62013 14.6616 9.90027C14.8699 10.1791 14.8095 10.5698 14.5254 10.7746C14.472 10.8129 13.5894 11.4329 11.9154 11.8279L12.6707 12.8423C12.7446 12.9416 12.8623 12.9994 12.987 12.9994C12.9915 12.9994 12.9954 12.9994 12.9992 12.9987C13.707 12.9768 16.8107 12.4655 17.9486 10.512C17.9826 10.4543 18 10.3896 18 10.323C18 6.55809 16.3517 2.20276 15.5057 1.44149ZM6.42857 9.01275C5.71821 9.01275 5.14286 8.30989 5.14286 7.44247C5.14286 6.57504 5.71821 5.87219 6.42857 5.87219C7.13893 5.87219 7.71429 6.57504 7.71429 7.44247C7.71429 8.30989 7.13893 9.01275 6.42857 9.01275ZM11.5714 9.01275C10.8611 9.01275 10.2857 8.30989 10.2857 7.44247C10.2857 6.57504 10.8611 5.87219 11.5714 5.87219C12.2818 5.87219 12.8571 6.57504 12.8571 7.44247C12.8571 8.30989 12.2818 9.01275 11.5714 9.01275Z"
+                 fill="#686868"/>
+         <Text fill="#686868" strokeType="OUTSIDE" strokeWidth="0.0" text="Discord">
+            <font>
+               <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+            <HBox.margin>
+               <Insets left="15.0"/>
+            </HBox.margin>
+         </Text>
+      </HBox>
+      <HBox fx:id="settingsBlock" alignment="CENTER_LEFT" layoutX="10.0" layoutY="299.0" maxWidth="160.0"
+            prefHeight="45.0" prefWidth="160.0">
+         <padding>
+            <Insets left="15.0"/>
+         </padding>
+         <SVGPath
+                 content="M11.47 7.13646C11.4979 6.93333 11.5118 6.72344 11.5118 6.5C11.5118 6.28333 11.4979 6.06667 11.4631 5.86354L12.8761 4.79375C13.0014 4.69896 13.0362 4.51615 12.9596 4.38073L11.6232 2.13281C11.5396 1.98385 11.3656 1.93646 11.2125 1.98385L9.54883 2.63385C9.20079 2.37656 8.83187 2.1599 8.42118 1.9974L8.17059 0.277604C8.14275 0.115104 8.00353 0 7.83647 0H5.16353C4.99647 0 4.86421 0.115104 4.83637 0.277604L4.58578 1.9974C4.17509 2.1599 3.79921 2.38333 3.45813 2.63385L1.7945 1.98385C1.64136 1.92969 1.46734 1.98385 1.38381 2.13281L0.0542945 4.38073C-0.0292351 4.52292 -0.001392 4.69896 0.137824 4.79375L1.55087 5.86354C1.51606 6.06667 1.48822 6.2901 1.48822 6.5C1.48822 6.7099 1.50214 6.93333 1.53695 7.13646L0.123903 8.20625C-0.00139199 8.30104 -0.0361959 8.48385 0.0403729 8.61927L1.37685 10.8672C1.46038 11.0161 1.6344 11.0635 1.78753 11.0161L3.45117 10.3661C3.79921 10.6234 4.16813 10.8401 4.57882 11.0026L4.82941 12.7224C4.86421 12.8849 4.99647 13 5.16353 13H7.83647C8.00353 13 8.14275 12.8849 8.16363 12.7224L8.41422 11.0026C8.82491 10.8401 9.20079 10.6234 9.54187 10.3661L11.2055 11.0161C11.3586 11.0703 11.5327 11.0161 11.6162 10.8672L12.9527 8.61927C13.0362 8.47031 13.0014 8.30104 12.8691 8.20625L11.47 7.13646ZM6.5 8.9375C5.12176 8.9375 3.99411 7.84062 3.99411 6.5C3.99411 5.15938 5.12176 4.0625 6.5 4.0625C7.87824 4.0625 9.00589 5.15938 9.00589 6.5C9.00589 7.84062 7.87824 8.9375 6.5 8.9375Z"
+                 fill="#686868"/>
+         <Text fill="#686868" strokeType="OUTSIDE" strokeWidth="0.0" text="Настройки">
+            <font>
+               <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+            <HBox.margin>
+               <Insets left="15.0"/>
+            </HBox.margin>
+         </Text>
+      </HBox>
+   </VBox>
+   <VBox layoutY="485.0">
+      <padding>
+         <Insets left="15.0"/>
+      </padding>
+      <HBox fx:id="logoutButton" alignment="CENTER_LEFT" maxWidth="125.0" prefHeight="35.0" prefWidth="200.0"
+            style="-fx-background-color: #1F1F1F; -fx-background-radius: 5;">
+         <padding>
+            <Insets left="16.0"/>
+         </padding>
+         <VBox.margin>
+            <Insets left="30.0"/>
+         </VBox.margin>
+         <SVGPath
+                 content="M8.63636 5.33333V2.625C8.63636 2.19402 8.46396 1.7807 8.15708 1.47595C7.85021 1.1712 7.43399 1 7 1H2.63636C2.20237 1 1.78616 1.1712 1.47928 1.47595C1.1724 1.7807 1 2.19402 1 2.625V12.375C1 12.806 1.1724 13.2193 1.47928 13.524C1.78616 13.8288 2.20237 14 2.63636 14H7C7.43399 14 7.85021 13.8288 8.15708 13.524C8.46396 13.2193 8.63636 12.806 8.63636 12.375V9.66667M5.90909 5.33333L3.72727 7.5M3.72727 7.5L5.90909 9.66667M3.72727 7.5H13"
+                 fill="#0e0e0e" stroke="#ffe6e6" strokeLineCap="ROUND" strokeLineJoin="ROUND" strokeWidth="1.2"/>
+         <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Выйти">
+            <font>
+               <Font name="Gilroy-SemiBold" size="12.0"/>
+            </font>
+            <HBox.margin>
+               <Insets left="10.0"/>
+            </HBox.margin>
+         </Text>
+      </HBox>
+      <HBox fx:id="profileBlock" alignment="CENTER_LEFT" layoutX="25.0" layoutY="10.0" maxWidth="160.0"
+            prefHeight="45.0" prefWidth="200.0">
+         <padding>
+            <Insets left="15.0"/>
+         </padding>
+         <GridPane alignment="CENTER" maxHeight="10.0" maxWidth="30.0">
+            <columnConstraints>
+               <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+            </columnConstraints>
+            <rowConstraints>
+               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+            </rowConstraints>
+            <SVGPath content="M 0, 15 a 15,15 0 1,0 30,0 a 15,15 0 1,0 -30,0&#10;" fill="#0e0e0e"/>
+            <SVGPath
+                    content="M5 5C6.38125 5 7.5 3.88125 7.5 2.5C7.5 1.11875 6.38125 0 5 0C3.61875 0 2.5 1.11875 2.5 2.5C2.5 3.88125 3.61875 5 5 5ZM5 6.25C3.33125 6.25 0 7.0875 0 8.75V10H10V8.75C10 7.0875 6.66875 6.25 5 6.25Z"
+                    fill="WHITE" layoutX="10.0" layoutY="10.0">
+               <GridPane.margin>
+                  <Insets left="10.0"/>
+               </GridPane.margin>
+            </SVGPath>
+         </GridPane>
+         <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="elueshka">
+            <font>
+               <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+            <HBox.margin>
+               <Insets left="10.0"/>
+            </HBox.margin>
+         </Text>
+      </HBox>
+   </VBox>
+   <VBox layoutX="200.0" prefHeight="600.0" prefWidth="800.0">
+      <padding>
+         <Insets left="35.0" right="35.0" top="40.0"/>
+      </padding>
+      <HBox prefWidth="320.0">
+         <VBox.margin>
+            <Insets bottom="20.0"/>
+         </VBox.margin>
+         <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Играть на ">
+            <font>
+               <Font name="Gilroy-Bold" size="40.0"/>
+            </font>
+         </Text>
+         <Text fill="#df9422" strokeType="OUTSIDE" strokeWidth="0.0" text="проекте">
+            <font>
+               <Font name="Gilroy-Bold" size="40.0"/>
+            </font>
+            <HBox.margin>
+               <Insets/>
+            </HBox.margin>
+         </Text>
+      </HBox>
+      <ScrollPane hbarPolicy="ALWAYS" prefHeight="340.0" prefWidth="200.0"
+                  style="-fx-background: #0E0E0E; -fx-background-color: #0E0E0E;" stylesheets="@scroll.css"
+                  vbarPolicy="NEVER">
+         <HBox spacing="35.0">
+            <ImageView fitHeight="320.0" fitWidth="580.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@ScreenShot.png"/>
+               </image>
+            </ImageView>
+            <VBox prefHeight="200.0" prefWidth="225.0"
+                  style="-fx-background-radius: 10; -fx-background-color: #171717;">
+               <ImageView fitHeight="150.0" fitWidth="225.0" pickOnBounds="true" preserveRatio="true">
+                  <Image url="@Maintenance.png"/>
+               </ImageView>
+               <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Технические работы">
+                  <font>
+                     <Font name="Gilroy-SemiBold" size="16.0"/>
+                  </font>
+                  <VBox.margin>
+                     <Insets left="15.0" top="15.0"/>
+                  </VBox.margin>
+               </Text>
+               <Text fill="#626262" layoutX="25.0" layoutY="164.0" strokeType="OUTSIDE" strokeWidth="0.0"
+                     text="Доброго времени суток!  &#10;&#10;Технические работы завершены.&#10;Критические ошибки устранены.&#10;...">
+                  <font>
+                     <Font name="Gilroy-Regular" size="12.0"/>
+                  </font>
+                  <VBox.margin>
+                     <Insets left="15.0" top="9.0"/>
+                  </VBox.margin>
+               </Text>
+            </VBox>
+         </HBox>
+      </ScrollPane>
+      <HBox layoutX="45.0" layoutY="60.0" prefWidth="320.0" style="-fx-border-color: #DF9422; -fx-border-radius: 5;">
+         <VBox.margin>
+            <Insets top="36.0"/>
+         </VBox.margin>
+         <padding>
+            <Insets bottom="13.0" left="13.0" right="13.0" top="13.0"/>
+         </padding>
+         <fx:include source="Update.fxml"/>
+         <VBox layoutX="25.0" layoutY="25.0" prefHeight="35.0" prefWidth="93.0">
+            <HBox.margin>
+               <Insets right="20.0"/>
+            </HBox.margin>
+            <HBox>
+               <SVGPath
+                       content="M7 8.75C4.66 8.75 0 9.92 0 12.25V14H14V12.25C14 9.92 9.34 8.75 7 8.75ZM2.34 12C3.18 11.42 5.21 10.75 7 10.75C8.79 10.75 10.82 11.42 11.66 12H2.34ZM7 7C8.93 7 10.5 5.43 10.5 3.5C10.5 1.57 8.93 0 7 0C5.07 0 3.5 1.57 3.5 3.5C3.5 5.43 5.07 7 7 7ZM7 2C7.83 2 8.5 2.67 8.5 3.5C8.5 4.33 7.83 5 7 5C6.17 5 5.5 4.33 5.5 3.5C5.5 2.67 6.17 2 7 2ZM14.04 8.81C15.2 9.65 16 10.77 16 12.25V14H20V12.25C20 10.23 16.5 9.08 14.04 8.81ZM13 7C14.93 7 16.5 5.43 16.5 3.5C16.5 1.57 14.93 0 13 0C12.46 0 11.96 0.13 11.5 0.35C12.13 1.24 12.5 2.33 12.5 3.5C12.5 4.67 12.13 5.76 11.5 6.65C11.96 6.87 12.46 7 13 7Z"
+                       fill="#df9422">
+                  <HBox.margin>
+                     <Insets top="2.0"/>
+                  </HBox.margin>
+               </SVGPath>
+               <Text fill="#df9422" strokeType="OUTSIDE" strokeWidth="0.0" text="Игроков">
+                  <font>
+                     <Font name="Gilroy-Bold" size="16.0"/>
+                  </font>
+                  <HBox.margin>
+                     <Insets left="10.0"/>
+                  </HBox.margin>
+               </Text>
+            </HBox>
+            <Text fx:id="playersOnline" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="2 869"
+                  textAlignment="CENTER" wrappingWidth="93.0">
+               <font>
+                  <Font name="Gilroy-Bold" size="18.0"/>
+               </font>
+               <VBox.margin>
+                  <Insets top="5.0"/>
+               </VBox.margin>
+            </Text>
+         </VBox>
+         <Button fx:id="playButton" alignment="CENTER" cache="true" contentDisplay="CENTER" graphicTextGap="1.0"
+                 mnemonicParsing="false" prefHeight="45.0" prefWidth="200.0"
+                 style="-fx-background-color: #DF9422;" text="Играть" textFill="WHITE">
+            <font>
+               <Font name="Gilroy-Bold" size="20.0"/>
+            </font>
+         </Button>
+      </HBox>
+   </VBox>
+   <HBox layoutX="930.0" layoutY="10.0" prefHeight="20.0" prefWidth="60.0">
+      <opaqueInsets>
+         <Insets/>
+      </opaqueInsets>
+      <AnchorPane fx:id="minimizeButton" prefHeight="20.0" prefWidth="20.0">
+         <HBox.margin>
+            <Insets right="15.0"/>
+         </HBox.margin>
+         <SVGPath content="M1.16663 1H12.8333" fill="WHITE" stroke="WHITE" strokeLineCap="ROUND"
+                  strokeLineJoin="ROUND" strokeWidth="1.5" AnchorPane.bottomAnchor="10.0"
+                  AnchorPane.leftAnchor="4.17" AnchorPane.rightAnchor="4.17" AnchorPane.topAnchor="10.0"/>
+      </AnchorPane>
+      <AnchorPane fx:id="closeButton" layoutX="10.0" layoutY="10.0" prefHeight="20.0" prefWidth="20.0">
+         <SVGPath content="M1 11L11 1M1 1L11 11" fill="WHITE" stroke="WHITE" strokeLineCap="ROUND"
+                  strokeLineJoin="ROUND" strokeWidth="1.5" AnchorPane.bottomAnchor="5.0"
+                  AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0"/>
+      </AnchorPane>
+   </HBox>
+   <Text fx:id="versionLabel" fill="#868686" layoutX="817.0" layoutY="580.0" strokeType="OUTSIDE" strokeWidth="0.0"
+         text="v2.36-5beta">
+      <font>
+         <Font name="Gilroy-Regular" size="12.0"/>
+      </font>
+   </Text>
+</Pane>

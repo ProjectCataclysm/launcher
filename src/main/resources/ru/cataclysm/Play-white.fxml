@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<HBox fx:id="playBlockWhite" alignment="CENTER_LEFT" maxWidth="160.0" prefHeight="45.0" prefWidth="160.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <SVGPath content="M0 1.05302V11.947C0 12.7777 0.857565 13.2824 1.51799 12.8303L9.54165 7.38329C10.1528 6.97319 10.1528 6.02681 9.54165 5.60619L1.51799 0.169723C0.857565 -0.282439 0 0.222301 0 1.05302Z" fill="WHITE" />
+      <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Играть">
+         <font>
+            <Font name="Gilroy-SemiBold" size="16.0" />
+         </font>
+         <HBox.margin>
+            <Insets left="15.0" />
+         </HBox.margin>
+      </Text>
+   </children>
+   <padding>
+      <Insets left="15.0" />
+   </padding>
+</HBox>
