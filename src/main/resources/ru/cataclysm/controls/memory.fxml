@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.shape.SVGPath?>
+<SVGPath
+         content="M1 9.65385L9.27273 1L7.5 7.34615H14L5.72727 16L7.5 9.65385H1ZM1 9.65385L9.27273 1L7.5 7.34615H14L5.72727 16L7.5 9.65385H1Z"
+         stroke="SILVER" strokeLineCap="ROUND" strokeLineJoin="ROUND" strokeWidth="1.5"
+         xmlns="http://javafx.com/javafx/21.0.5" xmlns:fx="http://javafx.com/fxml/1">
+</SVGPath>

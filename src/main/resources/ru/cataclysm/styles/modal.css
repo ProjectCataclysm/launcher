@@ -1,0 +1,12 @@
+ .modal {
+    -fx-background-color: #0E0E0E;
+    -fx-border-color: #DF9422;
+    -fx-border-width: 3.0px;
+ }
+
+ .modal .label {
+   -fx-background-color: black;
+   -fx-background-radius:10px;
+   -fx-text-fill:white;
+   -fx-font-size:15.0px;
+ }

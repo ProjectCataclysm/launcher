@@ -40,3 +40,11 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+/libs/native/libjlibtorrent.arm64.dylib
+/libs/native/libjlibtorrent.x86_64.dylib
+/libs/native/libMacOSXUtils.dylib
+/libs/native/libSystemUtilities.dylib
+/libs/native/libSystemUtilities.so
+/libs/native/SystemUtilities.dll
+/logs/
+/.idea/

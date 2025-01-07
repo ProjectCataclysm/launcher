@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.shape.SVGPath?>
+
+<SVGPath
+         content="M0 1.05302V11.947C0 12.7777 0.857565 13.2824 1.51799 12.8303L9.54165 7.38329C10.1528 6.97319 10.1528 6.02681 9.54165 5.60619L1.51799 0.169723C0.857565 -0.282439 0 0.222301 0 1.05302Z"
+         fill="WHITE"
+         xmlns="http://javafx.com/javafx/21.0.5" xmlns:fx="http://javafx.com/fxml/1">
+</SVGPath>

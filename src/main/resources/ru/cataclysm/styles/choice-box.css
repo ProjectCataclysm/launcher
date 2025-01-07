@@ -1,0 +1,24 @@
+
+// Background color of the whole context menu
+.choice-box .context-menu { -fx-background-color: black; }
+
+// Focused item background color in the list
+.choice-box .menu-item:focused { -fx-background-color: #DF9422; }
+
+// Text color of non-focused items in the list
+.choice-box .menu-item > .label { -fx-text-fill: white; }
+
+// Text color of focused item in the list
+.choice-box .menu-item:focused > .label { -fx-text-fill: black; }
+
+// Background color of the control itself
+.choice-box {
+  -fx-background-color:  #0E0E0E;
+  -fx-border-radius: 5;
+  -fx-border-color: #DF9422;
+  -fx-text-fill: #FFFFFF;
+  -fx-mark-color: #DF9422; // arrow color
+}
+
+// Selected item text color on the control itself
+.choice-box > .label { -fx-text-fill: white; }

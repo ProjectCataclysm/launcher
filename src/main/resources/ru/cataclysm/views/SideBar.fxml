@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import ru.cataclysm.controls.*?>
+<AnchorPane prefHeight="600.0" prefWidth="200.0" style="-fx-background-color: #171717;"
+            xmlns="http://javafx.com/javafx/21.0.5" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="ru.cataclysm.controllers.SidebarController">
+    <VBox alignment="TOP_CENTER">
+        <ImageView fitWidth="130.0" pickOnBounds="true" preserveRatio="true">
+            <Image url="@../images/LogoFull.png"/>
+            <VBox.margin>
+                <Insets top="35.0"/>
+            </VBox.margin>
+        </ImageView>
+        <HBox alignment="CENTER_LEFT" maxWidth="200.0" prefWidth="200.0" VBox.vgrow="NEVER">
+            <VBox.margin>
+                <Insets bottom="7.0" top="70.0"/>
+            </VBox.margin>
+            <VBox prefHeight="114.0">
+                <HBox alignment="CENTER_LEFT" maxWidth="200.0" prefHeight="45.0" prefWidth="120.0"
+                      style="-fx-background-color: #1F1F1F;">
+                    <SVGButton fx:id="playBlock"
+                               prefHeight="25" prefWidth="200"
+                               text="Играть"
+                               stylesheets="@../styles/button.css"
+                               onMouseClicked="#playBlock_Click"
+                               alignment="CENTER_LEFT"
+                               svgId="playBlock">
+                        <font>
+                            <Font name="Gilroy-SemiBold" size="16.0"/>
+                        </font>
+                    </SVGButton>
+                    <SVGLabel fx:id="dropdown" prefHeight="25" prefWidth="25" svgId="dropdown" textFill="white"/>
+                </HBox>
+                <VBox fx:id="playDropDown" style="-fx-background-color: #1F1F1F;">
+                    <padding>
+                        <Insets left="15.0" />
+                    </padding>
+                    <SVGButton fx:id="playServer1Button"
+                               prefHeight="25" prefWidth="150"
+                               text="Build server"
+                               stylesheets="@../styles/button.css"
+                               onMouseClicked="#playServer1Button_Click"
+                               alignment="CENTER_LEFT"
+                               svgId="playServer2Button">
+                        <font>
+                            <Font name="Gilroy-SemiBold" size="12.0"/>
+                        </font>
+                    </SVGButton>
+                    <SVGButton fx:id="playServer2Button"
+                               prefHeight="25" prefWidth="150"
+                               text="Build server"
+                               stylesheets="@../styles/button.css"
+                               onMouseClicked="#playServer2Button_Click"
+                               alignment="CENTER_LEFT"
+                               svgId="playServer2Button">
+                        <font>
+                            <Font name="Gilroy-SemiBold" size="12.0"/>
+                        </font>
+                    </SVGButton>
+                </VBox>
+            </VBox>
+        </HBox>
+        <SVGButton fx:id="supportButton"
+                   prefHeight="25" prefWidth="200"
+                   text="Поддержка"
+                   stylesheets="@../styles/button.css"
+                   onMouseClicked="#supportButton_Click"
+                   alignment="CENTER_LEFT"
+                   svgId="supportButton">
+            <font>
+                <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+        </SVGButton>
+
+        <SVGButton fx:id="websiteButton"
+                   prefHeight="25" prefWidth="200"
+                   text="Сайт"
+                   stylesheets="@../styles/button.css"
+                   onMouseClicked="#websiteButton_Click"
+                   alignment="CENTER_LEFT"
+                   svgId="websiteButton">
+            <font>
+                <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+        </SVGButton>
+
+        <SVGButton fx:id="discordButton"
+                   prefHeight="25" prefWidth="200"
+                   text="Discord"
+                   stylesheets="@../styles/button.css"
+                   onMouseClicked="#discordButton_Click"
+                   alignment="CENTER_LEFT"
+                   svgId="discordButton">
+            <font>
+                <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+        </SVGButton>
+
+        <SVGButton fx:id="settingsButton"
+                   prefHeight="25" prefWidth="200"
+                   text="Настройки"
+                   stylesheets="@../styles/button.css"
+                   onMouseClicked="#settingsButton_Click"
+                   alignment="CENTER_LEFT"
+                   svgId="settingsButton">
+            <font>
+                <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+        </SVGButton>
+    </VBox>
+
+    <VBox AnchorPane.bottomAnchor="50">
+        <padding>
+            <Insets top="20.0"/>
+        </padding>
+        <SVGButton fx:id="accountButton"
+                   prefHeight="20" prefWidth="200"
+                   text="elueshka"
+                   stylesheets="@../styles/button.css"
+                   onMouseClicked="#accountButton_Click"
+                   svgId="accountButton">
+            <font>
+                <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+        </SVGButton>
+        <SVGButton fx:id="logoutButton"
+                   prefHeight="20" prefWidth="200"
+                   text="Выйти"
+                   stylesheets="@../styles/button.css"
+                   onMouseClicked="#logoutButton_Click"
+                   visible="false"
+                   svgId="logoutButton">
+            <font>
+                <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+            <padding>
+                <Insets top="12.0"/>
+            </padding>
+        </SVGButton>
+    </VBox>
+</AnchorPane>

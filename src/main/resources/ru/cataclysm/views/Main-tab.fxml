@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import ru.cataclysm.controls.SVGLabel?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.Font?>
+
+<VBox layoutX="200.0" prefHeight="600.0" prefWidth="800.0"
+      xmlns="http://javafx.com/javafx/21.0.5" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="ru.cataclysm.controllers.MainTabController">
+    <padding>
+        <Insets left="35.0" right="35.0" top="40.0" />
+    </padding>
+    <HBox prefWidth="320.0">
+        <VBox.margin>
+            <Insets bottom="20.0" />
+        </VBox.margin>
+        <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Играть на ">
+            <font>
+                <Font name="Gilroy-Bold" size="40.0" />
+            </font>
+        </Text>
+        <Text fill="#df9422" strokeType="OUTSIDE" strokeWidth="0.0" text="проекте">
+            <font>
+                <Font name="Gilroy-Bold" size="40.0" />
+            </font>
+            <HBox.margin>
+                <Insets />
+            </HBox.margin>
+        </Text>
+    </HBox>
+    <ScrollPane hbarPolicy="ALWAYS" prefHeight="340.0" prefWidth="200.0" style="-fx-background: #0E0E0E; -fx-background-color: #0E0E0E;" stylesheets="@../styles/scroll.css" vbarPolicy="NEVER">
+        <HBox spacing="35.0">
+            <ImageView fitHeight="320.0" fitWidth="580.0" pickOnBounds="true" preserveRatio="true">
+                <Image url="@../images/ScreenShot.png"/>
+            </ImageView>
+            <VBox prefHeight="200.0" prefWidth="225.0" style="-fx-background-radius: 10; -fx-background-color: #171717;">
+                <ImageView fitHeight="150.0" fitWidth="225.0" pickOnBounds="true" preserveRatio="true">
+                    <Image url="@../images/Maintenance.png" />
+                </ImageView>
+                <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="Технические работы">
+                    <font>
+                        <Font name="Gilroy-SemiBold" size="16.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets left="15.0" top="15.0" />
+                    </VBox.margin>
+                </Text>
+                <Text fill="#626262" layoutX="25.0" layoutY="164.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Доброго времени суток!    Технические работы завершены. Критические ошибки устранены. ...">
+                    <font>
+                        <Font name="Gilroy-Regular" size="12.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets left="15.0" top="9.0" />
+                    </VBox.margin>
+                </Text>
+            </VBox>
+        </HBox>
+    </ScrollPane>
+    <HBox layoutX="45.0" layoutY="60.0" prefWidth="320.0" style="-fx-border-color: #DF9422; -fx-border-radius: 5;">
+        <VBox.margin>
+            <Insets top="20.0" />
+        </VBox.margin>
+        <padding>
+            <Insets bottom="13.0" left="13.0" right="13.0" top="13.0" />
+        </padding>
+
+        <fx:include fx:id="update" source="Update.fxml" />
+
+        <VBox prefHeight="45.0" prefWidth="150.0">
+            <SVGLabel fx:id="playersLabel"
+                      prefHeight="20" prefWidth="150"
+                      text="Игроков" textFill="#df9422" svgId="players">
+                <font>
+                    <Font name="Gilroy-Bold" size="16.0"/>
+                </font>
+            </SVGLabel>
+            <Text fx:id="playersOnline" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="2 869"
+                  textAlignment="CENTER" wrappingWidth="150.0">
+                <font>
+                    <Font name="Gilroy-Bold" size="18.0" />
+                </font>
+            </Text>
+        </VBox>
+
+        <Button fx:id="playButton" onMouseClicked="#playButton_Click" alignment="CENTER"
+                cache="true" contentDisplay="CENTER" graphicTextGap="1.0" mnemonicParsing="false"
+                prefHeight="45.0" prefWidth="200.0" style="-fx-background-color: #DF9422;"
+                text="Играть" textFill="WHITE">
+            <font>
+                <Font name="Gilroy-Bold" size="20.0" />
+            </font>
+        </Button>
+    </HBox>
+</VBox>

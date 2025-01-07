@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<?import ru.cataclysm.controls.SVGButton?>
+<?import ru.cataclysm.controls.SVGLabel?>
+<VBox prefHeight="45.0" prefWidth="345.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="ru.cataclysm.controllers.UpdateController">
+   <HBox prefWidth="200.0">
+      <SVGLabel fx:id="updateState"
+                prefHeight="20" prefWidth="170"
+                text="Обновление..."
+                textFill="white"
+                svgId="updateState"
+      />
+      <SVGButton fx:id="continueUpdateButton"
+                 prefHeight="20" prefWidth="20"
+                 onMouseClicked="#updateButton_Click"
+                 stylesheets="@../styles/button.css"
+                 svgId="continueUpdateButton"
+      />
+      <SVGButton fx:id="pauseUpdateButton"
+                 prefHeight="20" prefWidth="20"
+                 onMouseClicked="#pauseButton_Click"
+                 stylesheets="@../styles/button.css"
+                 svgId="pauseUpdateButton"
+      />
+   </HBox>
+   <ProgressBar fx:id="updateProgressBar" minHeight="5.0" prefHeight="5.0" prefWidth="345.0" progress="0.0"
+                stylesheets="@../styles/progress.css">
+      <VBox.margin>
+         <Insets bottom="5.0" top="5.0"/>
+      </VBox.margin>
+      <opaqueInsets>
+         <Insets/>
+      </opaqueInsets>
+   </ProgressBar>
+   <AnchorPane minWidth="345.0">
+      <Text fx:id="downloadedSizeLabel" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="0 мб / 245 мб"
+            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0">
+         <font>
+            <Font name="Gilroy-Medium" size="14.0"/>
+         </font>
+      </Text>
+      <Text fx:id="downloadSpeedLabel" fill="WHITE" layoutX="10.0" layoutY="10.0" strokeType="OUTSIDE"
+            strokeWidth="0.0" text="8,2 мб/c" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0">
+         <font>
+            <Font name="Gilroy-Medium" size="14.0"/>
+         </font>
+      </Text>
+   </AnchorPane>
+</VBox>
