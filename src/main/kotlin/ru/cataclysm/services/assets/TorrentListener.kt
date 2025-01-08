@@ -8,7 +8,7 @@ class TorrentListener(
 ) : AlertListener {
 
     override fun types(): IntArray {
-        return arrayOf(
+        return intArrayOf(
             AlertType.ADD_TORRENT.swig(),
             AlertType.BLOCK_FINISHED.swig(),
             AlertType.PIECE_FINISHED.swig(),
@@ -16,7 +16,7 @@ class TorrentListener(
             AlertType.TORRENT_FINISHED.swig(),
 //            AlertType.TORRENT_ERROR.swig(),
 //            AlertType.TORRENT_LOG.swig(),
-        ).toIntArray()
+        )
     }
 
 

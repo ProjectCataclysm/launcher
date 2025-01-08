@@ -9,7 +9,7 @@ object ParseHelper {
         try {
             for (v in array) result.add(v.toInt())
         } catch (ex: NumberFormatException) {
-            return arrayOf(0, 0, 0, 0).toIntArray()
+            return intArrayOf(0, 0, 0, 0)
         }
         return result.toIntArray()
     }
