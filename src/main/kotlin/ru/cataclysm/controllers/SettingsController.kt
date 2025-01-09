@@ -6,9 +6,9 @@ import javafx.scene.control.*
 import javafx.stage.DirectoryChooser
 import javafx.stage.Stage
 import me.pavanvo.appfx.CustomController
+import ru.cataclysm.Launcher
 import ru.cataclysm.helpers.PlatformHelper
 import ru.cataclysm.helpers.MemoryConverter
-import ru.cataclysm.helpers.ReportHelper
 import ru.cataclysm.services.Settings
 import kotlin.io.path.isDirectory
 
@@ -87,6 +87,6 @@ class SettingsController : CustomController() {
 
     @FXML
     private fun createReportButton_Click() {
-        ReportHelper.createReportArchive(stage,0)
+        Launcher.createReport(0)
     }
 }

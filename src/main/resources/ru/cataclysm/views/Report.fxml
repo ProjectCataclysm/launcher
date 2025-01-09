@@ -8,8 +8,7 @@
       xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       alignment="CENTER"
-      prefHeight="300.0" prefWidth="400.0"
-      fx:controller="ru.cataclysm.controllers.ReportController">
+      prefHeight="300.0" prefWidth="400.0">
     <Label text="Создание архива..." />
     <ProgressBar fx:id="progressBar" prefWidth="350"
                  style="-fx-accent: #DF9422;"

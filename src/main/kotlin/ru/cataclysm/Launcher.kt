@@ -1,5 +1,6 @@
 package ru.cataclysm
 
+import javafx.event.EventHandler
 import javafx.application.Application
 import javafx.application.Platform
 import javafx.scene.Scene
@@ -8,19 +9,23 @@ import javafx.stage.Stage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import me.pavanvo.appfx.BorderlessApp
 import me.pavanvo.appfx.BorderlessApp.Companion.draggableStage
 import ru.cataclysm.helpers.Constants
-import ru.cataclysm.helpers.ReportHelper
 import ru.cataclysm.modals.ErrorDialog
 import ru.cataclysm.modals.GameErrorDialog
+import ru.cataclysm.modals.ReportDialog
 import ru.cataclysm.services.Log
+import ru.cataclysm.services.Report
+import ru.cataclysm.services.account.AccountService
+import java.io.IOException
 
 object Launcher {
     lateinit var stage: Stage
 
     @Volatile
-    var mainScene: Scene? = null
+    private var mainScene: Scene? = null
     fun switchToMain() = synchronized(this) {
         mainScene ?: BorderlessApp.loadScene(stage, Constants.View.MAIN).also {
             mainScene = it
@@ -31,7 +36,7 @@ object Launcher {
     }
 
     @Volatile
-    var loginScene: Scene? = null
+    private var loginScene: Scene? = null
     fun switchToLogin() = synchronized(this) {
         loginScene ?: BorderlessApp.loadScene(stage, Constants.View.LOGIN).also { loginScene = it }
         stage.scene = loginScene
@@ -56,7 +61,23 @@ object Launcher {
         val errorMessage = GameErrorDialog(stage, exitCode)
         errorMessage.showAndWait().ifPresent { selection ->
             if (selection.buttonData == ButtonBar.ButtonData.YES)
-                ReportHelper.createReportArchive(stage, exitCode)
+                createReport(exitCode)
+        }
+    }
+
+    fun createReport(exitCode: Int) {
+        val report = ReportDialog(stage)
+        report.show()
+        scopeIO.launch {
+            try {
+                Report.createReportArchive(exitCode, report.onProgress)
+            } catch (e: IOException) {
+                scopeFX.launch {
+                    showError("Не удалось сформировать архив", e)
+                }
+            } finally {
+                scopeFX.launch { report.hide() }
+            }
         }
     }
 }
@@ -64,7 +85,23 @@ object Launcher {
 class Preloader : BorderlessApp(Constants.View.PRELOADER, Constants.App.NAME){
     override fun start(stage: Stage) {
         Launcher.stage = stage
+        stage.onShown = EventHandler { onShown() }
         super.start(stage)
+    }
+
+    private fun onShown() {
+        try {
+            AccountService.validateSession()
+        } catch (ex: Exception) {
+            Launcher.showError("Не удалось восстановить сессию", ex)
+        }
+
+        if (AccountService.session != null) {
+            Launcher.switchToMain()
+        } else {
+            Launcher.switchToLogin()
+        }
+        Launcher.stage.onShown = null
     }
 }
 

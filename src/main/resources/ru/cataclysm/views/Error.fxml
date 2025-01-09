@@ -5,8 +5,7 @@
 
 <VBox xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            prefHeight="300.0" prefWidth="600.0"
-            fx:controller="ru.cataclysm.controllers.ErrorController">
+            prefHeight="300.0" prefWidth="600.0">
     <Label text="Отладочные данные:"/>
     <TextArea fx:id="stackTrace" editable="false" stylesheets="@../styles/text-area.css"/>
 </VBox>

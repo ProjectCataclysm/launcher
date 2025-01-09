@@ -1,15 +1,8 @@
-package ru.cataclysm.helpers
+package ru.cataclysm.services
 
-import javafx.stage.Stage
-import kotlinx.coroutines.launch
 import me.pavanvo.events.Event1
-import ru.cataclysm.Launcher
 import ru.cataclysm.helpers.Constants.DATETIME_FORMATTER
-import ru.cataclysm.modals.ReportDialog
-import ru.cataclysm.scopeFX
-import ru.cataclysm.scopeIO
-import ru.cataclysm.services.Log
-import ru.cataclysm.services.Settings
+import ru.cataclysm.helpers.PlatformHelper
 import java.awt.Desktop
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -23,27 +16,10 @@ import java.time.LocalDateTime
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-object ReportHelper {
-
-    fun createReportArchive(parent: Stage, exitCode: Int) {
-        val report = ReportDialog(parent)
-        report.show()
-        scopeIO.launch {
-            try {
-                createReportArchiveImpl(exitCode, report.onProgress)
-            } catch (e: IOException) {
-                scopeFX.launch {
-                    Launcher.showError("Не удалось сформировать архив", e)
-                }
-            } finally {
-                scopeFX.launch { report.hide() }
-            }
-        }
-    }
-
+object Report {
 
     @Throws(IOException::class)
-    private fun createReportArchiveImpl(exitCode: Int, onProgress: Event1<Double>) {
+    fun createReportArchive(exitCode: Int, onProgress: Event1<Double>) {
         val launcherDir: Path = Settings.LAUNCHER_DIR_PATH
         val reportsPath = Files.createDirectories(Settings.currentGameDirectoryPath.resolve("reports"))
         val archivePath = reportsPath.resolve(
