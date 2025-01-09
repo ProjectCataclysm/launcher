@@ -10,6 +10,7 @@ import ru.cataclysm.services.Log
 import ru.cataclysm.services.Settings
 import ru.cataclysm.services.account.AccountService
 import ru.cataclysm.services.account.Session
+import ru.cataclysm.services.assets.AssetsService
 import java.io.File
 import java.io.IOException
 import java.nio.charset.StandardCharsets
@@ -150,6 +151,8 @@ object GameService {
     fun startGame() {
         check(!launched.get()) { "Игра уже запущена!" }
         checkNotNull(AccountService.session) { "Вход в аккаунт не был выполнен!" }
+        // Sanitizing
+        AssetsService.deleteUselessFiles()
 
         Log.msg("Starting game process...")
         scopeFX.launch {

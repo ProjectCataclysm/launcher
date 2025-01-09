@@ -1,7 +1,6 @@
 package ru.cataclysm.controllers
 
 import com.frostwire.jlibtorrent.SessionStats
-import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.TorrentStatus
 import javafx.scene.control.ProgressBar
 import javafx.scene.text.Text
@@ -13,7 +12,7 @@ import ru.cataclysm.controls.SVGLabel
 import ru.cataclysm.helpers.Converter.readableSize
 import ru.cataclysm.scopeFX
 import ru.cataclysm.services.assets.AssetsService
-import ru.cataclysm.services.assets.CheckedState
+import ru.cataclysm.services.assets.CheckResult
 
 
 class UpdateController : CustomController() {
@@ -28,24 +27,18 @@ class UpdateController : CustomController() {
     override fun loaded(stage: Stage) {
         super.loaded(stage)
         // Service Events
-        AssetsService.onDownloadStarted += ::DownloadStarded
         AssetsService.onProgressUpdated += ::updateProgress
         AssetsService.onStateChanged += ::stateChanged
-        AssetsService.onChecked += ::stateChecked
+        AssetsService.onChecked += ::checked
         AssetsService.onTraffic += ::updateSpeed
+        AssetsService.onDownload += { AssetsService.verify() }
 
         pauseUpdateButton.isDisable = true
         AssetsService.checkForUpdates()
         AssetsService.startBittorrentCore()
     }
 
-    var totalSize = 0L
-
-    fun DownloadStarded(info: TorrentInfo) {
-        totalSize = info.totalSize()
-    }
-
-    fun stateChanged(state: TorrentStatus.State) = scopeFX.launch {
+    private fun stateChanged(state: TorrentStatus.State) = scopeFX.launch {
         showProgress()
         when (state) {
             TorrentStatus.State.CHECKING_FILES -> {
@@ -76,38 +69,38 @@ class UpdateController : CustomController() {
         }
     }
 
-    fun stateChecked(state: CheckedState) = scopeFX.launch {
+    private fun checked(state: CheckResult) = scopeFX.launch {
         hideProgress()
         when (state) {
-            CheckedState.DOWNLOAD_AVAILABLE -> {
+            CheckResult.DOWNLOAD_AVAILABLE -> {
                 updateState.text = "Доступна загрузка"
             }
 
-            CheckedState.IN_PROGRESS -> {
+            CheckResult.IN_PROGRESS -> {
                 updateState.text = "Проверка обновления"
             }
 
-            CheckedState.UPDATE_AVAILABLE -> {
+            CheckResult.UPDATE_AVAILABLE -> {
                 updateState.text = "Доступно обновление";
             }
 
-            CheckedState.READY -> {
+            CheckResult.READY -> {
                 updateButton_Click()
             }
 
-            CheckedState.FAIL -> {
+            CheckResult.FAIL -> {
                 updateState.text = "Не удалось обновить"
             }
         }
     }
 
-    fun updateProgress(progress: Float) = scopeFX.launch  {
+    private fun updateProgress(progress: Float) = scopeFX.launch {
         updateProgressBar.progress = progress.toDouble()
-        val current = (totalSize * progress).toLong()
-        downloadedSizeLabel.text = "${readableSize(current)} / ${readableSize(totalSize)}"
+        val current = (AssetsService.totalSize * progress).toLong()
+        downloadedSizeLabel.text = "${readableSize(current)} / ${readableSize(AssetsService.totalSize)}"
     }
 
-    fun updateSpeed(stats: SessionStats) = scopeFX.launch  {
+    private fun updateSpeed(stats: SessionStats) = scopeFX.launch {
         downloadSpeedLabel.text = "${readableSize(stats.downloadRate())}/s /" +
                 " ${readableSize(stats.uploadRate())}/s"
     }
@@ -124,13 +117,13 @@ class UpdateController : CustomController() {
         pauseUpdateButton.isDisable = true
     }
 
-    fun hideProgress() {
+    private fun hideProgress() {
         updateProgressBar.isVisible = false
         downloadedSizeLabel.isVisible = false
         downloadSpeedLabel.isVisible = false
     }
 
-    fun showProgress() {
+    private fun showProgress() {
         updateProgressBar.isVisible = true
         downloadedSizeLabel.isVisible = true
         downloadSpeedLabel.isVisible = true

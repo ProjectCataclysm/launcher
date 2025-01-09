@@ -25,7 +25,10 @@ class MainTabController : CustomController() {
 
         updateController.loaded(stage)
 
+        playButton.isDisable = true
+
         TrayService.onAction += { scopeFX.launch { stage.show() } }
+        AssetsService.onVerified += { playButton.isDisable = false }
         GameService.onStartGameAvailable += ::startGameAvailable
     }
 
@@ -35,7 +38,7 @@ class MainTabController : CustomController() {
         stage.hide()
     }
 
-    fun startGameAvailable(available: Boolean) {
+    private fun startGameAvailable(available: Boolean) {
         if (available) {
             stage.setOnCloseRequest {
                 AssetsService.stop()

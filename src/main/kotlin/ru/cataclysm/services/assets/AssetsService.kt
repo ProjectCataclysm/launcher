@@ -18,7 +18,12 @@ import ru.cataclysm.services.Settings
 import java.io.File
 import java.util.*
 
-enum class CheckedState {
+enum class Task {
+    DOWNLOAD,
+    VERIFY
+}
+
+enum class CheckResult {
     IN_PROGRESS,
     DOWNLOAD_AVAILABLE,
     UPDATE_AVAILABLE,
@@ -34,12 +39,18 @@ object AssetsService {
         }
     }
 
+    private val torrentInfo: TorrentInfo
+        get() = TorrentInfo(Settings.torrentFile)
+
+    private var listener = TorrentListener(this)
+    var totalSize = 0L
+
     var onProgressUpdated: Event1<Float> = Event1()
     var onStateChanged: Event1<TorrentStatus.State> = Event1()
-    var onChecked: Event1<CheckedState> = Event1()
-    var onDownloadStarted: Event1<TorrentInfo> = Event1()
+    var onChecked: Event1<CheckResult> = Event1()
     var onTraffic: Event1<SessionStats> = Event1()
-    var onCompleted: Event = Event()
+    var onDownload: Event = Event()
+    var onVerified: Event = Event()
 
     fun startBittorrentCore() = scopeIO.launch {
         val homeDir = File(Settings.currentGameDirectoryPath.toString())
@@ -55,15 +66,13 @@ object AssetsService {
         ctx.enableDht = true
         BTEngine.ctx = ctx
         BTEngine.onCtxSetupComplete()
-        onCompleted += ::deleteUselessFiles
 
-        val listener = TorrentListener(this@AssetsService)
         BTEngine.instance.addListener(listener)
         BTEngine.instance.start()
     }
 
     fun checkForUpdates() = scopeIO.launch {
-        onChecked(CheckedState.IN_PROGRESS)
+        onChecked(CheckResult.IN_PROGRESS)
         try {
             // fetch torrent
             val bytes = RequestHelper.get(TORRENT_URL).use { it.response.body?.bytes() }
@@ -72,28 +81,27 @@ object AssetsService {
 
                 if (Settings.torrentFile.exists()) {
                     // compare with existing
-                    val torrentInfo = TorrentInfo(Settings.torrentFile)
                     if (newTorrent.creationDate() > torrentInfo.creationDate()) {
-                        onChecked(CheckedState.UPDATE_AVAILABLE)
+                        onChecked(CheckResult.UPDATE_AVAILABLE)
                         Settings.torrentFile.writeBytes(bytes)
                     }
                     // torrent files are same
                     if (newTorrent.infoHash() == torrentInfo.infoHash()) {
                         // all files already downloaded
-                        if (quickVerify()) onChecked(CheckedState.READY)
+                        if (quickVerify()) onChecked(CheckResult.READY)
                         // need to download something
-                        else onChecked(CheckedState.DOWNLOAD_AVAILABLE)
+                        else onChecked(CheckResult.DOWNLOAD_AVAILABLE)
                     }
                 } else {
-                    onChecked(CheckedState.DOWNLOAD_AVAILABLE)
+                    onChecked(CheckResult.DOWNLOAD_AVAILABLE)
                     Settings.torrentFile.writeBytes(bytes)
                 }
 
             } else
-                onChecked(CheckedState.FAIL)
+                onChecked(CheckResult.FAIL)
         } catch (ex: Exception) {
             Log.err(ex, "Unable to fetch torrent file")
-            onChecked(CheckedState.FAIL)
+            onChecked(CheckResult.FAIL)
         }
     }
 
@@ -113,9 +121,19 @@ object AssetsService {
         BTEngine.instance.stop()
     }
 
+    fun verify() {
+        listener.currentTask = Task.VERIFY
+        val handle = BTEngine.instance.find(torrentInfo.infoHash())
+        handle.pause()
+        BTEngine.instance.remove(handle)
+        val resumeFile = BTEngine.instance.resumeDataFile(torrentInfo.infoHash().toString())
+        resumeFile.delete()
+        BTEngine.instance.download(torrentInfo, Settings.currentGameDirectoryPath.toFile())
+    }
+
     private fun download() = scopeIO.launch {
-        val torrentInfo = TorrentInfo(Settings.torrentFile)
-        onDownloadStarted(torrentInfo)
+        listener.currentTask = Task.DOWNLOAD
+        totalSize = torrentInfo.totalSize()
 
         val resumeFile = BTEngine.instance.resumeDataFile(torrentInfo)
         if (resumeFile.exists()) {
@@ -130,8 +148,7 @@ object AssetsService {
         timer.schedule(timerTask, 0, 1000)
     }
 
-    private fun deleteUselessFiles() = scopeIO.launch {
-        val ti = TorrentInfo(Settings.torrentFile)
+    fun deleteUselessFiles() = scopeIO.launch {
         val torrentFiles = getTorrentFiles()
 
         val files = Settings.currentGameDirectoryPath.toFile().walkTopDown()
@@ -139,7 +156,7 @@ object AssetsService {
             if (file.isDirectory) continue
             if (file == Settings.torrentFile) continue
             if (file == BTEngine.instance.settingsFile()) continue
-            if (file == BTEngine.instance.resumeDataFile(ti.infoHash().toString())) continue
+            if (file == BTEngine.instance.resumeDataFile(torrentInfo.infoHash().toString())) continue
             if (torrentFiles.contains(file.absolutePath)) continue
 
             file.delete()
@@ -158,8 +175,7 @@ object AssetsService {
     }
 
     private fun getTorrentFiles(): MutableList<String> {
-        val ti = TorrentInfo(Settings.torrentFile)
-        val torrentStorage = ti.files()
+        val torrentStorage = torrentInfo.files()
         val count = torrentStorage.numFiles()
 
         val torrentFiles = mutableListOf<String>()

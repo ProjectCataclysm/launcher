@@ -19,6 +19,7 @@ class TorrentListener(
         )
     }
 
+    var currentTask: Task = Task.DOWNLOAD
 
     override fun alert(alert: Alert<*>) {
         val type: AlertType = alert.type()
@@ -47,7 +48,10 @@ class TorrentListener(
             }
 
             AlertType.TORRENT_FINISHED -> {
-                service.onCompleted()
+                when (currentTask) {
+                    Task.DOWNLOAD -> service.onDownload()
+                    Task.VERIFY -> service.onVerified()
+                }
             }
 
             AlertType.TORRENT_ERROR -> {
