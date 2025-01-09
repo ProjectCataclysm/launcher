@@ -35,7 +35,7 @@ object Constants {
         val REGISTER: URL = javaClass.classLoader.getResource("${Path.VIEWS}${App.REGISTER}.fxml")!!
         val LOGIN: URL = javaClass.classLoader.getResource("${Path.VIEWS}${App.LOGIN}.fxml")!!
         val ERROR: URL = javaClass.classLoader.getResource("${Path.VIEWS}Error.fxml")!!
-        val REPORT: URL = javaClass.classLoader.getResource("${Path.VIEWS}Report.fxml")!!
+        val LOADING: URL = javaClass.classLoader.getResource("${Path.VIEWS}Loading.fxml")!!
     }
 
     object App {

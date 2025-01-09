@@ -36,13 +36,13 @@ object StubChecker {
     }
 
     fun stubJarPath(): Path {
-        return Settings.configFile
+        return Settings.LAUNCHER_DIR_PATH.resolve("launcher.jar")
     }
 
     private fun checkLocation(): Path? {
         val jar = currentJarPath()
         val stubJar = stubJarPath()
-        val updateJar: Path = UpgradeService.updateJarPath()
+        val updateJar: Path = UpgradeService.updateJarPath
 
         Log.msg("JAR: $jar")
         Log.msg("STUB: $stubJar")
@@ -90,7 +90,7 @@ object StubChecker {
     }
 
     fun check(args: Array<String>) {
-        if (args.size > 0 && args[0] != "--restarted") {
+        if (args.isNotEmpty() && args[0] != "--restarted") {
             // Если в параметр был передан файл с окночнанием .jar, то удаляем
             // этот файл
             // нужно для удаления родительского джарника, напр. при запуске

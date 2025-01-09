@@ -18,8 +18,10 @@ import java.util.zip.ZipOutputStream
 
 object Report {
 
+    val onProgress: Event1<Double> = Event1()
+
     @Throws(IOException::class)
-    fun createReportArchive(exitCode: Int, onProgress: Event1<Double>) {
+    fun createReportArchive(exitCode: Int) {
         val launcherDir: Path = Settings.LAUNCHER_DIR_PATH
         val reportsPath = Files.createDirectories(Settings.currentGameDirectoryPath.resolve("reports"))
         val archivePath = reportsPath.resolve(

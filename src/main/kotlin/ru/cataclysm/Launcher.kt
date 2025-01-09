@@ -1,8 +1,8 @@
 package ru.cataclysm
 
-import javafx.event.EventHandler
 import javafx.application.Application
 import javafx.application.Platform
+import javafx.event.EventHandler
 import javafx.scene.Scene
 import javafx.scene.control.ButtonBar
 import javafx.stage.Stage
@@ -15,11 +15,15 @@ import me.pavanvo.appfx.BorderlessApp.Companion.draggableStage
 import ru.cataclysm.helpers.Constants
 import ru.cataclysm.modals.ErrorDialog
 import ru.cataclysm.modals.GameErrorDialog
-import ru.cataclysm.modals.ReportDialog
+import ru.cataclysm.modals.LoadingDialog
 import ru.cataclysm.services.Log
 import ru.cataclysm.services.Report
 import ru.cataclysm.services.account.AccountService
+import ru.cataclysm.services.upgrade.LauncherRestartedException
+import ru.cataclysm.services.upgrade.StubChecker
+import ru.cataclysm.services.upgrade.UpgradeService
 import java.io.IOException
+import kotlin.system.exitProcess
 
 object Launcher {
     lateinit var stage: Stage
@@ -66,17 +70,43 @@ object Launcher {
     }
 
     fun createReport(exitCode: Int) {
-        val report = ReportDialog(stage)
-        report.show()
+        val loading = LoadingDialog(stage, "Отчёт", "Создание архива...")
+        loading.show()
+        Report.onProgress += loading::setProgress
+
         scopeIO.launch {
             try {
-                Report.createReportArchive(exitCode, report.onProgress)
+                Report.createReportArchive(exitCode)
             } catch (e: IOException) {
                 scopeFX.launch {
                     showError("Не удалось сформировать архив", e)
                 }
             } finally {
-                scopeFX.launch { report.hide() }
+                Report.onProgress -= loading::setProgress
+                scopeFX.launch { loading.hide() }
+            }
+        }
+    }
+
+    fun checkForUpgrade() {
+        val loading = LoadingDialog(stage, "Обновление", "Проверяем наличие обновлений")
+        loading.show()
+        UpgradeService.onProgress += loading::setProgress
+        UpgradeService.onMessage += loading::setHeader
+
+        scopeIO.launch {
+            try {
+                UpgradeService.check()
+            } catch (e: LauncherRestartedException) {
+                exitProcess(0)
+            } catch (e: IOException) {
+                scopeFX.launch {
+                    showError("Не удалось обновить лаунчер", e)
+                }
+            } finally {
+                UpgradeService.onProgress -= loading::setProgress
+                UpgradeService.onMessage -= loading::setHeader
+                scopeFX.launch { loading.hide() }
             }
         }
     }
@@ -86,6 +116,7 @@ class Preloader : BorderlessApp(Constants.View.PRELOADER, Constants.App.NAME){
     override fun start(stage: Stage) {
         Launcher.stage = stage
         stage.onShown = EventHandler { onShown() }
+
         super.start(stage)
     }
 
@@ -97,6 +128,7 @@ class Preloader : BorderlessApp(Constants.View.PRELOADER, Constants.App.NAME){
         }
 
         if (AccountService.session != null) {
+            Launcher.checkForUpgrade()
             Launcher.switchToMain()
         } else {
             Launcher.switchToLogin()
@@ -112,6 +144,17 @@ val scopeFX = CoroutineScope(Dispatchers.JavaFx)
 fun main(args: Array<String>) {
     Log.configureLogging()
     Log.msg("Starting launcher...")
+
+    try {
+        StubChecker.check(args)
+    } catch (e: LauncherRestartedException) {
+        exitProcess(0)
+    } catch (t: Throwable) {
+//        AwtErrorDialog.showError(t.toString(), t)
+//        return
+    }
+
     Platform.setImplicitExit(false)
+
     Application.launch(Preloader::class.java)
 }

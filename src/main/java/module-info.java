@@ -10,6 +10,7 @@ module ru.cataclysm.main {
     requires org.apache.logging.log4j;
     requires org.apache.logging.log4j.core;
     requires okhttp3;
+    requires okio;
     requires jlibtorrent;
 
 

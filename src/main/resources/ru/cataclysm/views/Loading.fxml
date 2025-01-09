@@ -9,7 +9,7 @@
       xmlns:fx="http://javafx.com/fxml"
       alignment="CENTER"
       prefHeight="300.0" prefWidth="400.0">
-    <Label text="Создание архива..." />
+    <Label fx:id="header" />
     <ProgressBar fx:id="progressBar" prefWidth="350"
                  style="-fx-accent: #DF9422;"
     />
