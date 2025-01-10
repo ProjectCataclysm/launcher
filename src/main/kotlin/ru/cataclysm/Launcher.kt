@@ -13,9 +13,11 @@ import kotlinx.coroutines.launch
 import me.pavanvo.appfx.BorderlessApp
 import me.pavanvo.appfx.BorderlessApp.Companion.draggableStage
 import ru.cataclysm.helpers.Constants
+import ru.cataclysm.modals.AwtErrorDialog
 import ru.cataclysm.modals.ErrorDialog
 import ru.cataclysm.modals.GameErrorDialog
 import ru.cataclysm.modals.LoadingDialog
+import ru.cataclysm.services.LauncherLock
 import ru.cataclysm.services.Log
 import ru.cataclysm.services.Report
 import ru.cataclysm.services.account.AccountService
@@ -116,7 +118,7 @@ class Preloader : BorderlessApp(Constants.View.PRELOADER, Constants.App.NAME){
     override fun start(stage: Stage) {
         Launcher.stage = stage
         stage.onShown = EventHandler { onShown() }
-
+        Platform.setImplicitExit(false)
         super.start(stage)
     }
 
@@ -146,15 +148,25 @@ fun main(args: Array<String>) {
     Log.msg("Starting launcher...")
 
     try {
+        Thread.sleep(300)
+        LauncherLock.lock()
+    } catch (e: LauncherLock.AlreadyLaunchedException) {
+        AwtErrorDialog.showError("Лаунчер уже запущен", null)
+    } catch (t: Throwable) {
+        AwtErrorDialog.showError("Ошибка запуска лаунчера", t)
+    }
+
+    try {
         StubChecker.check(args)
     } catch (e: LauncherRestartedException) {
         exitProcess(0)
     } catch (t: Throwable) {
-//        AwtErrorDialog.showError(t.toString(), t)
-//        return
+        AwtErrorDialog.showError(t.toString(), t)
     }
 
-    Platform.setImplicitExit(false)
-
-    Application.launch(Preloader::class.java)
+    try {
+        Application.launch(Preloader::class.java)
+    } catch (t: Throwable) {
+        AwtErrorDialog.showError("Ошибка запуска", t)
+    }
 }

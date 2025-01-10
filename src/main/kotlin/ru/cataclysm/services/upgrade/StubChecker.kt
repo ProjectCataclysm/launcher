@@ -2,6 +2,7 @@ package ru.cataclysm.services.upgrade
 
 import ru.cataclysm.services.Log
 import ru.cataclysm.services.Settings
+import ru.cataclysm.services.LauncherLock
 import java.io.IOException
 import java.net.URISyntaxException
 import java.nio.file.Files
@@ -71,7 +72,7 @@ object StubChecker {
 
     fun restart(path: Path) {
         try {
-            //LauncherLock.unlock()
+            LauncherLock.unlock()
             val command: MutableList<String> = ArrayList()
             command.add(if (Settings.IS_INSTALLATION) "java/bin/java" else "java")
             command.add("-Xmx256m") // Так как лаунчер по кд висит в фоне, ему надо как можно минимум памяти задать
