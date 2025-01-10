@@ -13,7 +13,7 @@ import ru.cataclysm.helpers.Constants.View.LOADING
 import ru.cataclysm.scopeFX
 
 class LoadingDialog(
-    private val parent: Stage,
+    parent: Stage,
     title: String,
     header: String,
 ) : Stage() {

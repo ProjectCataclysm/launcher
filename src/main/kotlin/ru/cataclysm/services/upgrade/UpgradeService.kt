@@ -97,6 +97,5 @@ object UpgradeService {
 
         // проверяем наличие обновлений
         checkForUpdates()
-        //StubChecker.restart(updateJarPath)
     }
 }

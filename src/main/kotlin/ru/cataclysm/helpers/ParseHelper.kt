@@ -44,7 +44,7 @@ object ParseHelper {
             // if equal, reset variables and
             // go for next numeric part
             vnum2 = 0
-            vnum1 = vnum2
+            vnum1 = 0
             i++
             j++
         }

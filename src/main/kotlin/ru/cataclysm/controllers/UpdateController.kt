@@ -42,27 +42,27 @@ class UpdateController : CustomController() {
         showProgress()
         when (state) {
             TorrentStatus.State.CHECKING_FILES -> {
-                updateState.text = "Проверка файлов";
+                updateState.text = "Проверка файлов"
                 updateProgress(0F)
             }
 
             TorrentStatus.State.DOWNLOADING_METADATA -> {
-                updateState.text = "Загрузка данных";
+                updateState.text = "Загрузка данных"
                 updateProgress(0F)
             }
             TorrentStatus.State.DOWNLOADING -> {
                 updateState.text = "Загрузка"
             }
             TorrentStatus.State.FINISHED -> {
-                updateState.text = "Завершено";
+                updateState.text = "Завершено"
                 updateProgress(1F)
             }
             TorrentStatus.State.SEEDING -> {
-                updateState.text = "Раздаётся";
+                updateState.text = "Раздаётся"
                 updateProgress(1F)
             }
             TorrentStatus.State.CHECKING_RESUME_DATA -> {
-                updateState.text = "Восстановление";
+                updateState.text = "Восстановление"
                 updateProgress(0F)
             }
             TorrentStatus.State.UNKNOWN -> updateState.text = "Неизвестно"
@@ -81,7 +81,7 @@ class UpdateController : CustomController() {
             }
 
             CheckResult.UPDATE_AVAILABLE -> {
-                updateState.text = "Доступно обновление";
+                updateState.text = "Доступно обновление"
             }
 
             CheckResult.READY -> {

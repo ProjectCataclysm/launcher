@@ -11,7 +11,7 @@ import ru.cataclysm.helpers.Constants
 import ru.cataclysm.services.Log
 
 class GameErrorDialog(
-    private val parent: Stage,
+    parent: Stage,
     exitCode: Int
 ) : Alert(AlertType.ERROR) {
 

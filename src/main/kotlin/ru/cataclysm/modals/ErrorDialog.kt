@@ -11,7 +11,7 @@ import me.pavanvo.appfx.BorderlessApp
 import ru.cataclysm.helpers.Constants
 
 class ErrorDialog(
-    private val parent: Stage,
+    parent: Stage,
     message: String,
     exception: Throwable?
 ) : Alert(AlertType.ERROR){

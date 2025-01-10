@@ -2,6 +2,7 @@ package ru.cataclysm.services
 
 import ru.cataclysm.helpers.Converter
 import ru.cataclysm.helpers.PlatformHelper
+import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.nio.file.Files
@@ -47,9 +48,9 @@ object Settings {
         else
             gameDirectoryPath
 
-    val torrentFile = currentGameDirectoryPath.resolve("game.torrent").toFile()
+    val torrentFile: File = currentGameDirectoryPath.resolve("game.torrent").toFile()
 
-    fun load() {
+    private fun load() {
         try {
             Files.newInputStream(configFile).use { `in` ->
                 Log.msg("Loading config file...")
