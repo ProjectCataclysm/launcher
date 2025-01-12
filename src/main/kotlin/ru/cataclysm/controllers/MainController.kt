@@ -41,7 +41,10 @@ class MainController : CustomController() {
     }
 
     fun buttonClose_Click() {
-        AssetsService.stop()
-        Platform.exit()
+        try {
+            AssetsService.stop()
+        } finally {
+            Platform.exit()
+        }
     }
 }

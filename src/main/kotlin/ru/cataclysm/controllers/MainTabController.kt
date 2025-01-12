@@ -41,9 +41,12 @@ class MainTabController : CustomController() {
     private fun startGameAvailable(available: Boolean) {
         if (available) {
             stage.setOnCloseRequest {
-                AssetsService.stop()
-                TrayService.uninstall()
-                Platform.exit()
+                try {
+                    AssetsService.stop()
+                } finally {
+                    TrayService.uninstall()
+                    Platform.exit()
+                }
             }
             stage.setOnShown { AssetsService.checkForUpdates() }
             if (stage.isShowing) AssetsService.checkForUpdates() else stage.show()
