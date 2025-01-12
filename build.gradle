@@ -3,7 +3,6 @@ plugins {
     id 'application'
     id 'org.jetbrains.kotlin.jvm' version '2.1.0'
     id 'org.jetbrains.kotlin.plugin.serialization' version '2.1.0'
-    id 'org.javamodularity.moduleplugin' version '1.8.12'
     id 'org.openjfx.javafxplugin' version '0.0.13'
 }
 
@@ -18,7 +17,6 @@ ext {
     junitVersion = '5.10.2'
 }
 
-
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
@@ -32,7 +30,13 @@ kotlin {
     jvmToolchain(17)
 }
 
-
+compileKotlin {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
 
 javafx {
     version = '21.0.5'
@@ -40,7 +44,7 @@ javafx {
 }
 
 dependencies {
-    implementation fileTree("${project.rootDir}/libs/jars") { include '*.jar' }
+    implementation fileTree("$projectDir/libs/jars") { include '*.jar' }
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
@@ -75,5 +79,9 @@ task jarWithDependency (type: Jar){
         exclude '**/META-INF/NOTICE'
         exclude '**/META-INF/DEPENDENCIES'
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    // include libtorrent natives
+    from {
+        "$projectDir/libs/native"
     }
 } with jar

@@ -2,8 +2,11 @@ package ru.cataclysm.helpers
 
 import ru.cataclysm.services.Log
 import java.lang.management.ManagementFactory
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
+import java.util.*
 import javax.management.ObjectName
 import kotlin.math.min
 
@@ -94,5 +97,27 @@ object PlatformHelper {
             Log.err(t, "Failed to determine max physical memory size")
         }
         return 0
+    }
+
+    fun injectLibtorrent() {
+        val libNameMapped = System.mapLibraryName("jlibtorrent")
+        val libFileDirPath = Files.createDirectories(Paths.get("libs"))
+        val libFilePath = libFileDirPath.resolve(libNameMapped).toAbsolutePath()
+
+        try {
+            Files.copy(
+                Objects.requireNonNull(PlatformHelper.javaClass.getResourceAsStream("/$libNameMapped")),
+                libFilePath,
+                StandardCopyOption.REPLACE_EXISTING
+            )
+        } catch (ignored1: Throwable) {
+
+        }
+
+        if (!Files.isExecutable(libFilePath)) {
+            throw RuntimeException("jlibtorrent native $libFilePath is not executable")
+        }
+
+        System.setProperty("jlibtorrent.jni.path", libFilePath.toString())
     }
 }
