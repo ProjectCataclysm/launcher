@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import me.pavanvo.appfx.BorderlessApp
 import me.pavanvo.appfx.BorderlessApp.Companion.draggableStage
 import ru.cataclysm.helpers.Constants
+import ru.cataclysm.helpers.PlatformHelper
 import ru.cataclysm.modals.AwtErrorDialog
 import ru.cataclysm.modals.ErrorDialog
 import ru.cataclysm.modals.GameErrorDialog
@@ -116,6 +117,8 @@ object Launcher {
 
 class Preloader : BorderlessApp(Constants.View.PRELOADER, Constants.App.NAME){
     override fun start(stage: Stage) {
+        // inject jlibtotrent
+        PlatformHelper.injectLibtorrent()
         Launcher.stage = stage
         stage.onShown = EventHandler { onShown() }
         Platform.setImplicitExit(false)
@@ -156,12 +159,14 @@ fun main(args: Array<String>) {
         AwtErrorDialog.showError("Ошибка запуска лаунчера", t)
     }
 
-    try {
-        StubChecker.check(args)
-    } catch (e: LauncherRestartedException) {
-        exitProcess(0)
-    } catch (t: Throwable) {
-        AwtErrorDialog.showError(t.toString(), t)
+    if (args.isEmpty() || args[0] != "-skipUpdate") {
+        try {
+            StubChecker.check(args)
+        } catch (e: LauncherRestartedException) {
+            exitProcess(0)
+        } catch (t: Throwable) {
+            AwtErrorDialog.showError(t.toString(), t)
+        }
     }
 
     try {
