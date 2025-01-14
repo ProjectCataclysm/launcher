@@ -27,6 +27,7 @@ object Constants {
         const val ICONS = "${IMAGES}icons/"
         const val CONTROLS = "${BASE}controls/"
         const val STYLES = "${BASE}styles/"
+        const val FONTS = "${BASE}fonts/"
     }
 
     object View {
@@ -62,6 +63,14 @@ object Constants {
     }
 
     object Styles {
+        val font = javaClass.classLoader.getResource("gilroy-bold.ttf")?.toExternalForm()
         val alert: URL = javaClass.classLoader.getResource("${Path.STYLES}alert.css")!!
+    }
+
+    object Fonts {
+        val bold = javaClass.classLoader.getResource("${Path.FONTS}gilroy-bold.ttf")?.toExternalForm()
+        val medium = javaClass.classLoader.getResource("${Path.FONTS}gilroy-medium.ttf")?.toExternalForm()
+        val regular = javaClass.classLoader.getResource("${Path.FONTS}gilroy-regular.ttf")?.toExternalForm()
+        val semibold = javaClass.classLoader.getResource("${Path.FONTS}gilroy-semibold.ttf")?.toExternalForm()
     }
 }

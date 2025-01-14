@@ -5,6 +5,7 @@ import javafx.application.Platform
 import javafx.event.EventHandler
 import javafx.scene.Scene
 import javafx.scene.control.ButtonBar
+import javafx.scene.text.Font
 import javafx.stage.Stage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -119,6 +120,12 @@ class Preloader : BorderlessApp(Constants.View.PRELOADER, Constants.App.NAME){
     override fun start(stage: Stage) {
         // inject jlibtotrent
         PlatformHelper.injectLibtorrent()
+        // load Fonts
+        Font.loadFont(Constants.Fonts.bold, 14.0)
+        Font.loadFont(Constants.Fonts.medium, 14.0)
+        Font.loadFont(Constants.Fonts.regular, 14.0)
+        Font.loadFont(Constants.Fonts.semibold, 14.0)
+        // setup primary stage
         Launcher.stage = stage
         stage.onShown = EventHandler { onShown() }
         Platform.setImplicitExit(false)
