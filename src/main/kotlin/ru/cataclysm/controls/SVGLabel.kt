@@ -34,30 +34,32 @@ class SVGLabel : Label() {
         if (!id.isNullOrEmpty()) {
             val fxmlLoader = FXMLLoader(Constants.Controls.getControl(id))
             svgPath = fxmlLoader.load()
-            //resize(svgPath, prefHeight)
+//            svgPath.resize()
             text(text)
         }
     }
 
     private fun text(value: String?) {
         if (!value.isNullOrEmpty()) {
-            separator0.prefWidth = prefHeight / 2; separator1.prefWidth = prefHeight / 2
+            val separatorWidth = (prefHeight - svgPath.getWidth()) / 2
+            separator0.prefWidth = separatorWidth
+            separator1.prefWidth = separatorWidth
             graphic = HBox(separator0, svgPath, separator1)
         } else {
             graphic = svgPath
         }
     }
 
-    private fun resize(svg: SVGPath, height: Double) {
-        val originalHeight = svg.prefHeight(height)
-        val originalWidth = svg.prefWidth(height)
+    private fun SVGPath.getWidth(): Double {
+        val originalHeight = this.prefHeight(this@SVGLabel.prefHeight)
+        val originalWidth = this.prefWidth(this@SVGLabel.prefHeight)
         val original = if (originalHeight > originalWidth) originalHeight else originalWidth
-        val scale = height / original
+        return original
+    }
 
-        svg.scaleX = scale
-        svg.scaleY = scale
-
-//        svg.layoutX = height / 2
-//        svg.layoutY = height / 2
+    private fun SVGPath.resize() {
+        val scale = this@SVGLabel.prefHeight / this.getWidth()
+        this.scaleX = scale
+        this.scaleY = scale
     }
 }

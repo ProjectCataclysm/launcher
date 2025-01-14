@@ -1,6 +1,7 @@
 package ru.cataclysm.controllers
 
 import javafx.fxml.FXML
+import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import kotlinx.coroutines.delay
@@ -17,6 +18,7 @@ import ru.cataclysm.services.assets.AssetsService
 
 class SidebarController : CustomController() {
 
+    lateinit var playBlock: HBox
     lateinit var dropdown: SVGLabel
     lateinit var playDropDown: VBox
     lateinit var accountButton: SVGButton
@@ -35,9 +37,11 @@ class SidebarController : CustomController() {
 
 
     @FXML
-    private fun playBlock_Click() {
+    private fun playButton_Click() {
         playDropDown.isVisible = !playDropDown.isVisible
         dropdown.rotate = if (dropdown.rotate == 0.0) 180.0 else 0.0
+        if (playDropDown.isVisible) playBlock.style = "-fx-background-color: #232323;"
+        else playBlock.style = ""
     }
 
     @FXML
@@ -45,6 +49,9 @@ class SidebarController : CustomController() {
 
     @FXML
     private fun playServer2Button_Click() = onPlay()
+
+    @FXML
+    private fun playLastServer_Click() = onPlay()
 
     @FXML
     private fun supportButton_Click() {
