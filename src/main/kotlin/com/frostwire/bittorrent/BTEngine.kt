@@ -618,7 +618,7 @@ class BTEngine private constructor() : SessionManager(false) {
     }
 
     companion object {
-        private val LOG: Logger = Logger.Companion.getLogger(BTEngine::class.java)
+        private val LOG: Logger = Logger.getLogger(BTEngine::class.java)
         private val INNER_LISTENER_TYPES = intArrayOf(
             AlertType.ADD_TORRENT.swig(),
             AlertType.LISTEN_SUCCEEDED.swig(),
@@ -670,7 +670,7 @@ class BTEngine private constructor() : SessionManager(false) {
 
         private fun defaultSettings(): SettingsPack {
             val sp = SettingsPack()
-            sp.validateHttpsTrackers(false)
+            // sp.validateHttpsTrackers(false)
             if (ctx!!.optimizeMemory) {
                 val maxQueuedDiskBytes = sp.maxQueuedDiskBytes()
                 sp.maxQueuedDiskBytes(maxQueuedDiskBytes / 2)

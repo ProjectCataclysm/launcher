@@ -22,112 +22,67 @@ import java.util.logging.Level
  * @author gubatron
  * @author aldenml
  */
-class Logger private constructor(private val jul: java.util.logging.Logger) {
-    val name: String = jul.name
+class Logger private constructor(private val name: String) {
+    private val logger: org.tinylog.kotlin.TaggedLogger = org.tinylog.kotlin.Logger.tag(name)
 
     @JvmOverloads
     fun info(msg: String?, showCallingMethodInfo: Boolean = false) {
         if (contextPrefix == null) {
-            jul.logp(Level.INFO, name, "", (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg))
+            logger.info((if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg))
         } else {
-            jul.logp(
-                Level.INFO,
-                name,
-                "",
-                contextPrefix + (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg)
-            )
+            logger.info(contextPrefix + (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg))
         }
-    }
-
-    @JvmOverloads
-    fun info(msg: String?, e: Throwable?, showCallingMethodInfo: Boolean = false) {
-        jul.logp(Level.INFO, name, "", (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg), e)
     }
 
     @JvmOverloads
     fun warn(msg: String?, showCallingMethodInfo: Boolean = false) {
         if (contextPrefix == null) {
-            jul.logp(Level.WARNING, name, "", (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg))
+            logger.warn((if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg))
         } else {
-            jul.logp(
-                Level.WARNING,
-                name,
-                "",
-                contextPrefix + (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg)
-            )
+            logger.warn(contextPrefix + (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg))
         }
     }
 
     @JvmOverloads
     fun warn(msg: String?, e: Throwable?, showCallingMethodInfo: Boolean = false) {
         if (contextPrefix == null) {
-            jul.logp(Level.INFO, name, "", (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg), e)
+            if (e != null) {
+                logger.warn(e, (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg).toString())
+            } else {
+                logger.warn((if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg).toString())
+            }
         } else {
-            jul.logp(
-                Level.INFO,
-                name,
-                "",
-                contextPrefix + (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg),
-                e
-            )
+            if (e != null) {
+                logger.warn(e, contextPrefix + (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg).toString())
+            } else {
+                logger.warn(contextPrefix + (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg).toString())
+            }
         }
     }
 
     @JvmOverloads
     fun error(msg: String?, showCallingMethodInfo: Boolean = false) {
         if (contextPrefix == null) {
-            jul.logp(Level.SEVERE, name, "", (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg))
+            logger.error((if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg))
         } else {
-            jul.logp(
-                Level.SEVERE,
-                name,
-                "",
-                contextPrefix + (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg)
-            )
+            logger.error(contextPrefix + (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg))
         }
     }
 
     @JvmOverloads
     fun error(msg: String?, e: Throwable?, showCallingMethodInfo: Boolean = false) {
         if (contextPrefix == null) {
-            jul.logp(Level.INFO, name, "", (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg), e)
+            if (e != null) {
+                logger.error(e, (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg).toString())
+            } else {
+                logger.error((if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg).toString())
+            }
         } else {
-            jul.logp(
-                Level.INFO,
-                name,
-                "",
-                contextPrefix + (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg),
-                e
-            )
-        }
-    }
-
-    @JvmOverloads
-    fun debug(msg: String?, showCallingMethodInfo: Boolean = false) {
-        if (contextPrefix == null) {
-            jul.logp(Level.INFO, name, "", (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg))
-        } else {
-            jul.logp(
-                Level.INFO,
-                name,
-                "",
-                contextPrefix + (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg)
-            )
-        }
-    }
-
-    @JvmOverloads
-    fun debug(msg: String?, e: Throwable?, showCallingMethodInfo: Boolean = false) {
-        if (contextPrefix == null) {
-            jul.logp(Level.INFO, name, "", (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg), e)
-        } else {
-            jul.logp(
-                Level.INFO,
-                name,
-                "",
-                contextPrefix + (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg),
-                e
-            )
+            if (e != null) {
+                logger.error(e, contextPrefix + (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg).toString())
+            } else {
+                logger.error(contextPrefix + (if (showCallingMethodInfo) msg?.let { appendCallingMethodInfo(it) } else msg).toString())
+            }
         }
     }
 
@@ -143,7 +98,7 @@ class Logger private constructor(private val jul: java.util.logging.Logger) {
         }
 
         fun getLogger(clazz: Class<*>): Logger {
-            return Logger(java.util.logging.Logger.getLogger(clazz.simpleName))
+            return Logger(clazz.simpleName)
         }
 
         private val callingMethodInfo: String

@@ -44,17 +44,18 @@ javafx {
 }
 
 dependencies {
-    implementation fileTree("$projectDir/libs/jars") { include '*.jar' }
-
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
-    implementation("org.apache.logging.log4j:log4j-core:2.19.0")
+    implementation("org.tinylog:tinylog-api-kotlin:2.7.0")
+    implementation("org.tinylog:tinylog-impl:2.7.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.7.3")
 
-    implementation "org.openjfx:javafx-graphics:$javafx.version:win"
-    implementation "org.openjfx:javafx-graphics:$javafx.version:linux"
+    implementation("org.openjfx:javafx-graphics:$javafx.version:win")
+    implementation("org.openjfx:javafx-graphics:$javafx.version:linux")
+
+    implementation(files("$projectDir/libs/jlibtorrent-1.2.13.0.jar"))
 
 //    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
 //    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
@@ -66,7 +67,7 @@ test {
 
 
 // jar task modification to include dependencies
-task jarWithDependency (type: Jar){
+task jarWithDependency(type: Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes 'Main-Class': 'ru.cataclysm.LauncherKt',
@@ -82,6 +83,7 @@ task jarWithDependency (type: Jar){
     }
     // include libtorrent natives
     from {
-        "$projectDir/libs/native"
+        exclude '*.jar'
+        "$projectDir/libs"
     }
 } with jar
