@@ -7,28 +7,31 @@
 <?import javafx.scene.text.Text?>
 <?import ru.cataclysm.controls.SVGButton?>
 <?import ru.cataclysm.controls.SVGLabel?>
-<VBox prefHeight="45.0" prefWidth="345.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+<VBox prefHeight="45.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="ru.cataclysm.controllers.UpdateController">
-   <HBox prefWidth="200.0">
+   <AnchorPane>
       <SVGLabel fx:id="updateState"
-                prefHeight="20" prefWidth="170"
+                prefHeight="20"
                 text="Обновление..."
                 textFill="white"
                 svgId="updateState"
       />
-      <SVGButton fx:id="continueUpdateButton"
-                 prefHeight="20" prefWidth="20"
-                 onMouseClicked="#updateButton_Click"
-                 stylesheets="@../styles/button.css"
-                 svgId="continueUpdateButton"
-      />
-      <SVGButton fx:id="pauseUpdateButton"
-                 prefHeight="20" prefWidth="20"
-                 onMouseClicked="#pauseButton_Click"
-                 stylesheets="@../styles/button.css"
-                 svgId="pauseUpdateButton"
-      />
-   </HBox>
+      <HBox prefWidth="40.0" AnchorPane.rightAnchor="40">
+         <SVGButton fx:id="continueUpdateButton"
+                    prefHeight="20" prefWidth="20"
+                    onMouseClicked="#updateButton_Click"
+                    stylesheets="@../styles/button.css"
+                    svgId="continueUpdateButton"
+         />
+         <SVGButton fx:id="pauseUpdateButton"
+                    prefHeight="20" prefWidth="20"
+                    onMouseClicked="#pauseButton_Click"
+                    stylesheets="@../styles/button.css"
+                    svgId="pauseUpdateButton"
+         />
+      </HBox>
+   </AnchorPane>
+
    <ProgressBar fx:id="updateProgressBar" minHeight="5.0" prefHeight="5.0" prefWidth="345.0" progress="0.0"
                 stylesheets="@../styles/progress.css">
       <VBox.margin>
