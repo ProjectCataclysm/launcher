@@ -618,7 +618,7 @@ class BTEngine private constructor() : SessionManager(false) {
     }
 
     companion object {
-        private val LOG: Logger = Logger.Companion.getLogger(BTEngine::class.java)
+        private val LOG: Logger = Logger.getLogger(BTEngine::class.java)
         private val INNER_LISTENER_TYPES = intArrayOf(
             AlertType.ADD_TORRENT.swig(),
             AlertType.LISTEN_SUCCEEDED.swig(),
