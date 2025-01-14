@@ -1,12 +1,13 @@
 package ru.cataclysm.helpers
 
+import okio.IOException
 import ru.cataclysm.services.Log
+import ru.cataclysm.services.upgrade.StubChecker
 import java.lang.management.ManagementFactory
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
-import java.util.*
 import javax.management.ObjectName
 import kotlin.math.min
 
@@ -22,6 +23,8 @@ object PlatformHelper {
         MAC,
         LINUX
     }
+
+    private val JLIBTORRENT_VERSION: String = "1.2.13.0"
 
     val platform: Platform = readPlatform()
     val platformIdentifier: String = readPlatformID()
@@ -99,23 +102,35 @@ object PlatformHelper {
         return 0
     }
 
-    fun injectLibtorrent() {
-        val libNameMapped = System.mapLibraryName("jlibtorrent")
-        val libFileDirPath = Files.createDirectories(Paths.get("libs"))
-        val libFilePath = libFileDirPath.resolve(libNameMapped).toAbsolutePath()
-
-        try {
-            Files.copy(
-                Objects.requireNonNull(PlatformHelper.javaClass.getResourceAsStream("/$libNameMapped")),
-                libFilePath,
-                StandardCopyOption.REPLACE_EXISTING
-            )
-        } catch (ignored1: Throwable) {
-
+    private fun getTorrentNativeLibName(): String {
+        return when (platform) {
+            Platform.WINDOWS -> if (IS_64BIT) "x86_64/libjlibtorrent-$JLIBTORRENT_VERSION.dll" else "x86/libjlibtorrent-$JLIBTORRENT_VERSION.dll"
+            Platform.LINUX -> if (IS_64BIT) "x86/libjlibtorrent-$JLIBTORRENT_VERSION.so" else "x86_64/libjlibtorrent-$JLIBTORRENT_VERSION.so"
+            Platform.MAC -> "x86_64/libjlibtorrent-$JLIBTORRENT_VERSION.dylib";
         }
+    }
 
-        if (!Files.isExecutable(libFilePath)) {
-            throw RuntimeException("jlibtorrent native $libFilePath is not executable")
+    fun injectLibtorrent() {
+        val libName = getTorrentNativeLibName()
+        val libFilePath = Paths.get("libs", "natives", libName).toAbsolutePath()
+
+        // copy only if started from jar/exe
+        if (StubChecker.currentJarPath() != null) {
+            try {
+                Files.createDirectories(libFilePath.parent)
+
+                Files.copy(
+                    PlatformHelper.javaClass.getResourceAsStream("/natives/$libName")!!,
+                    libFilePath,
+                    StandardCopyOption.REPLACE_EXISTING
+                )
+            } catch (e: IOException) {
+                throw RuntimeException("Failed to extract jlibtorrent native library", e)
+            }
+
+            if (!Files.isExecutable(libFilePath)) {
+                throw RuntimeException("jlibtorrent native $libFilePath is not executable")
+            }
         }
 
         System.setProperty("jlibtorrent.jni.path", libFilePath.toString())
