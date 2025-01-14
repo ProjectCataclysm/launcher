@@ -7,12 +7,21 @@ import kotlin.math.log10
 import kotlin.math.pow
 
 object Converter {
+    private val group = log10(1024.0)
+
     fun readableSize(size: Long): String {
         if (size <= 0) return "0"
-        val units = arrayOf("B", "kB", "MB", "GB", "TB", "PB", "EB")
-        val digitGroups = (log10(size.toDouble()) / log10(1024.0)).toInt()
-        return DecimalFormat("#,##0.#").format(size /
-                    1024.0.pow(digitGroups.toDouble())) + " " + units[digitGroups]
+        val units = arrayOf("B", "kB", "MB", "GB", "TB")
+        val digitGroups = (log10(size.toDouble()) / group).toInt()
+        val sizeName = units[digitGroups]
+        val pattern: String = when(sizeName) {
+            "MB" -> "#,##0.##"
+            "GB" -> "#,##0.###"
+            "TB" -> "#,##0.###"
+            else -> "#,##0.#"
+        }
+        return DecimalFormat(pattern).format(size /
+                    1024.0.pow(digitGroups.toDouble())) + " " + sizeName
     }
 
     /**
