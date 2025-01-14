@@ -10,7 +10,7 @@ class TorrentListener(
     override fun types(): IntArray {
         return intArrayOf(
             AlertType.ADD_TORRENT.swig(),
-            AlertType.BLOCK_FINISHED.swig(),
+//            AlertType.BLOCK_FINISHED.swig(),
             AlertType.PIECE_FINISHED.swig(),
             AlertType.STATE_CHANGED.swig(),
             AlertType.TORRENT_FINISHED.swig(),
@@ -38,8 +38,10 @@ class TorrentListener(
             }
 
             AlertType.PIECE_FINISHED -> {
-                val a: PieceFinishedAlert = alert as PieceFinishedAlert
-                service.onProgressUpdated(a.handle().status().progress())
+                if(currentTask == Task.VERIFY) {
+                    val a: PieceFinishedAlert = alert as PieceFinishedAlert
+                    service.onProgressUpdated(a.handle().status().progress())
+                }
             }
 
             AlertType.STATE_CHANGED -> {

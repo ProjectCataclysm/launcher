@@ -35,7 +35,11 @@ object AssetsService {
     private var timer: Timer = Timer()
     private var timerTask: TimerTask = object : TimerTask() {
         override fun run() {
-            if (BTEngine.instance.isRunning) onTraffic(BTEngine.instance.stats())
+            if (BTEngine.instance.isRunning && !BTEngine.instance.isPaused) {
+                val handle = BTEngine.instance.find(torrentInfo.infoHash())
+                onProgressUpdated(handle.status().progress())
+                onTraffic(BTEngine.instance.stats())
+            }
         }
     }
 
@@ -66,6 +70,8 @@ object AssetsService {
         ctx.enableDht = true
         BTEngine.ctx = ctx
         BTEngine.onCtxSetupComplete()
+
+        onStateChanged += ::switchState
 
         BTEngine.instance.addListener(listener)
         BTEngine.instance.start()
@@ -138,6 +144,7 @@ object AssetsService {
         val resumeFile = BTEngine.instance.resumeDataFile(torrentInfo)
         if (resumeFile.exists()) {
             onStateChanged(TorrentStatus.State.CHECKING_RESUME_DATA)
+            listener.currentTask = Task.VERIFY
             BTEngine.instance.download(
                 torrentInfo, Settings.currentGameDirectoryPath.toFile(),
                 resumeFile, null, null
@@ -185,5 +192,13 @@ object AssetsService {
         }
 
         return torrentFiles
+    }
+
+    private fun switchState(state: TorrentStatus.State) {
+        when(state){
+            TorrentStatus.State.CHECKING_FILES -> listener.currentTask = Task.VERIFY
+            TorrentStatus.State.DOWNLOADING -> listener.currentTask = Task.DOWNLOAD
+            else -> {}
+        }
     }
 }
