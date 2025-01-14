@@ -109,12 +109,14 @@ class UpdateController : CustomController() {
         AssetsService.resume()
         continueUpdateButton.isDisable = true
         pauseUpdateButton.isDisable = false
+        downloadSpeedLabel.isVisible = true
     }
 
     fun pauseButton_Click() {
         AssetsService.pause()
         continueUpdateButton.isDisable = false
         pauseUpdateButton.isDisable = true
+        downloadSpeedLabel.isVisible = false
     }
 
     private fun hideProgress() {
