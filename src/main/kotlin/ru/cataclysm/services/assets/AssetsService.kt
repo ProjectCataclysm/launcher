@@ -32,7 +32,7 @@ enum class CheckResult {
 }
 
 object AssetsService {
-    private var timer: Timer = Timer()
+    private var timer: Timer = Timer("Download Progress Tracker", true)
     private var timerTask: TimerTask = object : TimerTask() {
         override fun run() {
             if (BTEngine.instance.isRunning && !BTEngine.instance.isPaused) {
@@ -123,7 +123,8 @@ object AssetsService {
     }
 
     fun stop() {
-        timer.cancel()
+        timerTask.cancel()
+        timer.purge()
         BTEngine.instance.stop()
     }
 
