@@ -1,4 +1,4 @@
-import java.util.Properties
+import java.util.*
 
 plugins {
 	id("java")
@@ -137,7 +137,7 @@ dependencies {
 //    implementation 'com.github.atomashpolskiy:bt-dht:1.10'
 //    implementation 'com.github.atomashpolskiy:bt-upnp:1.10'
 
-	testImplementation("com.frostwire:jlibtorrent:1.2.0.18")
+//	testImplementation("com.frostwire:jlibtorrent:1.2.0.18")
 	testImplementation("net.java.dev.jna:jna:4.4.0")
     testImplementation("org.yaml:snakeyaml:1.29")
     testImplementation("net.sf.jopt-simple:jopt-simple:5.0.3")

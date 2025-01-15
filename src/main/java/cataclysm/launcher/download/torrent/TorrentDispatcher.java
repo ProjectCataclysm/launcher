@@ -8,9 +8,6 @@ package cataclysm.launcher.download.torrent;
 //import com.frostwire.jlibtorrent.swig.libtorrent;
 //import com.frostwire.jlibtorrent.swig.settings_pack;
 
-import java.io.File;
-import java.util.concurrent.CountDownLatch;
-
 /**
  * <br><br>ProjectCataclysm
  * <br>Created: 24.11.2022 9:28

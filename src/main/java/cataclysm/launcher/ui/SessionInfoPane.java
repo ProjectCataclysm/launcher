@@ -2,11 +2,12 @@ package cataclysm.launcher.ui;
 
 import cataclysm.launcher.LauncherApplication;
 import cataclysm.launcher.account.Session;
-import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+
+import java.awt.*;
 
 /**
  * <br><br>ProjectCataclysm

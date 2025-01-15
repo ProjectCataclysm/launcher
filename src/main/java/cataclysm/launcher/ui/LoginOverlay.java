@@ -5,17 +5,16 @@ import cataclysm.launcher.utils.ApiException;
 import cataclysm.launcher.utils.HttpClientWrapper;
 import cataclysm.launcher.utils.LauncherConstants;
 import cataclysm.launcher.utils.Log;
-import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.css.PseudoClass;
 import javafx.geometry.HPos;
-import javafx.scene.control.*;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
+import java.awt.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;

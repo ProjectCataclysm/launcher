@@ -1,6 +1,5 @@
 package cataclysm.launcher.ui;
 
-import javafx.application.Platform;
 import javafx.scene.control.ProgressBar;
 
 /**

@@ -4,7 +4,6 @@ import cataclysm.launcher.utils.LauncherConfig;
 import cataclysm.launcher.utils.LauncherLock;
 import cataclysm.launcher.utils.Log;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
