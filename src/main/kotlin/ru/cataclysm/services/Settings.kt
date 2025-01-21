@@ -43,12 +43,10 @@ object Settings {
     }
 
     val currentGameDirectoryPath: Path
-        get() = if (clientBranch.subDirName != null)
-            gameDirectoryPath.resolve(clientBranch.subDirName!!)
-        else
-            gameDirectoryPath
+        get() = gameDirectoryPath.resolve(clientBranch.id!!)
 
-    val torrentFile: File = currentGameDirectoryPath.resolve("game.torrent").toFile()
+    val torrentFile: File
+        get() = currentGameDirectoryPath.resolve("game.torrent").toFile()
 
     private fun load() {
         try {
@@ -106,8 +104,8 @@ object Settings {
         }
     }
 
-    enum class ClientBranch(val value: String, val title: String, val subDirName: String?) {
-        PRODUCTION("production", "Основной клиент", null),
+    enum class ClientBranch(val value: String, val title: String, val id: String?) {
+        PRODUCTION("production", "Основной клиент", "branch_main"),
         TEST("textArea", "Тестовый клиент", "branch_test"),
     }
 }

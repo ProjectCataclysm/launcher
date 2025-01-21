@@ -15,7 +15,7 @@ object Constants {
     const val API_URL: String = "$WORK_SITE_URL/api"
     const val LAUNCHER_URL: String = "files.$WORK_SITE_URL/files/launcher"
     const val CLIENT_URL: String = "files.$WORK_SITE_URL/files/client"
-    const val TORRENT_URL: String = "http://itorrents.org/torrent/6DF63688C25658D3FB05DB5BD3C5B42A7BA035A8.torrent"
+    const val TORRENT_URL: String = "files.$WORK_SITE_URL/files/torrents"
 
     object Path {
         var jarLocation: String = javaClass.protectionDomain.codeSource.location.path
@@ -65,6 +65,7 @@ object Constants {
     object Styles {
         val font = javaClass.classLoader.getResource("gilroy-bold.ttf")?.toExternalForm()
         val alert: URL = javaClass.classLoader.getResource("${Path.STYLES}alert.css")!!
+        val button: URL = javaClass.classLoader.getResource("${Path.STYLES}button.css")!!
     }
 
     object Fonts {

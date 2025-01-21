@@ -130,7 +130,7 @@ object GameService {
 
         if (Settings.clientBranch !== Settings.ClientBranch.PRODUCTION) {
             command.add("--updateBranch")
-            command.add(Settings.clientBranch.subDirName!!)
+            command.add(Settings.clientBranch.id!!)
         }
 
         val pb = ProcessBuilder(command)

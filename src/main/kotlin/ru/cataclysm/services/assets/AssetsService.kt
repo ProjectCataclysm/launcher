@@ -81,7 +81,7 @@ object AssetsService {
         onChecked(CheckResult.IN_PROGRESS)
         try {
             // fetch torrent
-            val bytes = RequestHelper.get(TORRENT_URL).use { it.response.body?.bytes() }
+            val bytes = RequestHelper.get(getCurrentTorrentFileUrl()).use { it.response.body?.bytes() }
             if (bytes != null) {
                 val newTorrent = TorrentInfo.bdecode(bytes)
 
@@ -109,6 +109,10 @@ object AssetsService {
             Log.err(ex, "Unable to fetch torrent file")
             onChecked(CheckResult.FAIL)
         }
+    }
+
+    private fun getCurrentTorrentFileUrl(): String {
+        return "https://$TORRENT_URL/${Settings.clientBranch.id}.torrent"
     }
 
     fun pause() {
