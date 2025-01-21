@@ -8,7 +8,7 @@
 <?import ru.cataclysm.controls.SVGButton?>
 
 <AnchorPane fx:id="paneMain" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-            prefHeight="600.0" prefWidth="1000.0" style="-fx-background-color: #0E0E0E;"
+            prefHeight="600.0" prefWidth="1000.0" style="-fx-background-color: #0E0E0E; -fx-background-radius: 8; -fx-border-radius: 8;"
             xmlns="http://javafx.com/javafx/21.0.5" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="ru.cataclysm.controllers.MainController">
 

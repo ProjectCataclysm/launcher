@@ -1,6 +1,7 @@
 package ru.cataclysm.controllers
 
 import javafx.fxml.FXML
+import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
@@ -11,7 +12,9 @@ import me.pavanvo.events.Event
 import ru.cataclysm.Launcher
 import ru.cataclysm.controls.SVGButton
 import ru.cataclysm.controls.SVGLabel
+import ru.cataclysm.helpers.Constants
 import ru.cataclysm.scopeFX
+import ru.cataclysm.services.Settings
 import ru.cataclysm.services.account.AccountService
 import ru.cataclysm.services.assets.AssetsService
 
@@ -33,6 +36,19 @@ class SidebarController : CustomController() {
         accountButton.focusedProperty().addListener { _, _, newValue ->
             if (!newValue) scopeFX.launch { delay(1000); logoutButton.isVisible = false }
         }
+
+        for (v in Settings.ClientBranch.entries) {
+            val button = SVGButton()
+            button.id = "play-${v.name}"
+//            button.svgId = "play-${v.name}"
+            button.text = v.title
+            button.setPrefSize(170.0, 35.0)
+            button.alignment = Pos.CENTER_LEFT
+            button.stylesheets.add(Constants.Styles.button.toString())
+            playDropDown.children.add(button)
+        }
+
+        playDropDown.isVisible = false
     }
 
 

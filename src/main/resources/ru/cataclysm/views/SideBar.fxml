@@ -7,7 +7,7 @@
 <?import javafx.scene.text.*?>
 <?import ru.cataclysm.controls.*?>
 <?import javafx.scene.control.Separator?>
-<AnchorPane prefHeight="600.0" prefWidth="200.0" style="-fx-background-color: #171717;"
+<AnchorPane prefHeight="600.0" prefWidth="200.0" style="-fx-background-color: #171717; -fx-background-radius: 8 0 0 8; -fx-border-radius: 8 0 0 8;"
             xmlns="http://javafx.com/javafx/21.0.5" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="ru.cataclysm.controllers.SidebarController">
     <VBox alignment="TOP_CENTER">
@@ -40,29 +40,29 @@
                     <Separator prefWidth="25" visible="false"/>
                 </HBox>
                 <VBox fx:id="playDropDown" style="-fx-background-color: #232323;">
-                    <SVGButton fx:id="playServer1Button"
-                               prefHeight="35" prefWidth="170"
-                               text="Build server"
-                               stylesheets="@../styles/button.css"
-                               onMouseClicked="#playServer1Button_Click"
-                               alignment="CENTER_LEFT"
-                               svgId="playServer2Button">
-                        <font>
-                            <Font name="Gilroy-SemiBold" size="16.0"/>
-                        </font>
-                    </SVGButton>
+<!--                    <SVGButton fx:id="playServer1Button"-->
+<!--                               prefHeight="35" prefWidth="170"-->
+<!--                               text="Build server"-->
+<!--                               stylesheets="@../styles/button.css"-->
+<!--                               onMouseClicked="#playServer1Button_Click"-->
+<!--                               alignment="CENTER_LEFT"-->
+<!--                               svgId="playServer2Button">-->
+<!--                        <font>-->
+<!--                            <Font name="Gilroy-SemiBold" size="16.0"/>-->
+<!--                        </font>-->
+<!--                    </SVGButton>-->
 
-                    <SVGButton fx:id="playServer2Button"
-                               prefHeight="35" prefWidth="170"
-                               text="Build server"
-                               stylesheets="@../styles/button.css"
-                               onMouseClicked="#playServer2Button_Click"
-                               alignment="CENTER_LEFT"
-                               svgId="playServer2Button">
-                        <font>
-                            <Font name="Gilroy-SemiBold" size="16.0"/>
-                        </font>
-                    </SVGButton>
+<!--                    <SVGButton fx:id="playServer2Button"-->
+<!--                               prefHeight="35" prefWidth="170"-->
+<!--                               text="Build server"-->
+<!--                               stylesheets="@../styles/button.css"-->
+<!--                               onMouseClicked="#playServer2Button_Click"-->
+<!--                               alignment="CENTER_LEFT"-->
+<!--                               svgId="playServer2Button">-->
+<!--                        <font>-->
+<!--                            <Font name="Gilroy-SemiBold" size="16.0"/>-->
+<!--                        </font>-->
+<!--                    </SVGButton>-->
                 </VBox>
             </VBox>
         </HBox>
