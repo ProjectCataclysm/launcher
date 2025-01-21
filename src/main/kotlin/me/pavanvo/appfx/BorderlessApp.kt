@@ -6,6 +6,7 @@ import javafx.geometry.Rectangle2D
 import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.scene.control.Alert
+import javafx.scene.paint.Color
 import javafx.stage.Screen
 import javafx.stage.Stage
 import javafx.stage.StageStyle
@@ -18,13 +19,11 @@ open class BorderlessApp(private val view: URL,
     override fun start(stage: Stage) {
         stage.title = title
         loadScene(stage, view)
-        stage.initStyle(StageStyle.UNDECORATED)
-
+        stage.initStyle(StageStyle.TRANSPARENT)
+        stage.opacity = 0.0
         stage.show()
-
-        val primScreenBounds: Rectangle2D = Screen.getPrimary().visualBounds
-        stage.x = (primScreenBounds.width - stage.width) / 2
-        stage.y = (primScreenBounds.height - stage.height) / 2
+        stage.centerOnScreen()
+        stage.opacity = 1.0
     }
 
     companion object {
@@ -33,6 +32,8 @@ open class BorderlessApp(private val view: URL,
             val fxmlLoader = FXMLLoader(view)
             val scene = Scene(fxmlLoader.load())
             val controller = fxmlLoader.getController<CustomController>()
+
+            scene.fill = Color.TRANSPARENT
 
             stage.scene = scene
             draggableStage(scene.root, stage, null)
