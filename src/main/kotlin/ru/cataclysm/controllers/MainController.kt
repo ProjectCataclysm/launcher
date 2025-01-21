@@ -28,6 +28,7 @@ class MainController : CustomController() {
         sidebarController.loaded(stage)
         mainTabController.loaded(stage)
         settingsController.loaded(stage)
+        settingsController.done = sidebarController.onPlay
 
         sidebarController.onPlay += {
             if (tabs.selectionModel.selectedIndex == 1) Settings.save()

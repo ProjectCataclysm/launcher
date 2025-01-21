@@ -6,6 +6,7 @@ import javafx.scene.control.*
 import javafx.stage.DirectoryChooser
 import javafx.stage.Stage
 import me.pavanvo.appfx.CustomController
+import me.pavanvo.events.Event
 import ru.cataclysm.Launcher
 import ru.cataclysm.helpers.PlatformHelper
 import ru.cataclysm.helpers.MemoryConverter
@@ -18,8 +19,10 @@ class SettingsController : CustomController() {
     lateinit var createReportButton: Button
     lateinit var memoryLimitChoiceBox: ChoiceBox<Int>
     lateinit var directoryInput: TextField
+    lateinit var done : Event
 
     val pathChooser = DirectoryChooser()
+
 
     override fun loaded(stage: Stage) {
         super.loaded(stage)
@@ -88,5 +91,10 @@ class SettingsController : CustomController() {
     @FXML
     private fun createReportButton_Click() {
         Launcher.createReport(0)
+    }
+
+    @FXML
+    private fun doneButton_Click() {
+        done()
     }
 }
