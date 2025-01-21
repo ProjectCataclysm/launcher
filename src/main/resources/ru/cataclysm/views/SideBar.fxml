@@ -23,52 +23,11 @@
                 <Insets bottom="7.0" top="70.0" left="15" right="15" />
             </VBox.margin>
 <!--            Play ComboBox-->
-            <VBox prefHeight="120.0">
-                <HBox fx:id="playBlock" alignment="CENTER_LEFT" maxWidth="200.0" prefHeight="35.0" prefWidth="170.0"
-                    style="-fx-background-color: #232323;">
-                    <SVGButton prefHeight="35" prefWidth="155"
-                               text="Играть"
-                               stylesheets="@../styles/button.css"
-                               onMouseClicked="#playButton_Click"
-                               alignment="CENTER_LEFT"
-                               svgId="playButton">
-                        <font>
-                            <Font name="Gilroy-SemiBold" size="16.0"/>
-                        </font>
-                    </SVGButton>
-                    <SVGLabel fx:id="dropdown" prefHeight="35" prefWidth="35" svgId="dropdown" textFill="white"/>
-                    <Separator prefWidth="25" visible="false"/>
-                </HBox>
-                <VBox fx:id="playDropDown" style="-fx-background-color: #232323;">
-<!--                    <SVGButton fx:id="playServer1Button"-->
-<!--                               prefHeight="35" prefWidth="170"-->
-<!--                               text="Build server"-->
-<!--                               stylesheets="@../styles/button.css"-->
-<!--                               onMouseClicked="#playServer1Button_Click"-->
-<!--                               alignment="CENTER_LEFT"-->
-<!--                               svgId="playServer2Button">-->
-<!--                        <font>-->
-<!--                            <Font name="Gilroy-SemiBold" size="16.0"/>-->
-<!--                        </font>-->
-<!--                    </SVGButton>-->
-
-<!--                    <SVGButton fx:id="playServer2Button"-->
-<!--                               prefHeight="35" prefWidth="170"-->
-<!--                               text="Build server"-->
-<!--                               stylesheets="@../styles/button.css"-->
-<!--                               onMouseClicked="#playServer2Button_Click"-->
-<!--                               alignment="CENTER_LEFT"-->
-<!--                               svgId="playServer2Button">-->
-<!--                        <font>-->
-<!--                            <Font name="Gilroy-SemiBold" size="16.0"/>-->
-<!--                        </font>-->
-<!--                    </SVGButton>-->
-                </VBox>
-            </VBox>
+            <Separator prefHeight="40.0" visible="false"/>
         </HBox>
 
         <SVGButton fx:id="supportButton"
-                   prefHeight="35" prefWidth="170"
+                   prefHeight="45" prefWidth="170"
                    text="Поддержка"
                    stylesheets="@../styles/button.css"
                    onMouseClicked="#supportButton_Click"
@@ -80,7 +39,7 @@
         </SVGButton>
 
         <SVGButton fx:id="websiteButton"
-                   prefHeight="35" prefWidth="170"
+                   prefHeight="45" prefWidth="170"
                    text="Сайт"
                    stylesheets="@../styles/button.css"
                    onMouseClicked="#websiteButton_Click"
@@ -92,7 +51,7 @@
         </SVGButton>
 
         <SVGButton fx:id="discordButton"
-                   prefHeight="35" prefWidth="170"
+                   prefHeight="45" prefWidth="170"
                    text="Discord"
                    stylesheets="@../styles/button.css"
                    onMouseClicked="#discordButton_Click"
@@ -104,7 +63,7 @@
         </SVGButton>
 
         <SVGButton fx:id="settingsButton"
-                   prefHeight="35" prefWidth="170"
+                   prefHeight="45" prefWidth="170"
                    text="Настройки"
                    stylesheets="@../styles/button.css"
                    onMouseClicked="#settingsButton_Click"

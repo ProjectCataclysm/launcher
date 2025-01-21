@@ -1,7 +1,9 @@
 package ru.cataclysm.controllers
 
+import javafx.event.EventHandler
 import javafx.fxml.FXML
 import javafx.geometry.Pos
+import javafx.scene.control.ToggleButton
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
@@ -23,7 +25,6 @@ class SidebarController : CustomController() {
 
     lateinit var playBlock: HBox
     lateinit var dropdown: SVGLabel
-    lateinit var playDropDown: VBox
     lateinit var accountButton: SVGButton
     lateinit var logoutButton: SVGButton
 
@@ -37,34 +38,38 @@ class SidebarController : CustomController() {
             if (!newValue) scopeFX.launch { delay(1000); logoutButton.isVisible = false }
         }
 
-        for (v in Settings.ClientBranch.entries) {
-            val button = SVGButton()
-            button.id = "play-${v.name}"
-//            button.svgId = "play-${v.name}"
-            button.text = v.title
-            button.setPrefSize(170.0, 35.0)
-            button.alignment = Pos.CENTER_LEFT
-            button.stylesheets.add(Constants.Styles.button.toString())
-            playDropDown.children.add(button)
-        }
-
-        playDropDown.isVisible = false
+//        for (v in Settings.ClientBranch.entries) {
+//            val button = ToggleButton()
+//            button.styleClass += "button"
+//            button.id = "play-${v.name}"
+//            button.text = v.title
+//            button.setPrefSize(170.0, 35.0)
+//            button.alignment = Pos.CENTER_LEFT
+//            button.stylesheets.add(Constants.Styles.button.toString())
+//            button.isSelected = v == Settings.clientBranch
+//            button.onMouseClicked = EventHandler { selectUpdateBranch_Click(v) }
+//            playDropDown.children.add(button)
+//        }
+//
+//        playDropDown.isVisible = false
     }
 
 
-    @FXML
-    private fun playButton_Click() {
-        playDropDown.isVisible = !playDropDown.isVisible
-        dropdown.rotate = if (dropdown.rotate == 0.0) 180.0 else 0.0
-        if (playDropDown.isVisible) playBlock.style = "-fx-background-color: #232323;"
-        else playBlock.style = ""
-    }
-
-    @FXML
-    private fun playServer1Button_Click() = onPlay()
-
-    @FXML
-    private fun playServer2Button_Click() = onPlay()
+//    @FXML
+//    private fun playButton_Click() {
+//        playDropDown.isVisible = !playDropDown.isVisible
+//        dropdown.rotate = if (dropdown.rotate == 0.0) 180.0 else 0.0
+//        if (playDropDown.isVisible) playBlock.style = "-fx-background-color: #232323;"
+//        else playBlock.style = ""
+//    }
+//
+//    private fun selectUpdateBranch_Click(branch: Settings.ClientBranch) {
+//        for ((index, node) in playDropDown.children.withIndex()) {
+//            (node as ToggleButton).isSelected = index == branch.ordinal
+//        }
+//
+//        onPlay()
+//    }
 
     @FXML
     private fun playLastServer_Click() = onPlay()

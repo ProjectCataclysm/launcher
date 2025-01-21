@@ -106,6 +106,6 @@ object Settings {
 
     enum class ClientBranch(val value: String, val title: String, val id: String?) {
         PRODUCTION("production", "Основной клиент", "branch_main"),
-        TEST("textArea", "Тестовый клиент", "branch_test"),
+        TEST("test", "Тестовый клиент", "branch_test"),
     }
 }

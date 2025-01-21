@@ -48,7 +48,7 @@
             <VBox.margin>
                <Insets top="15.0"/>
             </VBox.margin>
-            <TextField fx:id="directoryInput" prefHeight="51.0" prefWidth="300.0" promptText="C:\Users\ыуе"
+            <TextField fx:id="directoryInput" prefHeight="51.0" prefWidth="300.0"
                        editable="false"
                        style="-fx-background-color: #0E0E0E; -fx-border-color: #DF9422; -fx-border-radius: 5 0 0 5; -fx-text-fill: #FFFFFF; -fx-prompt-text-fill: #FFFFFF; -fx-border-width: 1 0 1 1;"
                        HBox.hgrow="ALWAYS">
@@ -71,6 +71,29 @@
                </font>
             </Button>
          </HBox>
+
+         <!--Update branch block-->
+         <VBox>
+            <HBox prefWidth="400.0">
+               <VBox.margin>
+                  <Insets top="35.0"/>
+               </VBox.margin>
+               <SVGLabel prefHeight="30" prefWidth="400"
+                         text="Ветка обновлений:"
+                         textFill="white"
+                         svgId="playServer1Button">
+                  <font>
+                     <Font name="Gilroy-Medium" size="20.0"/>
+                  </font>
+               </SVGLabel>
+            </HBox>
+            <ChoiceBox fx:id="updateBranchChoiceBox" prefHeight="42.0" prefWidth="800.0"
+                       stylesheets="@../styles/choice-box.css">
+               <VBox.margin>
+                  <Insets top="12.0"/>
+               </VBox.margin>
+            </ChoiceBox>
+         </VBox>
 
          <HBox prefHeight="100.0">
             <!--Memory block-->

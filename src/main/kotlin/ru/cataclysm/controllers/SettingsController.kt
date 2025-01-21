@@ -5,16 +5,20 @@ import javafx.fxml.FXML
 import javafx.scene.control.*
 import javafx.stage.DirectoryChooser
 import javafx.stage.Stage
+import javafx.util.StringConverter
 import me.pavanvo.appfx.CustomController
 import me.pavanvo.events.Event
 import ru.cataclysm.Launcher
+import ru.cataclysm.helpers.ClientBranchConverter
 import ru.cataclysm.helpers.PlatformHelper
 import ru.cataclysm.helpers.MemoryConverter
 import ru.cataclysm.services.Settings
+import ru.cataclysm.services.assets.AssetsService
 import kotlin.io.path.isDirectory
 
 class SettingsController : CustomController() {
 
+    lateinit var updateBranchChoiceBox: ChoiceBox<Settings.ClientBranch>
     lateinit var changeDirectoryButton: Button
     lateinit var createReportButton: Button
     lateinit var memoryLimitChoiceBox: ChoiceBox<Int>
@@ -26,18 +30,34 @@ class SettingsController : CustomController() {
 
     override fun loaded(stage: Stage) {
         super.loaded(stage)
+        initUpdateBranchChoiceBox()
         initGamePath()
         initMemoryChoiceBox()
         initReportButton()
     }
 
     private fun initReportButton() {
-        val reportTio = Tooltip(
+        val reportTip = Tooltip(
             ("Создает архив, в который складывает всю необходимую информацию для "
                     + "диагностики и исправления ошибок. Папка, содержащая созданный архив будет открыта. "
                     + "Данный архив вы можете отправить нам, чтобы мы могли решить возникшую у вас проблему.")
         )
-        Tooltip.install(createReportButton, reportTio)
+        reportTip.isWrapText = true
+        reportTip.maxWidth = 400.0
+        Tooltip.install(createReportButton, reportTip)
+    }
+
+    private fun initUpdateBranchChoiceBox() {
+        updateBranchChoiceBox.items = FXCollections.observableArrayList(Settings.ClientBranch.entries)
+        updateBranchChoiceBox.converter = ClientBranchConverter
+        updateBranchChoiceBox.selectionModel.select(Settings.clientBranch)
+        updateBranchChoiceBox.selectionModel.selectedItemProperty()
+            .addListener { _, _, newValue -> updateBranch_Selected(newValue) }
+    }
+
+    private fun updateBranch_Selected(v: Settings.ClientBranch?) {
+        Settings.clientBranch = v!!
+        AssetsService.checkForUpdates()
     }
 
     private fun initMemoryChoiceBox() {

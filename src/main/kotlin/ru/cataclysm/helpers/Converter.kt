@@ -1,6 +1,7 @@
 package ru.cataclysm.helpers
 
 import javafx.util.StringConverter
+import ru.cataclysm.services.Settings
 import java.text.DecimalFormat
 import java.util.*
 import kotlin.math.log10
@@ -36,6 +37,15 @@ object Converter {
         result = result or (result shr 16)
         return result + 1
     }
+}
+
+object ClientBranchConverter : StringConverter<Settings.ClientBranch>() {
+    override fun toString(item: Settings.ClientBranch?): String {
+        return item?.title ?: ""
+    }
+
+    // not needed
+    override fun fromString(item: String?): Settings.ClientBranch = Settings.ClientBranch.PRODUCTION
 }
 
 object MemoryConverter : StringConverter<Int>() {
