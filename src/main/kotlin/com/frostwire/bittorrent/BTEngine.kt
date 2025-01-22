@@ -310,7 +310,7 @@ class BTEngine private constructor() : SessionManager(false) {
     }
 
     fun settingsFile(): File {
-        return File(ctx!!.homeDir, "settings.dat")
+        return File(ctx!!.homeDir, "bt.dat")
     }
 
     fun resumeTorrentFile(infoHash: String?): File {
