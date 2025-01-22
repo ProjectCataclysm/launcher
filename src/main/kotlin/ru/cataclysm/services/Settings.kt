@@ -43,7 +43,7 @@ object Settings {
     }
 
     val currentGameDirectoryPath: Path
-        get() = gameDirectoryPath.resolve(clientBranch.id!!)
+        get() = Files.createDirectories(gameDirectoryPath.resolve(clientBranch.id!!))
 
     val torrentFile: File
         get() = currentGameDirectoryPath.resolve("game.torrent").toFile()
