@@ -1,13 +1,14 @@
 package cataclysm.launcher.utils;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.config.Configurator;
-import org.apache.logging.log4j.core.config.builder.api.*;
-import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
+import org.intellij.lang.annotations.PrintFormat;
+import org.tinylog.Level;
+import org.tinylog.format.MessageFormatter;
+import org.tinylog.format.PrintfStyleFormatter;
+import org.tinylog.provider.LoggingProvider;
+import org.tinylog.provider.ProviderRegistry;
 
 import java.io.PrintStream;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -15,26 +16,48 @@ import java.util.Objects;
  * @author Knoblul
  */
 public class Log {
-	private static Logger logger;
+	private static final String ROOT_TAG = "ProjectCataclysm/Launcher";
 
-	private static Logger getLogger() {
-		if (logger == null) {
-			logger = LogManager.getLogger("ProjectCataclysm/Launcher");
+	public static void msg(String msg) {
+		if (Constants.MINIMUM_LEVEL_COVERS_INFO) {
+			Constants.PROVIDER.log(Constants.STACKTRACE_DEPTH, ROOT_TAG, Level.INFO, null,
+				Constants.FORMATTER, msg, Constants.EMPTY_ARGS);
 		}
-
-		return logger;
 	}
 
-	public static void err(Throwable t, String msg, Object... args) {
-		getLogger().log(Level.ERROR, "! " + String.format(msg, args), t);
+	public static void msg(@PrintFormat String fmt, Object... args) {
+		if (Constants.MINIMUM_LEVEL_COVERS_INFO) {
+			Constants.PROVIDER.log(Constants.STACKTRACE_DEPTH, ROOT_TAG, Level.INFO, null,
+				Constants.FORMATTER, fmt, args);
+		}
 	}
-	
-	public static void err(String msg, Object... args) {
-		err(null, msg, args);
+
+	public static void err(Throwable t, String msg) {
+		if (Constants.MINIMUM_LEVEL_COVERS_ERROR) {
+			Constants.PROVIDER.log(Constants.STACKTRACE_DEPTH, ROOT_TAG, Level.INFO, t,
+				Constants.FORMATTER, msg, Constants.EMPTY_ARGS);
+		}
 	}
-	
-	public static void msg(String msg, Object... args) {
-		getLogger().log(Level.INFO, "* " + String.format(msg, args));
+
+	public static void err(Throwable t, @PrintFormat String fmt, Object... args) {
+		if (Constants.MINIMUM_LEVEL_COVERS_ERROR) {
+			Constants.PROVIDER.log(Constants.STACKTRACE_DEPTH, ROOT_TAG, Level.INFO, t,
+				Constants.FORMATTER, fmt, args);
+		}
+	}
+
+	public static void err(String msg) {
+		if (Constants.MINIMUM_LEVEL_COVERS_ERROR) {
+			Constants.PROVIDER.log(Constants.STACKTRACE_DEPTH, ROOT_TAG, Level.INFO, null,
+				Constants.FORMATTER, msg, Constants.EMPTY_ARGS);
+		}
+	}
+
+	public static void err(@PrintFormat String fmt, Object... args) {
+		if (Constants.MINIMUM_LEVEL_COVERS_ERROR) {
+			Constants.PROVIDER.log(Constants.STACKTRACE_DEPTH, ROOT_TAG, Level.INFO, null,
+				Constants.FORMATTER, fmt, args);
+		}
 	}
 
 	public static void logFutureErrors(Object ignored, Throwable cause) {
@@ -43,95 +66,53 @@ public class Log {
 		}
 	}
 
-	public static void configureLogging() {
-		PrintStream out = System.out;
-		PrintStream err = System.err;
+	private static void wrapPrintStreams() {
+		System.setOut(new LoggingPrintStream(System.out, "STDOUT", Level.INFO));
+		System.setErr(new LoggingPrintStream(System.err, "STDERR", Level.ERROR));
+	}
 
-//		String pattern = "[%d{yyyy-MM-dd HH:mm:ss}] [%t/%level] [%c] %msg%n";
-//		LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-//		Configuration config = ctx.getConfiguration();
-//
-//		AbstractAppender appender = new ConsoleAppender.Builder<>()
-//			.setName("stdout")
-//			.setLayout(PatternLayout.newBuilder()
-//				.withPattern(pattern)
-//				.build())
-//			.build();
-//		if (appender == null) {
-//			throw new RuntimeException("Failed to create console appender for root logger");
-//		}
-//		appender.start();
-//		config.addAppender(appender);
-//		config.getRootLogger().addAppender(appender, Level.INFO, null);
-//
-//		appender = new RollingFileAppender.Builder<>()
-//			.setName("RootFile")
-//			.setLayout(PatternLayout.newBuilder()
-//				.withPattern(pattern)
-//				.build())
-//			.withFileName("logs/latest-launcher.log")
-//			.withFilePattern("logs/latest-launcher-%i.log")
-//			.withPolicy(OnStartupTriggeringPolicy.createPolicy(0))
-//			.withStrategy(DefaultRolloverStrategy.newBuilder().withMax("6").build())
-//			.build();
-//		if (appender == null) {
-//			throw new RuntimeException("Failed to create file appender for root logger");
-//		}
-//
-//		appender.start();
-//		config.addAppender(appender);
-//		config.getRootLogger().addAppender(appender, Level.INFO, null);
-//
-//		ctx.updateLoggers();
+	static {
+		wrapPrintStreams();
+	}
 
-		ConfigurationBuilder<BuiltConfiguration> configBuilder = ConfigurationBuilderFactory.newConfigurationBuilder();
-		LayoutComponentBuilder pattern = configBuilder.newLayout("PatternLayout");
-		pattern.addAttribute("pattern", "[%d{yyyy-MM-dd HH:mm:ss}] [%t/%level] [%c] %msg%n");
+	private interface Constants {
+		LoggingProvider PROVIDER = ProviderRegistry.getLoggingProvider();
+		MessageFormatter FORMATTER = new PrintfStyleFormatter(Locale.ROOT);
 
-		AppenderComponentBuilder console = configBuilder.newAppender("stdout", "Console");
-		console.add(pattern);
-		configBuilder.add(console);
+		int STACKTRACE_DEPTH = 2;
 
-		AppenderComponentBuilder rollingFile = configBuilder.newAppender("file", "RollingFile");
-		rollingFile.addAttribute("fileName", "logs/latest-launcher.log");
-		rollingFile.addAttribute("filePattern", "logs/latest-launcher-%i.log");
-		rollingFile.addComponent(configBuilder.newComponent("Policies")
-			.addComponent(configBuilder.newComponent("OnStartupTriggeringPolicy")
-				.addAttribute("minSize", 0)));
-		rollingFile.addComponent(configBuilder.newComponent("DefaultRolloverStrategy")
-				.addAttribute("max", 6));
-		rollingFile.add(pattern);
-		configBuilder.add(rollingFile);
+		Object[] EMPTY_ARGS = new Object[0];
 
-		RootLoggerComponentBuilder rootLogger = configBuilder.newRootLogger(Level.INFO);
-		rootLogger.add(configBuilder.newAppenderRef("stdout"));
-		rootLogger.add(configBuilder.newAppenderRef("file"));
-		configBuilder.add(rootLogger);
+//		boolean MINIMUM_LEVEL_COVERS_TRACE = isCoveredByMinimumLevel(Level.TRACE);
+//		boolean MINIMUM_LEVEL_COVERS_DEBUG = isCoveredByMinimumLevel(Level.DEBUG);
+		boolean MINIMUM_LEVEL_COVERS_INFO  = isCoveredByMinimumLevel(Level.INFO);
+//		boolean MINIMUM_LEVEL_COVERS_WARN  = isCoveredByMinimumLevel(Level.WARN);
+		boolean MINIMUM_LEVEL_COVERS_ERROR = isCoveredByMinimumLevel(Level.ERROR);
 
-		Configurator.initialize(configBuilder.build());
-
-		System.setOut(new LoggingPrintStream(out, LogManager.getLogger("STDOUT"), Level.INFO));
-		System.setErr(new LoggingPrintStream(err, LogManager.getLogger("STDERR"), Level.ERROR));
+		static boolean isCoveredByMinimumLevel(final Level level) {
+			return PROVIDER.getMinimumLevel(null).ordinal() <= level.ordinal();
+		}
 	}
 
 	private static final class LoggingPrintStream extends PrintStream {
-		private final Logger logger;
+		private final String tag;
 		private final Level level;
 
-		public LoggingPrintStream(PrintStream original, Logger logger, Level level) {
+		public LoggingPrintStream(PrintStream original, String tag, Level level) {
 			super(original);
-			this.logger = logger;
+			this.tag = tag;
 			this.level = level;
 		}
 
 		@Override
-		public void println(Object o) {
-			logger.log(level, Objects.toString(o));
+		public void println(String s) {
+			Constants.PROVIDER.log(Constants.STACKTRACE_DEPTH, tag,
+				level, null, Constants.FORMATTER, s, Constants.EMPTY_ARGS);
 		}
 
 		@Override
-		public void println(String s) {
-			logger.log(level, s);
+		public void println(Object o) {
+			println(Objects.toString(o));
 		}
 	}
 }

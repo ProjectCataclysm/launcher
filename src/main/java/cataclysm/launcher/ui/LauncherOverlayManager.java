@@ -1,12 +1,11 @@
 package cataclysm.launcher.ui;
 
+import javafx.animation.*;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
-
-import javax.xml.crypto.dsig.keyinfo.KeyValue;
 
 /**
  * <br><br>ProjectCataclysm
