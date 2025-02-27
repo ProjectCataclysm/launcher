@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<?import ru.cataclysm.controls.SVGButton?>
+
+<AnchorPane fx:id="paneMain" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="600.0" prefWidth="1000.0" style="-fx-background-color: #0E0E0E; -fx-background-radius: 8; -fx-border-radius: 8;"
+            xmlns="http://javafx.com/javafx/21.0.5" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="ru.cataclysm.controllers.MainController">
+
+   <fx:include fx:id="sidebar" source="SideBar.fxml"/>
+
+   <TabPane fx:id="tabs" layoutX="200.0" prefHeight="600.0" prefWidth="800.0"
+            stylesheets="@../styles/tab-pane.css"
+            >
+      <Tab>
+         <fx:include fx:id="mainTab" source="Main-tab.fxml"/>
+      </Tab>
+      <Tab>
+         <fx:include fx:id="settings" source="Settings.fxml"/>
+      </Tab>
+   </TabPane>
+
+   <HBox prefHeight="20.0" prefWidth="60.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+      <SVGButton prefHeight="20" prefWidth="20"
+                 onMouseClicked="#buttonMinimize_Click"
+                 stylesheets="@../styles/button.css"
+                 svgId="minimizeButton"
+      />
+      <SVGButton prefHeight="20" prefWidth="20"
+                 onMouseClicked="#buttonClose_Click"
+                 stylesheets="@../styles/button.css"
+                 svgId="closeButton"
+      />
+   </HBox>
+
+   <Text fx:id="versionLabel" fill="#868686" strokeType="OUTSIDE" strokeWidth="0.0" text="v2.36-5beta"
+         AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0">
+      <font>
+         <Font name="Gilroy-Regular" size="12.0" />
+      </font>
+   </Text>
+</AnchorPane>

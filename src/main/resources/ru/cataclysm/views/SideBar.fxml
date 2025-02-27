@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import ru.cataclysm.controls.*?>
+<?import javafx.scene.control.Separator?>
+<AnchorPane prefHeight="600.0" prefWidth="200.0" style="-fx-background-color: #171717; -fx-background-radius: 8 0 0 8; -fx-border-radius: 8 0 0 8;"
+            xmlns="http://javafx.com/javafx/21.0.5" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="ru.cataclysm.controllers.SidebarController">
+    <VBox alignment="TOP_CENTER">
+        <ImageView fitWidth="130.0" pickOnBounds="true" preserveRatio="true"
+            onMouseClicked="#playLastServer_Click">
+            <Image url="@../images/Logo.png"/>
+            <VBox.margin>
+                <Insets top="35.0"/>
+            </VBox.margin>
+        </ImageView>
+        <HBox alignment="CENTER_LEFT" maxWidth="200.0" prefWidth="170.0" VBox.vgrow="NEVER">
+            <VBox.margin>
+                <Insets bottom="7.0" top="70.0" left="15" right="15" />
+            </VBox.margin>
+<!--            Play ComboBox-->
+            <Separator prefHeight="40.0" visible="false"/>
+        </HBox>
+
+        <SVGButton fx:id="supportButton"
+                   prefHeight="45" prefWidth="170"
+                   text="Поддержка"
+                   stylesheets="@../styles/button.css"
+                   onMouseClicked="#supportButton_Click"
+                   alignment="CENTER_LEFT"
+                   svgId="supportButton">
+            <font>
+                <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+        </SVGButton>
+
+        <SVGButton fx:id="websiteButton"
+                   prefHeight="45" prefWidth="170"
+                   text="Сайт"
+                   stylesheets="@../styles/button.css"
+                   onMouseClicked="#websiteButton_Click"
+                   alignment="CENTER_LEFT"
+                   svgId="websiteButton">
+            <font>
+                <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+        </SVGButton>
+
+        <SVGButton fx:id="discordButton"
+                   prefHeight="45" prefWidth="170"
+                   text="Discord"
+                   stylesheets="@../styles/button.css"
+                   onMouseClicked="#discordButton_Click"
+                   alignment="CENTER_LEFT"
+                   svgId="discordButton">
+            <font>
+                <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+        </SVGButton>
+
+        <SVGButton fx:id="settingsButton"
+                   prefHeight="45" prefWidth="170"
+                   text="Настройки"
+                   stylesheets="@../styles/button.css"
+                   onMouseClicked="#settingsButton_Click"
+                   alignment="CENTER_LEFT"
+                   svgId="settingsButton">
+            <font>
+                <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+        </SVGButton>
+    </VBox>
+
+    <VBox AnchorPane.bottomAnchor="50">
+        <padding>
+            <Insets top="20.0" left="25"/>
+        </padding>
+        <SVGButton fx:id="accountButton"
+                   prefHeight="25" prefWidth="150"
+                   text="elueshka"
+                   stylesheets="@../styles/button.css"
+                   onMouseClicked="#accountButton_Click"
+                   svgId="accountButton">
+            <font>
+                <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+        </SVGButton>
+        <Separator prefHeight="12" visible="false"/>
+        <SVGButton fx:id="logoutButton"
+                   prefHeight="25" prefWidth="150"
+                   text="Выйти"
+                   stylesheets="@../styles/button.css"
+                   style="-fx-background-color: #1F1F1F; -fx-background-radius: 5;"
+                   onMouseClicked="#logoutButton_Click"
+                   visible="false"
+                   svgId="logoutButton">
+            <font>
+                <Font name="Gilroy-SemiBold" size="16.0"/>
+            </font>
+        </SVGButton>
+    </VBox>
+</AnchorPane>

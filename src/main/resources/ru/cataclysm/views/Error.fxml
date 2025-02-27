@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            prefHeight="300.0" prefWidth="600.0">
+    <Label text="Отладочные данные:"/>
+    <TextArea fx:id="stackTrace" editable="false" stylesheets="@../styles/text-area.css"/>
+</VBox>
