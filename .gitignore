@@ -1,12 +1,14 @@
-/bin/
-/build/
-/game/
-/out/
-/logs/
-out
-build
-.classpath
-.project
+.gradle
+
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# launcher files
+bin/
+build/
+game/
+out/
+logs/
 /configurations/launcher.map
 session.txt
 config.cfg
