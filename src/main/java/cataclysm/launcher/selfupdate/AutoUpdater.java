@@ -8,14 +8,12 @@ import cataclysm.launcher.utils.Log;
 import javafx.application.Platform;
 import okio.BufferedSource;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
-import java.util.Properties;
+import java.util.Optional;
 
 /**
  * <br><br>ProjectCataclysm
@@ -24,7 +22,7 @@ import java.util.Properties;
  * @author Knoblul
  */
 public class AutoUpdater {
-	public static final String VERSION = getVersion();
+	public static final String VERSION = Optional.ofNullable(AutoUpdater.class.getPackage().getImplementationVersion()).orElse("");
 
 	static Path updateJarPath() {
 		return LauncherConfig.LAUNCHER_DIR_PATH.resolve("launcher_update.jar");
@@ -93,24 +91,5 @@ public class AutoUpdater {
 
 		// проверяем наличие обновлений
 		checkForUpdates(updateUI);
-	}
-
-	private static String getVersion() {
-		try (InputStream in = AutoUpdater.class.getResourceAsStream("/build.properties")) {
-			if (in == null) {
-				throw new FileNotFoundException();
-			}
-
-			Properties properties = new Properties();
-			properties.load(in);
-			String version = properties.getProperty("version");
-			if (version == null) {
-				throw new IllegalArgumentException("build.properties does not contains 'version' parameter");
-			}
-
-			return version;
-		} catch (IOException e) {
-			throw new RuntimeException("Failed to get version", e);
-		}
 	}
 }

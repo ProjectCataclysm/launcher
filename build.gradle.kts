@@ -1,17 +1,9 @@
-import java.util.*
-
 plugins {
 	id("java")
 	id("com.github.johnrengelman.shadow").version("7.1.0")
 }
 
-val props = Properties().apply {
-	file("$projectDir/src/main/resources/build.properties").inputStream().use { fis ->
-		load(fis)
-	}
-}
-
-version = props.getProperty("version")
+version = "1.8.3-2"
 
 tasks.withType<JavaCompile> {
 	options.encoding = "UTF-8"
@@ -20,37 +12,7 @@ tasks.withType<JavaCompile> {
 tasks.jar {
 	manifest {
 		attributes["Main-Class"] = "Main"
-	}
-}
-
-tasks.register<JavaExec>("obfuscate") {
-	dependsOn(tasks.shadowJar)
-	description = "Obfuscates launcher jar with local tool"
-	mainClass = "cataclysm.build.BuildTools"
-
-	doFirst {
-		classpath = files(project(":build-tools").layout.buildDirectory.file("libs/build-tools.jar")) +
-			project(":build-tools").sourceSets.main.get().runtimeClasspath
-
-		args(
-			"-job", "transformObf",
-			"-i", tasks.shadowJar.get().archiveFile.get().asFile,
-			"-o", layout.buildDirectory.file("lib/launcher-final.jar").get(),
-			"-cp", "${System.getProperty("java.home")}/lib/rt.jar",
-			"-pm", layout.buildDirectory.file("lib/launcher-final.map").get(),
-			"-mainClass", "Main",
-			"-packageFilter", "cataclysm.",
-			"-keepAnnotations", "proguard.annotation.Keep",
-			"-m", "launcher"
-		)
-	}
-}
-
-tasks.register("generateVersion") {
-	description = "Generating version.txt file with current launcher version"
-	doLast {
-		val libsDir = mkdir(layout.buildDirectory.dir("libs"))
-		file("$libsDir/version.txt").writeText(project.version.toString())
+		attributes["Implementation-Version"] = version
 	}
 }
 

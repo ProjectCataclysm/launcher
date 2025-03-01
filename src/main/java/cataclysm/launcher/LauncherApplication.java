@@ -118,7 +118,7 @@ public class LauncherApplication {
 
 		primaryStage.setResizable(false);
 		primaryStage.setScene(StageUtils.createScene(new StackPane(launcherNode, overlays), 400, 400));
-		primaryStage.setTitle("ProjectCataclysm Launcher v" + AutoUpdater.VERSION);
+		primaryStage.setTitle("ProjectCataclysm Launcher " + AutoUpdater.VERSION);
 
 		primaryStage.setOnCloseRequest(event -> closeApplication());
 		primaryStage.setOnShown(event -> checkForUpdates(0));
