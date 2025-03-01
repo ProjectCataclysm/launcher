@@ -8,7 +8,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 /**
- * Created 21 ���. 2018 �. / 17:14:34 
+ * Created 21 сент. 2018 г. / 17:14:34 
  * @author Knoblul
  */
 public class Main extends Application {
