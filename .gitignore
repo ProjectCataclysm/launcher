@@ -13,3 +13,6 @@ logs/
 session.txt
 config.cfg
 *.log
+
+.idea
+.vscode
