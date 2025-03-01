@@ -86,22 +86,6 @@ public class LauncherApplication {
 	public Stage getPrimaryStage() {
 		return primaryStage;
 	}
-	//	public void launch() {
-//		Thread t = new Thread(() -> {
-//		executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1,
-//				new ThreadFactoryBuilder().setNameFormat("Parallel Executor #%d").build());
-//			try {
-//				gameLauncher.startGame();
-//			} finally {
-//				//noinspection UnstableApiUsage
-//				MoreExecutors.shutdownAndAwaitTermination(executor, 10, TimeUnit.SECONDS);
-//			}
-//		});
-//		t.setDaemon(true);
-//		t.setName("Game Launcher");
-//		t.start();
-
-//	}
 
 	public void start(Stage primaryStage) {
 		// Загружаем иконки окна
@@ -192,7 +176,7 @@ public class LauncherApplication {
 		}
 
 		if (realCause instanceof LauncherRestartedException) {
-//			Platform.exit();
+			Platform.exit();
 			System.exit(0);
 			return null;
 		}
