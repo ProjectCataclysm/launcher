@@ -6,7 +6,6 @@ import cataclysm.launcher.ui.DialogUtils;
 import cataclysm.launcher.utils.LauncherConfig;
 import cataclysm.launcher.utils.Log;
 import cataclysm.launcher.utils.PlatformHelper;
-import com.google.common.collect.Lists;
 import javafx.application.Platform;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -18,6 +17,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -41,15 +41,15 @@ public class GameLauncher {
 		Path gameDirPath = config.getCurrentGameDirectoryPath();
 
 		// Может быть проблема при закрытии игры через диспетчер задач, код завершения 1
-		List<String> command = Lists.newArrayList();
+		List<String> command = new ArrayList<>();
 
-		boolean customJava = true;
 		if (PlatformHelper.getPlatform() == PlatformHelper.Platform.WINDOWS) {
-			Path javaPath = gameDirPath.resolve(Paths.get("jre8", "bin", "java.exe"));
-			if (Files.isExecutable(javaPath)) {
-				command.add(javaPath.toAbsolutePath().toString());
-				customJava = false;
+			Path javaPath = gameDirPath.resolve(Paths.get("bin", "game.exe"));
+			if (!Files.isExecutable(javaPath)) {
+				throw new RuntimeException("No executable found");
 			}
+
+			command.add(javaPath.toAbsolutePath().toString());
 		}
 
 		// пример аргументов IntelliJ при запуске:
@@ -57,10 +57,6 @@ public class GameLauncher {
 
 		// для репортов JVM
 		Files.createDirectories(gameDirPath.resolve("crashes"));
-
-		if (customJava) {
-			command.add("java");
-		}
 
 		command.add("-Dfile.encoding=UTF-8");
 
@@ -105,30 +101,20 @@ public class GameLauncher {
 		command.add("-Djava.net.preferIPv4Stack=true");
 
 		// либрарипатх
-		command.add("-Djava.library.path=");
+		command.add("-Djava.library.path=lib/*");
 
 		// класспатх
 		command.add("-cp");
 
-		List<String> classPath = Lists.newArrayList();
+		List<String> classPath = new ArrayList<>();
 		Path binPath = gameDirPath.resolve("bin");
 		try (DirectoryStream<Path> ds = Files.newDirectoryStream(binPath)) {
 			for (Path path : ds) {
-				Path relativePath = gameDirPath.relativize(path);
-				classPath.add(relativePath.toString());
-			}
-		}
-
-		Path binNativesPath = binPath.resolve("natives");
-		try (DirectoryStream<Path> ds = Files.newDirectoryStream(binNativesPath)) {
-			for (Path path : ds) {
-				Path relativePath = gameDirPath.relativize(path);
-				classPath.add(relativePath.toString());
+				classPath.add(gameDirPath.relativize(path).toString());
 			}
 		}
 
 		Collections.sort(classPath);
-		classPath.add(0, "core.jar");
 
 		command.add(String.join(File.pathSeparator, classPath));
 		command.add("start.StartClient");

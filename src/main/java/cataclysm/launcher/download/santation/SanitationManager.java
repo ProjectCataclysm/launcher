@@ -3,11 +3,11 @@ package cataclysm.launcher.download.santation;
 import cataclysm.launcher.assets.AssetDifferenceComputer;
 import cataclysm.launcher.assets.AssetInfo;
 import cataclysm.launcher.assets.AssetInfoContainer;
-import com.google.common.collect.Sets;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -41,7 +41,7 @@ public class SanitationManager  {
 	}
 
 	public CompletableFuture<Set<AssetInfo>> sanitize(AssetInfoContainer assets, Executor executor, Path rootPath) {
-		Set<AssetInfo> downloadSet = Sets.newHashSet();
+		Set<AssetInfo> downloadSet = new HashSet<>();
 		return AssetDifferenceComputer.findDifferences(assets, executor, rootPath,
 				diff -> handleDifference(assets, downloadSet, rootPath, diff)).thenApply(__ -> downloadSet);
 	}

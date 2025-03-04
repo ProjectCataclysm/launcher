@@ -4,14 +4,11 @@ import cataclysm.launcher.LauncherApplication;
 import cataclysm.launcher.utils.LauncherConfig;
 import cataclysm.launcher.utils.Log;
 import cataclysm.launcher.utils.PlatformHelper;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -26,9 +23,8 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -54,7 +50,7 @@ public class DialogUtils {
 			Label label = new Label("Отладочные данные:");
 			TextArea textArea = new TextArea();
 			textArea.setEditable(false);
-			textArea.setText(Throwables.getStackTraceAsString(t));
+			textArea.setText(AwtErrorDialog.getThrowableStackTrace(t));
 			dialogPaneContent.getChildren().addAll(label, textArea);
 			alert.getDialogPane().setContent(dialogPaneContent);
 		} else {
@@ -143,7 +139,7 @@ public class DialogUtils {
 
 		Log.msg("Creating report file " + archivePath.getFileName());
 
-		Set<Path> filesToDelete = Sets.newHashSet();
+		Set<Path> filesToDelete = new HashSet<>();
 		try (ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(archivePath))) {
 			if (exitCode != 0) {
 				out.putNextEntry(new ZipEntry("exit_code.txt"));
@@ -205,7 +201,7 @@ public class DialogUtils {
 			if (PlatformHelper.getPlatform() == PlatformHelper.Platform.WINDOWS) {
 				try {
 					Path dxDiagPath = launcherDir.resolve("dxdiag.txt").toAbsolutePath();
-					List<String> commandLine = Lists.newArrayList();
+					List<String> commandLine = new ArrayList<>();
 					commandLine.add("dxdiag.exe");
 					commandLine.add("/dontskip");
 					commandLine.add("/whql:off");

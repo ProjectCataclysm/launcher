@@ -8,7 +8,6 @@ import cataclysm.launcher.ui.*;
 import cataclysm.launcher.utils.LauncherConfig;
 import cataclysm.launcher.utils.LauncherConstants;
 import cataclysm.launcher.utils.Log;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
@@ -41,14 +40,18 @@ public class LauncherApplication {
 
 	public LauncherApplication() {
 		instance = this;
-		mainExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
-						.setNameFormat("Main Task Executor")
-						.setDaemon(true)
-						.build());
-		parallelExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
-				.setNameFormat("Parallel Task Executor")
-				.setDaemon(true)
-				.build());
+		mainExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+			Thread t = new Thread(r);
+			t.setName("Main Task Executor");
+			t.setDaemon(true);
+			return t;
+		});
+		parallelExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+			Thread t = new Thread(r);
+			t.setName("Parallel Task Executor");
+			t.setDaemon(true);
+			return t;
+		});
 	}
 
 	public static LauncherApplication getInstance() {

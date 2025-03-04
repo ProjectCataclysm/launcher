@@ -40,7 +40,6 @@ dependencies {
 	implementation("org.tinylog:tinylog-api:2.7.0")
 	implementation("org.tinylog:tinylog-impl:2.7.0")
 	implementation("com.squareup.okhttp3:okhttp:4.10.0")
-	implementation("com.google.guava:guava:33.4.0-jre")
 	implementation("com.googlecode.json-simple:json-simple:1.1.1")
 
 	testImplementation("net.sf.jopt-simple:jopt-simple:5.0.4")

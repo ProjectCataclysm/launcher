@@ -4,7 +4,6 @@ import cataclysm.launcher.utils.ApiException;
 import cataclysm.launcher.utils.HttpClientWrapper;
 import cataclysm.launcher.utils.LauncherConfig;
 import cataclysm.launcher.utils.Log;
-import com.google.common.collect.Sets;
 import org.jetbrains.annotations.Nullable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -14,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -77,7 +77,7 @@ public class AccountManager {
 		Profile profile = new Profile((String) profileNode.get("uuid"), (String) profileNode.get("email"),
 				(String) profileNode.get("username"));
 
-		Set<String> ticketsRaw = Sets.newHashSet();
+		Set<String> ticketsRaw = new HashSet<>();
 		JSONArray ticketsNode = (JSONArray) userNode.get("tickets");
 		for (Object o : ticketsNode) {
 			JSONObject node = (JSONObject) o;

@@ -5,8 +5,6 @@ import cataclysm.launcher.account.Session;
 import cataclysm.launcher.utils.HttpClientWrapper;
 import cataclysm.launcher.utils.LauncherConfig;
 import cataclysm.launcher.utils.PlatformHelper;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
@@ -19,7 +17,6 @@ import proguard.annotation.Keep;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.*;
-import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -78,7 +75,7 @@ public class SettingsDialog extends VBox {
 	}
 
 	private void clientBranchOption(LauncherApplication application, GridPane gp) {
-		Set<LauncherConfig.ClientBranch> accessibleBranches = Sets.newHashSet();
+		Set<LauncherConfig.ClientBranch> accessibleBranches = new HashSet<>();
 		Set<String> tickets = Optional.ofNullable(application.getAccountManager().getSession())
 			.map(Session::getTickets)
 			.orElse(Collections.emptySet());
@@ -123,7 +120,7 @@ public class SettingsDialog extends VBox {
 		Label label = new Label("Ограничение памяти");
 		gp.add(label, 0, 1);
 
-		List<Integer> values = Lists.newArrayList();
+		List<Integer> values = new ArrayList<>();
 		values.add(0);
 
 		int maxMemory = PlatformHelper.getMaxMemory();

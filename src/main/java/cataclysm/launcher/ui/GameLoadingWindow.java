@@ -7,16 +7,13 @@ import cataclysm.launcher.download.DownloadingManager;
 import cataclysm.launcher.download.santation.SanitationManager;
 import cataclysm.launcher.launch.GameLauncher;
 import cataclysm.launcher.utils.Log;
-import com.google.common.util.concurrent.MoreExecutors;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -116,18 +113,31 @@ public class GameLoadingWindow extends LoadingOverlay implements DownloadingMana
 		AtomicReference<ExecutorService> executorReference = new AtomicReference<>();
 		CompletableFuture.runAsync(() -> showLoading("Проверка файлов игры...", 0), Platform::runLater)
 				.thenComposeAsync(__ -> {
-					ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("File Checker #%d")
-							.setDaemon(true)
-							.build();
+					ThreadFactory threadFactory = new ThreadFactory() {
+						private int threadCounter = 0;
+
+						@Override
+						public Thread newThread(@NotNull Runnable r) {
+							Thread t = new Thread(r);
+							t.setName("File Checker " + (threadCounter++));
+							t.setDaemon(true);
+							return t;
+					}};
 					int nThreads = Runtime.getRuntime().availableProcessors();
 					ExecutorService executor = Executors.newFixedThreadPool(nThreads, threadFactory);
 					executorReference.set(executor);
 					return sanitationManager.sanitize(assets, executor, application.getConfig().getCurrentGameDirectoryPath());
 				}, application.getMainExecutor())
 				.whenCompleteAsync((result, cause) -> {
-					//noinspection UnstableApiUsage
-					MoreExecutors.shutdownAndAwaitTermination(executorReference.get(),
-							Duration.of(10, ChronoUnit.SECONDS));
+					ExecutorService exec = executorReference.get();
+					try {
+						exec.shutdown();
+						if (!exec.awaitTermination(10, TimeUnit.SECONDS)) {
+							exec.shutdownNow();
+						}
+					} catch (Throwable ignored) {
+
+					}
 				}, application.getMainExecutor())
 				.handleAsync(this::handleGameFilesCheckedResult, Platform::runLater)
 				.whenComplete(Log::logFutureErrors);

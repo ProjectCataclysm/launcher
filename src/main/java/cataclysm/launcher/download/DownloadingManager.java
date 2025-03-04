@@ -3,8 +3,6 @@ package cataclysm.launcher.download;
 import cataclysm.launcher.assets.AssetInfo;
 import cataclysm.launcher.assets.AssetInfoContainer;
 import cataclysm.launcher.utils.*;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import okio.BufferedSource;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -18,10 +16,7 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -63,11 +58,11 @@ public class DownloadingManager {
 			}
 		}
 
-		Set<String> protectedFolders = Sets.newHashSet();
+		Set<String> protectedFolders = new HashSet<>();
 		((JSONArray) root.get("protected_folders")).forEach(t -> protectedFolders.add((String) t));
 
-		Map<String, String> hashes = Maps.newHashMap();
-		Set<AssetInfo> assets = Sets.newHashSet();
+		Map<String, String> hashes = new HashMap<>();
+		Set<AssetInfo> assets = new HashSet<>();
 		((JSONArray) root.get("resources_default"))
 				.forEach(t -> assets.add(parseAsset((JSONObject) t, hashes)));
 		((JSONArray) root.get("resources_" + PlatformHelper.getPlatformIdentifier()))

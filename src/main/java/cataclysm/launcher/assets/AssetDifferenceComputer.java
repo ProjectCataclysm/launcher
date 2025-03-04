@@ -1,6 +1,5 @@
 package cataclysm.launcher.assets;
 
-import com.google.common.collect.Lists;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -8,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +25,7 @@ public class AssetDifferenceComputer {
 	                                                         DifferenceSink sink) {
 		if (Files.isDirectory(filePath)) {
 			try {
-				List<CompletableFuture<Void>> futures = Lists.newArrayList();
+				List<CompletableFuture<Void>> futures = new ArrayList<>();
 				try (DirectoryStream<Path> ds = Files.newDirectoryStream(filePath)) {
 					for (Path path : ds) {
 						futures.add(findModifiedFiles(executor, asset, rootPath, path, hashes, sink));
@@ -57,7 +57,7 @@ public class AssetDifferenceComputer {
 	                                                        Path filePath, Map<String, String> hashes,
 	                                                        DifferenceSink sink) {
 		return CompletableFuture.runAsync(() -> {
-			List<Path> paths = Lists.newArrayList();
+			List<Path> paths = new ArrayList<>();
 			String path = rootPath.relativize(filePath).toString().replace(File.separatorChar, '/');
 			for (String fn : hashes.keySet()) {
 				if (fn.startsWith(path)) {
@@ -73,15 +73,15 @@ public class AssetDifferenceComputer {
 		}, executor);
 	}
 
-	private static CompletableFuture<Void> findExtraFiles(Executor executor, AssetInfo asset, Path rootPath, Path filePath,
-	                                   Map<String, String> hashes, DifferenceSink sink) {
+	private static CompletableFuture<Void> findExtraFiles(AssetInfo asset, Path rootPath, Path filePath,
+	                                                      Map<String, String> hashes, DifferenceSink sink) {
 		if (Files.isDirectory(filePath)) {
 			// пробегаемся по всем файлам в директории
 			int fileNum = 0;
 			try (DirectoryStream<Path> ds = Files.newDirectoryStream(filePath)) {
-				List<CompletableFuture<Void>> futures = Lists.newArrayList();
+				List<CompletableFuture<Void>> futures = new ArrayList<>();
 				for (Path path : ds) {
-					futures.add(findExtraFiles(executor, asset, rootPath, path, hashes, sink));
+					futures.add(findExtraFiles(asset, rootPath, path, hashes, sink));
 					fileNum++;
 				}
 				return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
@@ -126,11 +126,11 @@ public class AssetDifferenceComputer {
 
 		Set<AssetInfo> contents = assets.getAssets();
 		Map<String, String> hashes = assets.getHashes();
-		List<CompletableFuture<Void>> futures = Lists.newArrayList();
+		List<CompletableFuture<Void>> futures = new ArrayList<>();
 
 		// удаляем все посторонние файлы из защищёных директорий
 		for (String folder : assets.getProtectedFolders()) {
-			futures.add(findExtraFiles(executor, null, rootPath, rootPath.resolve(folder), hashes, sink));
+			futures.add(findExtraFiles(null, rootPath, rootPath.resolve(folder), hashes, sink));
 		}
 
 		// санитизируем папку с игрой, сравниваем хеши файлов с hashes

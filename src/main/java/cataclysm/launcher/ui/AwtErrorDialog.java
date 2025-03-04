@@ -1,10 +1,11 @@
 package cataclysm.launcher.ui;
 
 import cataclysm.launcher.utils.Log;
-import com.google.common.base.Throwables;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * <br><br>ProjectCataclysm
@@ -13,10 +14,17 @@ import java.awt.*;
  * @author Knoblul
  */
 public class AwtErrorDialog {
+	static String getThrowableStackTrace(Throwable t) {
+		StringWriter stringWriter = new StringWriter();
+		t.printStackTrace(new PrintWriter(stringWriter));
+		return stringWriter.toString();
+	}
+
 	public static void showError(String message, Throwable t) {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ignored) {
+
 		}
 
 		Log.err(t, message);
@@ -46,7 +54,7 @@ public class AwtErrorDialog {
 
 			JTextArea ta = new JTextArea();
 			ta.setFont(new Font("Consolas", Font.PLAIN, 12));
-			ta.setText(Throwables.getStackTraceAsString(t));
+			ta.setText(getThrowableStackTrace(t));
 
 			JScrollPane scroll = new JScrollPane(ta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 					JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);

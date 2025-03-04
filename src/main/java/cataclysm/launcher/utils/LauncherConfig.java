@@ -1,7 +1,5 @@
 package cataclysm.launcher.utils;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.FileNotFoundException;
@@ -12,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -23,7 +22,7 @@ import java.util.Properties;
  * @author Knoblul
  */
 public class LauncherConfig {
-	private static final Map<String, ClientBranch> CLIENT_BRANCH_NAME_MAP = Maps.newHashMap();
+	private static final Map<String, ClientBranch> CLIENT_BRANCH_NAME_MAP = new HashMap<>();
 
 	public static final boolean IS_INSTALLATION = Files.isRegularFile(Paths.get(".setup"));
 	public static final Path LAUNCHER_DIR_PATH;
@@ -56,10 +55,8 @@ public class LauncherConfig {
 			props.load(in);
 
 			gameDirectoryPath = Paths.get(props.getProperty("gameDirectory", gameDirectoryPath.toString()));
-			limitMemoryMegabytes = roundUpToPowerOfTwo(
-					Integer.parseInt(props.getProperty("limitMemory", Integer.toString(limitMemoryMegabytes))));
-			clientBranch = CLIENT_BRANCH_NAME_MAP.getOrDefault(Strings.nullToEmpty(props.getProperty("clientUpdateBranch")).toLowerCase(Locale.ROOT),
-				ClientBranch.PRODUCTION);
+			limitMemoryMegabytes = roundUpToPowerOfTwo(Integer.parseInt(props.getProperty("limitMemory", Integer.toString(limitMemoryMegabytes))));
+			clientBranch = CLIENT_BRANCH_NAME_MAP.getOrDefault(props.getProperty("clientUpdateBranch", "").toLowerCase(Locale.ROOT), ClientBranch.PRODUCTION);
 		} catch (FileNotFoundException | NoSuchFileException e) {
 			save();
 		} catch (Exception e) {
