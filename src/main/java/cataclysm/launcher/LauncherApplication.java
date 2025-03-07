@@ -46,7 +46,7 @@ public class LauncherApplication {
 			t.setDaemon(true);
 			return t;
 		});
-		parallelExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+		parallelExecutor = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors(), r -> {
 			Thread t = new Thread(r);
 			t.setName("Parallel Task Executor");
 			t.setDaemon(true);
@@ -255,4 +255,19 @@ public class LauncherApplication {
 			startButton.setText("Игра запущена");
 		}
 	}
+
+//	public enum State {
+//		SELF_UPDATE_CHECK,
+//		SELF_UPDATING,
+//
+//		LOGIN_VALIDATION,
+//		LOGIN_UNAUTHORIZED,
+//		LOGIN_SUBMIT,
+//		LOGIN_INCORRECT,
+//		LOGIN_OK,
+//
+//		GAME_UPDATE_CHECK,
+//		GAME_DOWNLOADING,
+//		GAME_PLAYING,
+//	}
 }

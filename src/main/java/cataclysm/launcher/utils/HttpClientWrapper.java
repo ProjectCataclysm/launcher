@@ -1,9 +1,11 @@
 package cataclysm.launcher.utils;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import okhttp3.*;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.jetbrains.annotations.Nullable;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -11,7 +13,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
@@ -24,10 +25,13 @@ import java.time.temporal.ChronoUnit;
  * @author Knoblul
  */
 public class HttpClientWrapper {
+	public static final Gson GSON = new GsonBuilder()
+		.create();
+
 	private static final OkHttpClient HTTP_CLIENT;
 	private static final MediaType MEDIA_TYPE_JSON = MediaType.get("application/json; charset=utf-8");
 
-	// тайм-аут всех подключений, в миллисекундах
+	// тайм-аут всех подключений
 	private static final Duration REQ_TIMEOUT = Duration.of(15, ChronoUnit.SECONDS);
 
 	/**
@@ -35,10 +39,9 @@ public class HttpClientWrapper {
 	 * Проверяет ответ на наличие статуса 200 OK.
 	 * Если такового статуса нет в ответе, то выкидывает исключение.
 	 * @param url адрес, на который обращаемся
-	 * @param parser парсер ответа из {@link InputStream}
 	 * @throws IOException выбрасывается, если произошла ошибка, связанная с I/O
 	 */
-	public static HttpResponse get(String url) throws IOException {
+	public static HttpGetResponse get(String url) throws IOException {
 		Request request = new Request.Builder().url(url).get().build();
 		Response response = HTTP_CLIENT.newCall(request).execute();
 		int responseCode = response.code();
@@ -53,22 +56,22 @@ public class HttpClientWrapper {
 			throw new IOException("Missing response body!");
 		}
 
-		return new HttpResponse(response, body);
+		return new HttpGetResponse(response, body);
 	}
 
 	/**
 	 * Данный метод служит для общения с API через HTTP-POST.
 	 *
 	 * @param endpoint       к какому скрипту обращаемся, относительно API
-	 * @param requestBuilder запрос в JSON
+	 * @param req запрос в JSON
 	 * @return ответ в JSON
 	 * @throws IOException если какая-то ошибка при чтении ответа происходит, выбрасывается это исключение.
 	 */
-	public static JSONObject postJsonRequest(String endpoint, JSONObject requestBuilder)
+	public static <T> T postJsonRequest(String endpoint, Object req, @Nullable Class<T> responseClass)
 			throws ApiException, IOException {
 		Request request = new Request.Builder()
 				.url("https://" + LauncherConstants.API_URL + "/" + endpoint)
-				.post(RequestBody.create(requestBuilder.toJSONString(), MEDIA_TYPE_JSON))
+				.post(RequestBody.create(GSON.toJson(req), MEDIA_TYPE_JSON))
 				.build();
 		try (Response response = HTTP_CLIENT.newCall(request).execute();
 		    ResponseBody responseBody = response.body()) {
@@ -91,23 +94,19 @@ public class HttpClientWrapper {
 			}
 
 			try {
-				// парсим ответ
-				JSONObject node = (JSONObject) new JSONParser().parse(responseBody.charStream());
+				JsonObject obj = GSON.fromJson(responseBody.charStream(), JsonObject.class);
 
 				// если сервер ответил нам ошибкой, она хранится в ноде error
-				if (node.containsKey("error")) {
-					throw new ApiException((String) node.get("error"));
-				} else if (!node.containsKey("response")) {
+				if (obj.has("error")) {
+					throw new ApiException(obj.get("error").getAsString());
+				} else if (!obj.has("response")) {
 					// если в данных ответа нет ноды response
 					throw new IOException("Json does not contains 'response'!");
 				}
 
-				if (!(node.get("response") instanceof JSONObject)) {
-					return null;
-				}
-
-				return (JSONObject) node.get("response");
-			} catch (ParseException e) {
+				// парсим ответ
+				return responseClass != null ? GSON.fromJson(obj.get("response"), responseClass) : null;
+			} catch (JsonSyntaxException e) {
 				throw new IOException("Failed to parse response '" + responseBody + "'", e);
 			}
 		}
@@ -125,9 +124,6 @@ public class HttpClientWrapper {
 	public static void browse(String url) {
 		browse(URI.create(url));
 	}
-
-	//	private static final DefaultHttpRequestRetryHandler RETRY_HANDLER = new DefaultHttpRequestRetryHandler(3, false);
-//	private static final SSLContext SSL_CONTEXT;
 
 	static {
 		try {
@@ -163,11 +159,11 @@ public class HttpClientWrapper {
 		}
 	}
 
-	public static final class HttpResponse implements Closeable {
+	public static final class HttpGetResponse implements Closeable {
 		private final Response response;
 		private final ResponseBody body;
 
-		public HttpResponse(Response response, ResponseBody body) {
+		public HttpGetResponse(Response response, ResponseBody body) {
 			this.response = response;
 			this.body = body;
 		}
@@ -181,7 +177,7 @@ public class HttpClientWrapper {
 		}
 
 		@Override
-		public void close() throws IOException {
+		public void close() {
 			response.close();
 			body.close();
 		}

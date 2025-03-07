@@ -17,6 +17,14 @@ public class DownloadProgressBar extends ProgressBar {
 		setMaxWidth(Double.MAX_VALUE);
 	}
 
+	public long getContentLength() {
+		return contentLength;
+	}
+
+	public long getCurrentProgress() {
+		return currentProgress;
+	}
+
 	public void setContentLength(long contentLength) {
 		this.contentLength = contentLength;
 		currentProgress = 0;

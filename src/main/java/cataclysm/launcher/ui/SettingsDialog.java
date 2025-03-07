@@ -12,12 +12,12 @@ import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import proguard.annotation.Keep;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * <br><br>ProjectCataclysm
@@ -76,12 +76,12 @@ public class SettingsDialog extends VBox {
 
 	private void clientBranchOption(LauncherApplication application, GridPane gp) {
 		Set<LauncherConfig.ClientBranch> accessibleBranches = new HashSet<>();
-		Set<String> tickets = Optional.ofNullable(application.getAccountManager().getSession())
-			.map(Session::getTickets)
+		Set<Session.User.Ticket> tickets = Optional.ofNullable(application.getAccountManager().getSession())
+			.map(s -> Arrays.stream(s.getUser().getTickets()).collect(Collectors.toSet()))
 			.orElse(Collections.emptySet());
 
-		accessibleBranches.add(LauncherConfig.ClientBranch.PRODUCTION);
-		if (tickets.contains("e:test")) {
+		accessibleBranches.add(LauncherConfig.ClientBranch.MAIN);
+		if (tickets.contains(new Session.User.Ticket("e", "test"))) {
 			accessibleBranches.add(LauncherConfig.ClientBranch.TEST);
 		}
 
@@ -89,7 +89,7 @@ public class SettingsDialog extends VBox {
 		gp.add(label, 0, 2);
 
 		Function<LauncherConfig.ClientBranch, LauncherConfig.ClientBranch> convFun =
-			b -> accessibleBranches.contains(b) ? b : LauncherConfig.ClientBranch.PRODUCTION;
+			b -> accessibleBranches.contains(b) ? b : LauncherConfig.ClientBranch.MAIN;
 
 		ObservableList<LauncherConfig.ClientBranch> optionList = FXCollections.observableArrayList(accessibleBranches);
 		optionList.sort(Comparator.comparingInt(Enum::ordinal));
@@ -101,7 +101,7 @@ public class SettingsDialog extends VBox {
 				super.updateItem(item, empty);
 
 				if (item == null) {
-					item = LauncherConfig.ClientBranch.PRODUCTION;
+					item = LauncherConfig.ClientBranch.MAIN;
 				}
 
 				setText(item.getTitle());
@@ -123,7 +123,7 @@ public class SettingsDialog extends VBox {
 		List<Integer> values = new ArrayList<>();
 		values.add(0);
 
-		int maxMemory = PlatformHelper.getMaxMemory();
+		int maxMemory = PlatformHelper.getMaxMemoryMegabytes();
 		int selectedValue = config.limitMemoryMegabytes;
 		int selectedIndex = 0;
 
@@ -198,7 +198,6 @@ public class SettingsDialog extends VBox {
 	}
 
 	private static final class MemoryListCell extends ListCell<Integer> {
-		@Keep
 		@Override
 		protected void updateItem(Integer item, boolean empty) {
 			super.updateItem(item, empty);

@@ -1,7 +1,5 @@
 package cataclysm.launcher.utils;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +33,7 @@ public class LauncherConfig {
 
 	private final Path configFile = LAUNCHER_DIR_PATH.resolve("launcher.cfg");
 
-	public ClientBranch clientBranch = ClientBranch.PRODUCTION;
+	public ClientBranch clientBranch = ClientBranch.MAIN;
 
 	public LauncherConfig() {
 		Log.msg("Config file %s", configFile);
@@ -43,9 +41,7 @@ public class LauncherConfig {
 	}
 
 	public Path getCurrentGameDirectoryPath() {
-		return clientBranch.getSubDirName() != null
-		       ? gameDirectoryPath.resolve(clientBranch.getSubDirName())
-		       : gameDirectoryPath;
+		return gameDirectoryPath.resolve(clientBranch.getName());
 	}
 
 	public void load() {
@@ -56,7 +52,7 @@ public class LauncherConfig {
 
 			gameDirectoryPath = Paths.get(props.getProperty("gameDirectory", gameDirectoryPath.toString()));
 			limitMemoryMegabytes = roundUpToPowerOfTwo(Integer.parseInt(props.getProperty("limitMemory", Integer.toString(limitMemoryMegabytes))));
-			clientBranch = CLIENT_BRANCH_NAME_MAP.getOrDefault(props.getProperty("clientUpdateBranch", "").toLowerCase(Locale.ROOT), ClientBranch.PRODUCTION);
+			clientBranch = CLIENT_BRANCH_NAME_MAP.getOrDefault(props.getProperty("clientUpdateBranch", "").toLowerCase(Locale.ROOT), ClientBranch.MAIN);
 		} catch (FileNotFoundException | NoSuchFileException e) {
 			save();
 		} catch (Exception e) {
@@ -65,7 +61,7 @@ public class LauncherConfig {
 		}
 
 		if (limitMemoryMegabytes != 0 && limitMemoryMegabytes < 1024
-				|| limitMemoryMegabytes > PlatformHelper.getMaxMemory()) {
+				|| limitMemoryMegabytes > PlatformHelper.getMaxMemoryMegabytes()) {
 			limitMemoryMegabytes = 0;
 		}
 	}
@@ -97,19 +93,17 @@ public class LauncherConfig {
 	}
 
 	public enum ClientBranch {
-		PRODUCTION("production", "Основной клиент", null),
-		TEST("test", "Тестовый клиент", "branch_test"),
+		MAIN("branch_main", "Основной клиент"),
+		TEST("branch_test", "Тестовый клиент"),
 
 		;
 
 		private final String name;
 		private final String title;
-		private final @Nullable String subDirName;
 
-		ClientBranch(String name, String title, @Nullable String subDirName) {
+		ClientBranch(String name, String title) {
 			this.name = name;
 			this.title = title;
-			this.subDirName = subDirName;
 		}
 
 		public String getName() {
@@ -118,10 +112,6 @@ public class LauncherConfig {
 
 		public String getTitle() {
 			return title;
-		}
-
-		public @Nullable String getSubDirName() {
-			return subDirName;
 		}
 	}
 

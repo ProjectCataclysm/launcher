@@ -5,17 +5,13 @@ import cataclysm.launcher.utils.HttpClientWrapper;
 import cataclysm.launcher.utils.LauncherConfig;
 import cataclysm.launcher.utils.Log;
 import org.jetbrains.annotations.Nullable;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.HashMap;
 
 /**
  * <br><br>ProjectCataclysm
@@ -31,7 +27,6 @@ public class AccountManager {
 		return session;
 	}
 
-	@SuppressWarnings("unchecked")
 	public void validateSession() {
 		String accessToken = null;
 		try {
@@ -43,13 +38,14 @@ public class AccountManager {
 
 		if (accessToken != null) {
 			try {
-				JSONObject request = new JSONObject();
-				request.put("accessToken", accessToken);
-				parseSession(Objects.requireNonNull(HttpClientWrapper.postJsonRequest("client/validate", request)));
+				useSession(HttpClientWrapper.postJsonRequest(
+					"client/validate",
+					Collections.singletonMap("accessToken", accessToken),
+					Session.class
+				));
 			} catch (Exception e) {
 				if (e instanceof ApiException) {
-					session = null;
-					saveSession();
+					useSession(null);
 				}
 
 				throw new RuntimeException("Failed to validate session", e);
@@ -57,13 +53,12 @@ public class AccountManager {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public void authorize(String login, String password) {
 		try {
-			JSONObject request = new JSONObject();
-			request.put("login", login);
-			request.put("password", password);
-			parseSession(Objects.requireNonNull(HttpClientWrapper.postJsonRequest("client/auth", request)));
+			HashMap<Object, Object> req = new HashMap<>();
+			req.put("login", login);
+			req.put("password", password);
+			useSession(HttpClientWrapper.postJsonRequest("client/auth", req, Session.class));
 		} catch (ApiException e) {
 			throw e;
 		} catch (Exception e) {
@@ -71,43 +66,29 @@ public class AccountManager {
 		}
 	}
 
-	private void parseSession(JSONObject response) {
-		JSONObject userNode = (JSONObject) response.get("user");
-		JSONObject profileNode = (JSONObject) userNode.get("profile");
-		Profile profile = new Profile((String) profileNode.get("uuid"), (String) profileNode.get("email"),
-				(String) profileNode.get("username"));
+//	private void parseSession(JSONObject response) {
+//		JSONObject userNode = (JSONObject) response.get("user");
+//		JSONObject profileNode = (JSONObject) userNode.get("profile");
+//		Profile profile = new Profile((String) profileNode.get("uuid"), (String) profileNode.get("email"),
+//				(String) profileNode.get("username"));
+//
+//		Set<String> ticketsRaw = new HashSet<>();
+//		JSONArray ticketsNode = (JSONArray) userNode.get("tickets");
+//		for (Object o : ticketsNode) {
+//			JSONObject node = (JSONObject) o;
+//			ticketsRaw.add(node.get("type") + ":" + node.get("name"));
+//		}
+//
+//		String accessToken = Objects.requireNonNull((String) response.get("accessToken"));
+//		int balance = ((Number) userNode.get("balance")).intValue();
+//		session = new Session(profile, accessToken, ticketsRaw, balance);
+//
+//		saveSession();
+//	}
 
-		Set<String> ticketsRaw = new HashSet<>();
-		JSONArray ticketsNode = (JSONArray) userNode.get("tickets");
-		for (Object o : ticketsNode) {
-			JSONObject node = (JSONObject) o;
-			ticketsRaw.add(node.get("type") + ":" + node.get("name"));
-		}
+	private void useSession(@Nullable Session session) {
+		this.session = session;
 
-		String accessToken = Objects.requireNonNull((String) response.get("accessToken"));
-		int balance = ((Number) userNode.get("balance")).intValue();
-		session = new Session(profile, accessToken, ticketsRaw, balance);
-
-		saveSession();
-	}
-
-	@SuppressWarnings("unchecked")
-	public void logout() {
-		if (session != null) {
-			try {
-				JSONObject request = new JSONObject();
-				request.put("accessToken", session.getAccessToken());
-				HttpClientWrapper.postJsonRequest("client/invalidate", request);
-			} catch (Exception e) {
-				Log.err(e, "Failed to logout");
-			}
-		}
-
-		session = null;
-		saveSession();
-	}
-
-	private void saveSession() {
 		try {
 			if (session != null) {
 				Files.write(sessionFilePath, Collections.singletonList(session.getAccessToken()));
@@ -117,5 +98,21 @@ public class AccountManager {
 		} catch (Exception e) {
 			Log.err(e, "Failed to write session to file");
 		}
+	}
+
+	public void logout() {
+		if (session != null) {
+			try {
+				HttpClientWrapper.postJsonRequest(
+					"client/invalidate",
+					Collections.singletonMap("accessToken", session.getAccessToken()),
+					null
+				);
+			} catch (Exception e) {
+				Log.err(e, "Failed to logout");
+			}
+		}
+
+		useSession(null);
 	}
 }

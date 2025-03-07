@@ -34,7 +34,7 @@ public class AutoUpdater {
 			Log.msg("Downloading launcher update...");
 			String url = "https://" + LauncherConstants.LAUNCHER_URL + "/launcher.jar";
 
-			try (HttpClientWrapper.HttpResponse response = HttpClientWrapper.get(url);
+			try (HttpClientWrapper.HttpGetResponse response = HttpClientWrapper.get(url);
 			     BufferedSource source = response.getBody().source();
 			     OutputStream out = Files.newOutputStream(updateJar)) {
 				Platform.runLater(() -> updateUI.showLoading("Скачиваем обновление...", response.getBody().contentLength()));
@@ -56,7 +56,7 @@ public class AutoUpdater {
 	private static void checkForUpdates(LoadingOverlay updateUI) {
 		String version;
 		String url = "https://" + LauncherConstants.LAUNCHER_URL + "/version.txt";
-		try (HttpClientWrapper.HttpResponse response = HttpClientWrapper.get(url)) {
+		try (HttpClientWrapper.HttpGetResponse response = HttpClientWrapper.get(url)) {
 			version = response.getBody().string().trim();
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to check version", e);

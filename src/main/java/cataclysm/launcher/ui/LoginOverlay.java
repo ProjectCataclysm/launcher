@@ -168,10 +168,6 @@ public class LoginOverlay extends AbstractLauncherOverlay {
 			realCause = cause.getCause();
 		}
 
-//		if (realCause instanceof AuthorizationException) {
-//			realCause = realCause.getCause();
-//		}
-
 		if (realCause != null) {
 			Log.err(realCause, "Failed to login");
 		}

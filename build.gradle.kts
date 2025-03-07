@@ -35,12 +35,12 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains:annotations:15.0")
-	implementation("com.guardsquare:proguard-annotations:7.0.1")
 	implementation("org.tinylog:tinylog-api:2.7.0")
 	implementation("org.tinylog:tinylog-impl:2.7.0")
-	implementation("com.squareup.okhttp3:okhttp:4.10.0")
-	implementation("com.googlecode.json-simple:json-simple:1.1.1")
+	implementation("com.squareup.okhttp3:okhttp:4.12.0")
+	implementation("com.google.code.gson:gson:2.12.1")
+
+	runtimeOnly("org.jetbrains:annotations:15.0")
 
 	testImplementation("net.sf.jopt-simple:jopt-simple:5.0.4")
 }

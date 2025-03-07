@@ -1,4 +1,4 @@
-package cataclysm.launcher.assets;
+package cataclysm.launcher.download;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -3,12 +3,11 @@ package cataclysm.launcher.launch;
 import cataclysm.launcher.LauncherApplication;
 import cataclysm.launcher.account.Session;
 import cataclysm.launcher.ui.DialogUtils;
+import cataclysm.launcher.utils.HttpClientWrapper;
 import cataclysm.launcher.utils.LauncherConfig;
 import cataclysm.launcher.utils.Log;
 import cataclysm.launcher.utils.PlatformHelper;
 import javafx.application.Platform;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -82,15 +81,13 @@ public class GameLauncher {
 		// макс. размер стека вызова
 		command.add("-Xss1M");
 
-		// антиинжект
-		command.add("-XX:+DisableAttachMechanism");
+//		// антиинжект
+//		command.add("-XX:+DisableAttachMechanism");
 
 		// память
 		command.add("-Xms256m");
 		if (config.limitMemoryMegabytes > 0) {
 			command.add("-Xmx" + (config.limitMemoryMegabytes) + "m");
-		} else if (!PlatformHelper.is64bit()) {
-			command.add("-Xmx1024m");
 		}
 
 		if (PlatformHelper.getPlatform() == PlatformHelper.Platform.MAC) {
@@ -101,31 +98,35 @@ public class GameLauncher {
 		command.add("-Djava.net.preferIPv4Stack=true");
 
 		// либрарипатх
-		command.add("-Djava.library.path=lib/*");
+		List<String> binPath = new ArrayList<>();
+		Path binDir = gameDirPath.resolve("bin");
+		try (DirectoryStream<Path> ds = Files.newDirectoryStream(binDir)) {
+			for (Path path : ds) {
+				binPath.add(gameDirPath.relativize(path).toString());
+			}
+		}
+		Collections.sort(binPath);
+		command.add("-Djava.library.path=" + String.join(File.pathSeparator, binPath));
 
 		// класспатх
-		command.add("-cp");
-
 		List<String> classPath = new ArrayList<>();
-		Path binPath = gameDirPath.resolve("bin");
-		try (DirectoryStream<Path> ds = Files.newDirectoryStream(binPath)) {
+		Path libDir = gameDirPath.resolve("lib");
+		try (DirectoryStream<Path> ds = Files.newDirectoryStream(libDir)) {
 			for (Path path : ds) {
 				classPath.add(gameDirPath.relativize(path).toString());
 			}
 		}
-
 		Collections.sort(classPath);
-
+		command.add("-cp");
 		command.add(String.join(File.pathSeparator, classPath));
+
 		command.add("start.StartClient");
 
 		command.add("--session");
 		command.add(buildSessionString(session));
 
-		if (config.clientBranch != LauncherConfig.ClientBranch.PRODUCTION) {
-			command.add("--updateBranch");
-			command.add(config.clientBranch.getSubDirName());
-		}
+		command.add("--updateBranch");
+		command.add(config.clientBranch.getName());
 
 		ProcessBuilder pb = new ProcessBuilder(command);
 		pb.directory(gameDirPath.toFile());
@@ -136,38 +137,10 @@ public class GameLauncher {
 		return process.waitFor();
 	}
 
-	@SuppressWarnings("unchecked")
 	private static String buildSessionString(Session session) {
-		JSONObject root = new JSONObject();
-
-		JSONObject user = new JSONObject();
-		{
-			JSONObject profile = new JSONObject();
-			{
-				profile.put("username", session.getProfile().getUsername());
-//		        profile.put("email", session.getProfile().getEmail());
-				profile.put("uuid", session.getProfile().getUuid());
-			}
-			user.put("profile", profile);
-
-			JSONArray tickets = new JSONArray();
-			{
-				for (String ticket : session.getTickets()) {
-					String[] split = ticket.split(":");
-					JSONObject t = new JSONObject();
-					t.put("type", split[0]);
-					t.put("name", split[1]);
-					tickets.add(t);
-				}
-			}
-			user.put("tickets", tickets);
-		}
-		root.put("user", user);
-		root.put("accessToken", session.getAccessToken());
-
 		return Base64.getEncoder()
 			.withoutPadding()
-			.encodeToString(JSONObject.toJSONString(root).getBytes(StandardCharsets.UTF_8));
+			.encodeToString(HttpClientWrapper.GSON.toJson(session).getBytes(StandardCharsets.UTF_8));
 	}
 
 	public void startGame() {
@@ -194,14 +167,17 @@ public class GameLauncher {
 				exitCode = startGame(config, session);
 			} catch (InterruptedException e) {
 				Platform.runLater(() -> DialogUtils.showError("Ошибка: доступ к процессу игры был прерван", e, true));
-			} catch (IOException e) {
+			} catch (Throwable e) {
 				Platform.runLater(() -> DialogUtils.showError("Ошибка запуска процесса игры", e, true));
 			} finally {
 				launched.set(false);
 			}
 
+			Log.msg("Game process finished with exit code %d", exitCode);
+
 			int finalExitCode = exitCode;
 			Platform.runLater(() -> {
+				application.getTrayManager().uninstall();
 				application.setStartGameAvailable(true);
 				if (finalExitCode != 0) {
 					if (finalExitCode == -1337) {
