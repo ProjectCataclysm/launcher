@@ -81,8 +81,8 @@ public class GameLauncher {
 		// макс. размер стека вызова
 		command.add("-Xss1M");
 
-//		// антиинжект
-//		command.add("-XX:+DisableAttachMechanism");
+		// антиинжект
+		command.add("-XX:+DisableAttachMechanism");
 
 		// память
 		command.add("-Xms256m");
