@@ -8,6 +8,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -100,7 +101,7 @@ public class GameLoadingWindow extends LoadingOverlay implements DownloadingMana
 	public void updateDownloadProgress(long totalBytesDownloaded) {
 		Platform.runLater(() -> {
 			fileProgress.addProgress(totalBytesDownloaded - fileProgress.getCurrentProgress());
-			percentLabel.setText((int) Math.floor(fileProgress.getProgress() * 100D) + "%");
+			percentLabel.setText(String.format(Locale.ROOT, "%.2f%%", fileProgress.getProgress() * 100D));
 		});
 	}
 
