@@ -40,6 +40,10 @@ public class LauncherConfig {
 		load();
 	}
 
+	public Path getGameDirectoryPath() {
+		return gameDirectoryPath;
+	}
+
 	public Path getCurrentGameDirectoryPath() {
 		return gameDirectoryPath.resolve(clientBranch.getName());
 	}

@@ -50,13 +50,13 @@ public class DownloadingManager {
 		Path gameDirPath = LauncherApplication.getInstance().getConfig().getCurrentGameDirectoryPath();
 		Downloader downloader = new WebDownloader(gameDirPath, getCurrentClientUrl(), bpsCounter, listener);
 		ScheduledExecutorService executor = LauncherApplication.getInstance().getParallelExecutor();
-		downloader.download(executor).whenComplete((result, cause) -> {
+		MigrationHelper.migrate(gameDirPath, listener, executor).thenCompose(__ -> downloader.download(executor).whenComplete((result, cause) -> {
 			if (cause != null) {
 				listener.downloadFailed(cause);
 			} else {
 				listener.updateState(DownloadState.FINISHED);
 			}
-		});
+		}));
 	}
 
 	public static String downloadSpeedString(long bps) {

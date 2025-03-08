@@ -3,31 +3,7 @@ plugins {
 	id("com.github.johnrengelman.shadow").version("7.1.0")
 }
 
-version = "1.8.3-2"
-
-tasks.withType<JavaCompile> {
-	options.encoding = "UTF-8"
-}
-
-tasks.jar {
-	manifest {
-		attributes["Main-Class"] = "Main"
-		attributes["Implementation-Version"] = version
-	}
-}
-
-tasks.register<Copy>("deploy") {
-	dependsOn(tasks.named("obfuscate"), tasks.named("generateVersion"))
-	group = "deploying"
-	description = "Copying launcher jar into deploy directory"
-
-	from(layout.buildDirectory.file("libs")) {
-//		include("launcher-final.jar").rename { "launcher.jar" }
-		include("version.txt")
-	}
-
-	into("${properties["projectCataclysm.deployDirPath"]}/launcher/")
-}
+version = "1.8.3-4"
 
 repositories {
     mavenCentral()
@@ -43,4 +19,15 @@ dependencies {
 	runtimeOnly("org.jetbrains:annotations:15.0")
 
 	testImplementation("net.sf.jopt-simple:jopt-simple:5.0.4")
+}
+
+tasks.withType<JavaCompile> {
+	options.encoding = "UTF-8"
+}
+
+tasks.jar {
+	manifest {
+		attributes["Main-Class"] = "Main"
+		attributes["Implementation-Version"] = version
+	}
 }
