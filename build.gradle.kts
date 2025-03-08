@@ -31,3 +31,13 @@ tasks.jar {
 		attributes["Implementation-Version"] = version
 	}
 }
+
+tasks.shadowJar {
+	// make it to just launcher.jar
+	archiveClassifier = ""
+	archiveVersion = ""
+	doLast {
+		archiveFile.get().asFile.parentFile.resolve("version.txt")
+			.writeText(project.version.toString())
+	}
+}
