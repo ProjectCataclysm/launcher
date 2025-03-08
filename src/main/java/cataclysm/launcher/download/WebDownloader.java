@@ -83,13 +83,14 @@ class WebDownloader extends Downloader {
 	private boolean checkModified(Path filePath, RemoteFile rf) throws IOException {
 		long timestamp = getGameFileFormatTimeStamp(filePath);
 		if (timestamp != 0L) {
-			return timestamp != rf.getTimestamp();
+			return timestamp != rf.getTimestamp() || rf.getSize() != Files.size(filePath);
 		} else if (rf.isVerify()) {
 			return !rf.getChecksum().equals(ChecksumUtil.computeChecksum(filePath));
 		}
 
 		BasicFileAttributes attr = Files.readAttributes(filePath, BasicFileAttributes.class);
-		return rf.getTimestamp() != attr.lastModifiedTime().to(TimeUnit.SECONDS);
+		return rf.getTimestamp() != attr.lastModifiedTime().to(TimeUnit.SECONDS)
+			|| rf.getSize() != Files.size(filePath);
 	}
 
 	private CompletableFuture<Void> checkGameFiles(ExecutorService parallelExecutor) {
