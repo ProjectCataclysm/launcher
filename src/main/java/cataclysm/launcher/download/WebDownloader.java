@@ -77,7 +77,7 @@ class WebDownloader extends Downloader {
 			}
 		}
 
-		return 0;
+		return 0L;
 	}
 
 	private boolean checkModified(Path filePath, RemoteFile rf) throws IOException {
@@ -99,6 +99,7 @@ class WebDownloader extends Downloader {
 		try {
 			deleteExtraFiles(gameDirPath.resolve("bin"));
 			deleteExtraFiles(gameDirPath.resolve("lib"));
+			deleteExtraFiles(gameDirPath.resolve("res"));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
