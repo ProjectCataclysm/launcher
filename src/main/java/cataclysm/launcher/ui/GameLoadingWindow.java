@@ -72,7 +72,7 @@ public class GameLoadingWindow extends LoadingOverlay implements DownloadingMana
 					super.showLoading("Загрузка файлов игры", 0);
 					break;
 				case FINISHED:
-					showLoading("Играем", 0);
+					showLoading("Готово", 0);
 					CompletableFuture.runAsync(gameLauncher::startGame).whenComplete((result, cause) -> {
 						if (cause != null) {
 							Log.err(cause, "Game launcher error");
